@@ -60,8 +60,13 @@ def judge_one(question: dict, answer: dict, model: str, variant: str,
     reply = ""
     for attempt in range(max_retries + 1):
         try:
-            reply = chat(messages, model=model, max_tokens=1024,
+            # 4096 tokens: reasoning-model judges (e.g. Nemotron) spend most of
+            # the budget thinking and return content=None when it runs out.
+            reply = chat(messages, model=model, max_tokens=4096,
                          temperature=0.0, quiet=True)
+            if not reply:
+                reply = ""
+                raise ValueError("empty reply (reasoning budget exhausted?)")
             judgment = _normalize(_extract_json(reply))
             judgment["judge_model"] = model
             return judgment
