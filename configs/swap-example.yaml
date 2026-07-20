@@ -1,0 +1,6 @@
+extends: configs/default.yaml
+index_dir: rag_index/chroma-trankit
+normalizer: {impl: trankit, params: {}}
+dense_index: {impl: chroma, params: {}}
+embedder: {impl: sentence_transformers, params: {model: BAAI/bge-m3, batch_size: 16}}  # fully offline
+generation: {prompt: strict_extractive}

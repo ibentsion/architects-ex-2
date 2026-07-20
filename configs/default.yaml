@@ -1,0 +1,74 @@
+corpus_dir: corpus            # 12 category dirs, each with files/ (PDF) and pages/ (TXT)
+index_dir: rag_index/default  # all persistent artifacts live under here
+cache_dir: cache              # stage caches, SHARED across all configs/index_dirs:
+                              #   parsed/     DoclingDocument JSON, key: file sha256
+                              #   tokens/     normalized token lists, key: (file sha256,
+                              #               chunker id, normalizer id)
+                              #   embeddings/ per-doc chunk vectors (.npz), key: (file
+                              #               sha256, chunker id, embedder id+dims)
+
+parser:
+  impl: docling               # alternatives: (marker fallback is per-file, not global)
+  params:
+    rtl_canary: true          # hard-stop gate on reversed Hebrew (see §5 stage 2)
+    canary_sample: 10         # PDFs sampled for the gate, spread across categories
+
+chunker:
+  impl: per_page              # alternatives: per_paragraph, per_table
+  params:
+    max_tokens: 1800          # per_page: pages longer than this are split (token-counted
+                              #   with the embedder tokenizer); bge-m3 tolerates full pages
+    txt_max_tokens: 512       # TXT files have no pages -> paragraph-packed to this size
+    # per_paragraph params: max_tokens: 512, merge_peers: true
+    # per_table params: prose_max_tokens: 512 (non-table text falls back to per_paragraph)
+
+normalizer:
+  impl: stanza                # alternatives: trankit, yap (same interface; optional deps)
+  params:
+    package: default          # stanza he package; 'iahltwiki' scores better on modern
+                              #   text (lemmas 92.5 vs 89.7) — worth an eval run
+    index_surface_forms: true # index lemma+surface union (hedges ~10% lemma errors
+                              #   on domain terms like הראל); lowercase Latin; strip nikud
+
+embedder:
+  impl: tokenfactory          # DEFAULT: served by Nebius Token Factory (course key in
+                              #   .env) — no local GPU/CPU embedding compute needed.
+                              #   alternative: sentence_transformers (local; model:
+                              #   BAAI/bge-m3 | intfloat/multilingual-e5-large | Webiks)
+  params:
+    model: Qwen/Qwen3-Embedding-8B  # verified served; Apache-2.0; 32K ctx
+    dimensions: 4096          # MRL: any 32–4096 (verified the API honors this); stamped
+                              #   into the index manifest — query must match ingest
+    batch_size: 64            # texts per /v1/embeddings request
+    query_instruct: "Given a Hebrew insurance customer question, retrieve relevant policy passages"
+                              # Qwen3-Embedding is instruction-aware: queries are sent as
+                              #   "Instruct: {q_instruct}\nQuery: {q}"; documents plain.
+                              #   Skipping the instruct costs ~1-5% retrieval quality.
+
+dense_index:
+  impl: qdrant_local          # alternatives: qdrant_server (url:), chroma, milvus
+  params: {}                  # qdrant_local path is derived: <index_dir>/qdrant
+                              # NOTE: local mode = single-process lock; ingest and
+                              # query CLIs cannot open it concurrently
+
+sparse_index:
+  impl: bm25s                 # alternatives: elasticsearch, opensearch (Docker, url:)
+  params: {}                  # persisted mmap at <index_dir>/bm25
+
+retrieval:
+  dense_top_k: 20
+  sparse_top_k: 20            # with a category filter, sparse fetches 60 and post-filters
+  rrf_k: 60                   # standard RRF constant
+  rerank:
+    impl: bge                 # alternatives: jina (CC-BY-NC — non-commercial only!)
+    params: {model: BAAI/bge-reranker-v2-m3, max_length: 512}
+    top_n: 6                  # chunks passed to generation
+    gate_threshold: 0.35      # sigmoid relevance gate; below for ALL candidates ->
+                              #   "not enough information" fallback. Tune on dev set.
+
+generation:
+  model: deepseek-ai/DeepSeek-V4-Pro   # any Token Factory model id (via tf_client)
+  prompt: grounded_cite       # alternatives: strict_extractive, few_shot_cite (§6 stage 6)
+  max_tokens: 1024
+  temperature: 0.2
+  retry_on_citation_failure: true      # one retry with corrective system nudge
