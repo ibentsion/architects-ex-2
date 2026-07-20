@@ -10,4 +10,4 @@ Last activity: 2026-07-20 - Completed quick task 260720-001: researched and plan
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260715-001 | Baseline evaluation harness and report | 2026-07-15 | 315450d | [260715-001-eval-harness](./quick/260715-001-eval-harness/) |
-| 260720-001 | Research + implementation plan for Hebrew RAG ingestion/query pipelines (rag_plan.md) | 2026-07-20 | 008a281 | [260720-001-rag-pipeline-plan](./quick/260720-001-rag-pipeline-plan/) |
+| 260720-001 | Research + implementation plan for Hebrew RAG ingestion/query pipelines (rag_plan.md) | 2026-07-20 | fdd8d71 | [260720-001-rag-pipeline-plan](./quick/260720-001-rag-pipeline-plan/) |
