@@ -24,8 +24,8 @@ INGESTION (rag.cli.ingest — offline, run once per config)
 │              │                                                               │
 │    ┌─────────┴──────────────┐                                                │
 │    ▼                        ▼                                                │
-│ Normalizer (Stanza he    Embedder (bge-m3 via                                │
-│ lemma+surface union)     sentence-transformers)                              │
+│ Normalizer (Stanza he    Embedder (Token Factory API                         │
+│ lemma+surface union)     Qwen3-Embedding-8B; local fallback)                 │
 │    │                        │                                                │
 │    ▼                        ▼                                                │
 │ bm25s index (disk,       Qdrant local (path=…, HNSW,                         │
@@ -64,12 +64,12 @@ QUERY (rag.cli.query — single question or interactive loop)
 | TXT parsing | plain UTF-8 read | — | stdlib | Web-page dumps; `page=null` matches ground truth |
 | Chunking | per_page | per_paragraph (Docling `HybridChunker`), per_table; size parameterized | ships with docling | Page chunks = trivially correct citations; bge-m3's 8192-token window tolerates full pages |
 | Normalizer | Stanza he (`tokenize,mwt,pos,lemma`) | trankit, YAP — same `Normalizer` interface | `stanza~=1.14` | MWT expansion strips fused prefixes (ו/ב/ל/כ/מ/ש/ה) — this is what makes Hebrew BM25 work |
-| Embeddings | `BAAI/bge-m3` (1024-dim, 8192 ctx, MIT) | `intfloat/multilingual-e5-large` (needs `query:`/`passage:` prefixes), Webiks KolZchut Hebrew embedder | `sentence-transformers~=5.6`, `langchain-huggingface~=1.2` | BGE-M3 paper shows Hebrew stability where other multilingual models collapse; no prefix footguns |
+| Embeddings | **Token Factory API** `Qwen/Qwen3-Embedding-8B` (4096-dim, MRL 32–4096 via `dimensions`, 32K ctx, Apache-2.0) | local `BAAI/bge-m3` (offline fallback, 1024-dim, MIT), `intfloat/multilingual-e5-large`, Webiks KolZchut — all via `sentence_transformers` impl | existing `litellm` (`litellm.embedding`), `sentence-transformers~=5.6` for local impls | **Verified live 2026-07-20** on the course key: `/v1/embeddings` works, `dimensions` param honored; #1 MTEB-multilingual at release, 100+ languages; offloads the only heavy ingest compute from this CPU-only machine |
 | Vector DB | Qdrant **local mode** (`QdrantClient(path=…)`) | Qdrant server (`url=`, same code path), Chroma, Milvus | `qdrant-client~=1.18`, `langchain-qdrant~=1.1` | Filterable HNSW (category filter), zero infra, identical API local/server |
 | Keyword/BM25 | `bm25s` in-process (mmap persistence, pre-tokenized input) | Elasticsearch / OpenSearch + Hebrew analyzer (Docker) | `bm25s~=0.3.9` | Maintained (vs rank_bm25 dead since ~2022), ~7–500× faster, accepts Stanza lemma token lists directly |
 | Fusion | RRF, k=60 | weighted-score fusion | own code | Standard, rank-based, no score-calibration coupling between backends |
-| Reranker | `BAAI/bge-reranker-v2-m3` (Apache-2.0), CrossEncoder | jina-reranker-v2 (CC-BY-NC — license warning in config comment) | `sentence-transformers` CrossEncoder | Apache license, Hebrew coverage, calibrated sigmoid score doubles as the relevance gate |
-| Generation | Token Factory via `tf_client.chat` | any TF model id via config | existing `litellm` | Locked; shared course key, per-call cost estimate |
+| Reranker | `BAAI/bge-reranker-v2-m3` (Apache-2.0), CrossEncoder, **local CPU** | jina-reranker-v2 (CC-BY-NC — license warning in config comment) | `sentence-transformers` CrossEncoder | Token Factory serves **no reranker** (verified 2026-07-20: `/v1/rerank` route exists but no reranker model on the course key) — local CPU on ≤20 pairs is the only option; sigmoid score doubles as the relevance gate |
+| Generation | Token Factory via `tf_client.chat` (`deepseek-ai/DeepSeek-V4-Pro` — on the live model list) | any of the 26 TF model ids (`GET /v1/models`); e.g. `Qwen/Qwen3-235B-A22B-Instruct-2507`, `zai-org/GLM-5.2` for A/B | existing `litellm` | Locked; shared course key, per-call cost estimate |
 | Config | YAML + pydantic validation | — | `pyyaml~=6.0`, existing `pydantic>=2` | Registry pattern: every phase is `{impl: name, params: {…}}` |
 | Tests | pytest | — | `pytest~=8` | No test framework exists in repo yet; `-m "not slow"` for the quick loop |
 
@@ -78,7 +78,8 @@ Install (append to `requirements.txt` with these pins, then fresh resolve — ve
 ```bash
 pip install "docling~=2.113" "langchain-docling~=2.0" "langchain~=1.3" \
   "langchain-qdrant~=1.1" "langchain-huggingface~=1.2" "qdrant-client~=1.18" \
-  "sentence-transformers~=5.6" "bm25s~=0.3.9" "stanza~=1.14" "pyyaml~=6.0" "pytest~=8"
+  "sentence-transformers~=5.6" "bm25s~=0.3.9" "stanza~=1.14" "pyyaml~=6.0" \
+  "python-dotenv~=1.0" "pytest~=8"
 pip freeze > requirements.lock   # langchain-core minors have shipped regressions — lock
 ```
 
@@ -109,7 +110,9 @@ rag/
     yap_norm.py         # adapter stub (HTTP subprocess; optional)
   embed/
     __init__.py         # Embedder protocol: embed_docs/embed_query; registry
-    st_embedder.py      # sentence-transformers; e5 prefix handling lives HERE, not call sites
+    tf_embedder.py      # DEFAULT: Token Factory /v1/embeddings via litellm.embedding;
+                        #   batching, retry/backoff, query-side instruct prefix, .env load
+    st_embedder.py      # local sentence-transformers fallback; e5 prefix handling lives HERE
   index/
     __init__.py
     dense.py            # VectorIndex protocol; impls: qdrant_local, qdrant_server, chroma, milvus
@@ -174,11 +177,19 @@ normalizer:
                               #   on domain terms like הראל); lowercase Latin; strip nikud
 
 embedder:
-  impl: sentence_transformers
+  impl: tokenfactory          # DEFAULT: served by Nebius Token Factory (course key in
+                              #   .env) — no local GPU/CPU embedding compute needed.
+                              #   alternative: sentence_transformers (local; model:
+                              #   BAAI/bge-m3 | intfloat/multilingual-e5-large | Webiks)
   params:
-    model: BAAI/bge-m3        # alternatives: intfloat/multilingual-e5-large (adapter
-                              #   auto-adds query:/passage: prefixes), Webiks KolZchut
-    batch_size: 16            # CPU-only machine — embed in batches at ingestion
+    model: Qwen/Qwen3-Embedding-8B  # verified served; Apache-2.0; 32K ctx
+    dimensions: 4096          # MRL: any 32–4096 (verified the API honors this); stamped
+                              #   into the index manifest — query must match ingest
+    batch_size: 64            # texts per /v1/embeddings request
+    query_instruct: "Given a Hebrew insurance customer question, retrieve relevant policy passages"
+                              # Qwen3-Embedding is instruction-aware: queries are sent as
+                              #   "Instruct: {q_instruct}\nQuery: {q}"; documents plain.
+                              #   Skipping the instruct costs ~1-5% retrieval quality.
 
 dense_index:
   impl: qdrant_local          # alternatives: qdrant_server (url:), chroma, milvus
@@ -216,6 +227,7 @@ extends: configs/default.yaml
 index_dir: rag_index/chroma-trankit
 normalizer: {impl: trankit, params: {}}
 dense_index: {impl: chroma, params: {}}
+embedder: {impl: sentence_transformers, params: {model: BAAI/bge-m3, batch_size: 16}}  # fully offline
 generation: {prompt: strict_extractive}
 ```
 
@@ -245,7 +257,7 @@ All strategies consume the DoclingDocument dict — **never** Markdown (rule §1
 
 **Stage 5 — Embed.**
 *In:* chunk texts. *Out:* `float32[n_chunks, dim]`.
-sentence-transformers, `batch_size` from config, normalized embeddings. The e5 `query:`/`passage:` prefix logic is inside `st_embedder` keyed on model name — call sites never know. *Failure:* OOM → halve batch and retry once.
+Default `tf_embedder`: `litellm.embedding(model="openai/Qwen/Qwen3-Embedding-8B", api_base=NEBIUS_BASE_URL, dimensions=…)` in `batch_size`-text requests (key loaded from `.env` via python-dotenv, same env vars as `tf_client`). Retry with exponential backoff on 429/5xx (3 attempts); log cumulative input-token usage per run (shared-key etiquette — embedding the full corpus is a few million input tokens, cents at input-token rates, and happens once thanks to the parse/index cache). Documents are sent plain; the `query_instruct` prefix applies only to `embed_query`. Local `st_embedder` fallback keeps the pipeline runnable offline; the e5 `query:`/`passage:` prefix logic lives inside it keyed on model name — call sites never know. *Failure:* API batch fails after retries → abort ingest with resumable state (embeddings not yet indexed); local impl OOM → halve batch and retry once.
 
 **Stage 6 — Index dense + sparse.**
 Dense: `QdrantVectorStore` over `QdrantClient(path=<index_dir>/qdrant)`; collection `chunks`; payload = full chunk metadata (category is a payload-indexed field → efficient filtered HNSW). Server mode: same code, `url=` instead of `path=` (locked requirement). Chroma/Milvus impls satisfy the same `VectorIndex` protocol.
@@ -263,11 +275,11 @@ Entry: `rag/cli/query.py` → `QueryEngine(config)` loads once, then `answer(que
 
 **Stage 1 — Normalize query.** Same `Normalizer` instance/recipe as ingestion (lemma+surface union). Symmetry is mandatory — an asymmetric normalizer silently zeroes BM25 recall.
 
-**Stage 2 — Dual search.** Dense: embed query (`query:` prefix if e5) → Qdrant top-`dense_top_k`, with `models.Filter` on `category` payload when a filter is given. Sparse: bm25s top-`sparse_top_k`; with a category filter, fetch 3× and post-filter by chunk metadata (571-doc corpus — cheap).
+**Stage 2 — Dual search.** Dense: embed query via the same embedder identity the index was built with (Token Factory call with `Instruct:`/`Query:` framing by default — adds one ~100–300 ms network round-trip per query; local fallback adds none) → Qdrant top-`dense_top_k`, with `models.Filter` on `category` payload when a filter is given. Sparse: bm25s top-`sparse_top_k`; with a category filter, fetch 3× and post-filter by chunk metadata (571-doc corpus — cheap).
 
 **Stage 3 — RRF fusion.** `score(c) = Σ_r 1/(rrf_k + rank_r(c))` over the two rankings, joined on `chunk_id`; take top 20. Rank-based → no cross-backend score calibration needed.
 
-**Stage 4 — Rerank + relevance gate.** CrossEncoder `(question, chunk_text)` pairs, `max_length=512` (query + chunk head first — Hebrew page chunks truncate). CPU cost ~1–3 s for 20 pairs (measured in task 7; shrink candidate set if worse). Keep top-`top_n`=6 with sigmoid score ≥ `gate_threshold` (0.35 start; **tune on dev set** — this is the "how do you know retrieval works, independent of generation" knob). **Gate fail (zero survivors):** skip generation entirely, return `Answer(text="אין לי מספיק מידע במסמכים כדי לענות על שאלה זו.", citations=[], confidence=0.0)` — zero LLM cost, and the evalharness treats refusals as non-hallucinations. This is the locked "retrieval validation before generation" step.
+**Stage 4 — Rerank + relevance gate.** CrossEncoder `(question, chunk_text)` pairs, `max_length=512` (query + chunk head first — Hebrew page chunks truncate). Runs **locally on CPU** — Token Factory serves no reranker model (verified: `/v1/rerank` exists but rejects every candidate model id), so this is the one model that must stay on-machine. CPU cost ~1–3 s for 20 pairs (measured in task 7; shrink candidate set if worse). Keep top-`top_n`=6 with sigmoid score ≥ `gate_threshold` (0.35 start; **tune on dev set** — this is the "how do you know retrieval works, independent of generation" knob). **Gate fail (zero survivors):** skip generation entirely, return `Answer(text="אין לי מספיק מידע במסמכים כדי לענות על שאלה זו.", citations=[], confidence=0.0)` — zero LLM cost, and the evalharness treats refusals as non-hallucinations. This is the locked "retrieval validation before generation" step.
 
 **Stage 5 — Context assembly.** Each surviving chunk rendered with a machine-readable header:
 `[מקור: {file} | עמוד: {page|"-"} | תחום: {category}]` followed by original chunk text. Order: rerank score desc. Token budget guard (~6k tokens) trims the tail.
@@ -342,7 +354,7 @@ Framework: pytest (`pytest~=8`), new `tests/` tree, markers: `slow` (E2E, model 
 - `test_parsing.py`: PDF → every text item carries `prov.page_no ≥ 1`; TXT → `page=None`; cache hit skips converter (converter mocked, assert not called); sha256 change → re-parse; **RTL canary**: passes on fixture PDF, fails on a synthetic reversed-Hebrew doc (`חוטיב` string); ground-truth anchor page contains התיישנות (validates A1: 1-based pages).
 - `test_chunking.py`: per_page → one chunk per page, page order preserved; over-long page splits share the same `page`; per_paragraph → all chunks ≤ max_tokens (embedder tokenizer); per_table → table chunk is atomic, contains Markdown pipe rows and heading context; all invariants of §8; Hebrew filename survives into `file` NFC-byte-identical to the fixture ground truth.
 - `test_normalize.py`: Hebrew fixtures — `בבית` tokens include lemma `בית`; `והפוליסות` yields `פוליסה`; surface form also present (union); `הראל` survives (surface hedge); Latin `Dental-Claim-Form` → `dental`, `claim`, `form`; `6,000 ₪` keeps `6,000`; gershayim `חו״ל` normalized; identical output for identical input across two pipeline instances (determinism); whitespace fallback triggers on induced Stanza failure.
-- `test_index.py`: dense round-trip (index 10 chunks → query returns nearest with intact payload); category filter excludes other categories; bm25s save/load → identical scores; chunk_id join dense↔sparse consistent; manifest write→verify; incompatible manifest rejected.
+- `test_index.py`: dense round-trip (index 10 chunks → query returns nearest with intact payload); category filter excludes other categories; bm25s save/load → identical scores; chunk_id join dense↔sparse consistent; manifest write→verify; incompatible manifest rejected (including embedder provider/model/`dimensions` mismatch); `tf_embedder` — batching splits correctly, query gets `Instruct:`/`Query:` framing while docs stay plain, 429 triggers backoff-retry (litellm mocked); one live 1-text embedding call marked `llm` asserts dims match config.
 - `test_retrieve.py`: RRF determinism + hand-computed 3-doc example; item ranked #1 in both lists wins fusion; gate: all-below-threshold → empty result (mock CrossEncoder); top_n truncation; **retrieval smoke check**: on the mini index, the question "תקופת התיישנות" retrieves the anchor chunk in top-3 (embeddings real, marked `slow`).
 - `test_generate.py`: prompt variants all contain citation mandate + fallback instruction; SOURCES-block parser on well-formed / RTL-punctuated / missing-block outputs; validator rejects `{file,page}` not in retrieved set; fabricated-citation → retry path (LLM mocked); gate-fail path never calls the LLM (mock asserts).
 
@@ -360,7 +372,7 @@ Ordered; each sized for a focused execution session. **Parallelizable:** after T
 | T2 | Parsing + cache + RTL canary | `rag/parsing/*`, `tests/test_parsing.py` | Docling adapter (DoclingDocument→dict, never Markdown), TXT reader, sha256 cache, canary module with ground-truth anchor check | `pytest tests/test_parsing.py`; **GATE:** run canary on 10 real corpus PDFs across categories — hard stop + escalation if reversed Hebrew; done when gate passes (or marker fallback documented for failing files) |
 | T3 | Chunking (3 strategies) | `rag/chunking/*`, `tests/test_chunking.py` | per_page, per_paragraph (HybridChunker), per_table; §8 invariants enforced | `pytest tests/test_chunking.py`; done when all invariants hold on mini-corpus for all 3 strategies |
 | T4 | Normalizer | `rag/normalize/*`, `tests/test_normalize.py` | Stanza adapter (lemma+surface union recipe), trankit/YAP ImportError stubs | `pytest tests/test_normalize.py` incl. all Hebrew fixture cases |
-| T5 | Indexes + manifest | `rag/embed/*`, `rag/index/*`, `tests/test_index.py` | st_embedder (e5 prefixes inside), qdrant_local/qdrant_server dense impl (+ chroma/milvus stubs behind protocol), bm25s sparse impl, atomic manifest | `pytest tests/test_index.py`; done when round-trips + category filter + manifest verify pass |
+| T5 | Embedders + indexes + manifest | `rag/embed/*`, `rag/index/*`, `tests/test_index.py` | tf_embedder (TF API default: batching, backoff, query instruct, .env), st_embedder local fallback (e5 prefixes inside), qdrant_local/qdrant_server dense impl (+ chroma/milvus stubs behind protocol), bm25s sparse impl, atomic manifest recording embedder provider/model/dims | `pytest tests/test_index.py` (API mocked) + one live `llm`-marked embedding call; done when round-trips + category filter + manifest verify pass |
 | T6 | Ingestion CLI | `rag/cli/ingest.py` | Wire stages 1–7, flags per §7, timing/count logs, atomic index_dir | `python -m rag.cli.ingest --config configs/default.yaml --categories apartment travel` completes; manifest sane; done when subset index built |
 | T7 | Retrieval + gate | `rag/retrieve/*`, `tests/test_retrieve.py` | RRF, CrossEncoder rerank, gate; measure CPU rerank latency, adjust candidate count if >3 s | `pytest tests/test_retrieve.py`; smoke check: anchor chunk in top-3 for its dev question |
 | T8 | Generation + citations | `rag/generate/*`, `tests/test_generate.py` | 3 prompt variants, context assembly, tf_client call, SOURCES parser, validator, retry + fallback paths | `pytest tests/test_generate.py` (LLM mocked); one live smoke call via tf_client |
@@ -373,10 +385,11 @@ Ordered; each sized for a focused execution session. **Parallelizable:** after T
 |---|---|---|
 | **Reversed/jumbled Hebrew from PDF extraction** (docling #1938 open; AI21: all parsers degrade on Hebrew) | Garbage index, wrong answers, wasted downstream work | T2 blocking canary gate before anything downstream; ladder: marker-pdf per-file fallback → BiDi line repair → human escalation if systemic. Born-digital PDFs (no OCR) are docling-parse's best case |
 | **Page fidelity loss** (Markdown export destroys `prov.page_no`) | Citation metric → 0 | Architectural rule: chunk only from DoclingDocument JSON; unit invariant PDF `page≥1` / TXT `null`; ground-truth anchor test validates 1-based numbering (assumption A1) |
-| **CPU-only machine** (no GPU) | Docling parse = hours for 350 PDFs; reranker 1–3 s/query | Parse cache keyed by sha256 (parse once, ever); measure on 10-doc sample before full run; batch embeddings; rerank set capped at 20, shrink if measured latency is worse; jina flash-attn path not viable anyway |
+| **CPU-only machine** (no GPU) | Docling parse = hours for 350 PDFs; reranker 1–3 s/query | Embeddings offloaded to Token Factory API (no local embedding compute at all); parse cache keyed by sha256 (parse once, ever); measure on 10-doc sample before full run; rerank set capped at 20, shrink if measured latency is worse; jina flash-attn path not viable anyway |
+| **Token Factory dependency for embeddings** (shared course key: rate limits, outages, model delisting) | Ingest stalls or query-time embedding fails | Backoff-retry + resumable ingest; `sentence_transformers`/bge-m3 is a one-line config swap to fully-local (requires re-ingest — different vector space, enforced by manifest); log token usage per run to stay a good citizen on the shared key |
 | **Mixed Hebrew/English + morphology in BM25** | Keyword recall collapse on fused prefixes or Latin terms | Stanza mwt+lemma with lemma+surface union; keep lowercased Latin + digits; normalize gershayim/maqaf; identical normalizer at ingest and query (symmetry unit-tested) |
 | **Tables fragmented or diluted** | Medium/hard questions (limits, amounts) unanswerable | Tables atomic (one chunk per TableItem, Markdown + heading context) in per_table strategy; per_page keeps tables whole within their page; A/B via config + evalharness |
-| **Embedder Hebrew ranking unknown** (no trustworthy Hebrew retrieval leaderboard) | Suboptimal dense recall | bge-m3 default (best published Hebrew-stability evidence, 8192 ctx, no prefixes); A/B multilingual-e5-large + Webiks via config swap, decided by evalharness citation accuracy on 48 dev questions |
+| **Embedder Hebrew ranking unknown** (no trustworthy Hebrew retrieval leaderboard) | Suboptimal dense recall | Qwen3-Embedding-8B default (#1 MTEB-multilingual at release, 100+ languages, but no per-language Hebrew breakdown published); A/B local bge-m3 (best published Hebrew-stability evidence) + multilingual-e5-large + Webiks via config swap, decided by evalharness citation accuracy on 48 dev questions |
 | **Qdrant local single-process lock** | Concurrent ingest+query crash | Documented in config + CLI error message; E2E runs pipelines sequentially; server mode (url:) lifts the limit with zero code change |
 | **LangChain churn** (community archived; core minors have regressed) | Breakage on install/upgrade | Thin LC usage behind own protocols; compatible-release pins + `requirements.lock`; partner packages only |
 | **Shared TF key budget** | Burning the course pool | Gate-fail skips the LLM entirely; tf_client cost prints kept visible; E2E uses 2 questions, not 48 |
