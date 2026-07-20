@@ -192,7 +192,11 @@ def test_unknown_phase_name_helpful_error(default_config_path: Path):
 def test_build_resolves_default_chunker(default_config_path: Path):
     cfg = load_config(default_config_path)
     chunker = build("chunker", cfg)
-    assert chunker.params == {"max_tokens": 1800, "txt_max_tokens": 512}
+    from rag.chunking.per_page import PerPageChunker
+
+    assert isinstance(chunker, PerPageChunker)
+    assert chunker.max_tokens == 1800
+    assert chunker.txt_max_tokens == 512
 
 
 # --------------------------------------------------------------------------- #
