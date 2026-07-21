@@ -68,6 +68,55 @@ def whitespace_tokens(text: str) -> list[str]:
     return tokens
 
 
+#: Upper bound on the text length handed to Stanza in one piece. Serialized
+#: Markdown tables produce huge punctuation-free "sentences"; Stanza's memory
+#: use is superlinear in sentence length — a single 14.5K-char table chunk
+#: peaked >8 GB (OOM-killed the ingest) while the same text split into
+#: <=8K-char segments peaked at 1.9 GB with a near-identical token stream
+#: (723 vs 725 tokens; measured 2026-07-21 on the shirbit travel policy PDF).
+#: 4000 keeps a 2x safety margin. BM25 needs a token multiset, not sentence
+#: structure, so segment boundaries are harmless.
+MAX_SEGMENT_CHARS = 4000
+
+#: Upper bound on the cumulative chars per ``bulk_process`` call. Bulk memory
+#: also scales with total batch text: 24 segments / 71K chars in one call made
+#: torch attempt a single 3.3 GB allocation (whole-doc batch of the same
+#: policy PDF), while a 16K-char call peaked at 1.9 GB including the pipeline.
+MAX_BULK_CHARS = 16000
+
+
+def split_long_text(text: str, max_chars: int = MAX_SEGMENT_CHARS) -> list[str]:
+    """Split ``text`` into segments of at most ``max_chars``, preferring line
+    boundaries; single lines longer than ``max_chars`` are hard-split at
+    whitespace (or mid-token as a last resort)."""
+    if len(text) <= max_chars:
+        return [text]
+    segments: list[str] = []
+    current: list[str] = []
+    current_len = 0
+
+    def flush() -> None:
+        nonlocal current, current_len
+        if current:
+            segments.append("\n".join(current))
+            current, current_len = [], 0
+
+    for line in text.splitlines():
+        while len(line) > max_chars:
+            cut = line.rfind(" ", 1, max_chars)
+            if cut <= 0:
+                cut = max_chars
+            flush()
+            segments.append(line[:cut])
+            line = line[cut:].lstrip()
+        if current_len + len(line) + 1 > max_chars:
+            flush()
+        current.append(line)
+        current_len += len(line) + 1
+    flush()
+    return segments or [text]
+
+
 class StanzaNormalizer:
     """Satisfies the ``Normalizer`` protocol (``tokens``); adds
     ``tokens_batch_ex`` (batched via ``bulk_process``, per-chunk fallback
@@ -147,27 +196,68 @@ class StanzaNormalizer:
 
     def tokens_batch_ex(self, texts: list[str]) -> list[tuple[list[str], bool]]:
         """Batch tokenization via ``bulk_process``. Returns per text
-        ``(tokens, used_fallback)`` — fallback docs must NOT be cached."""
+        ``(tokens, used_fallback)`` — fallback docs must NOT be cached.
+
+        Long texts are pre-split into ``MAX_SEGMENT_CHARS`` segments (memory
+        bound — see :data:`MAX_SEGMENT_CHARS`); each text's segment token
+        lists are concatenated back, so callers see one list per input text.
+        """
         if not texts:
             return []
         pipeline = self._get_pipeline()
+        segment_lists = [split_long_text(text) for text in texts]
+        flat_segments = [seg for segments in segment_lists for seg in segments]
+
+        # Bulk in sub-batches bounded by MAX_BULK_CHARS (memory guard).
+        segment_results: list[tuple[list[str], bool]] = []
+        batch: list[str] = []
+        batch_chars = 0
+        for segment in flat_segments:
+            if batch and batch_chars + len(segment) > MAX_BULK_CHARS:
+                segment_results.extend(self._bulk_tokens(pipeline, batch))
+                batch, batch_chars = [], 0
+            batch.append(segment)
+            batch_chars += len(segment)
+        if batch:
+            segment_results.extend(self._bulk_tokens(pipeline, batch))
+
+        # Reassemble: one (tokens, used_fallback) pair per input text.
+        results: list[tuple[list[str], bool]] = []
+        offset = 0
+        for segments in segment_lists:
+            per_text = segment_results[offset : offset + len(segments)]
+            results.append(
+                (
+                    [token for tokens, _ in per_text for token in tokens],
+                    any(fallback for _, fallback in per_text),
+                )
+            )
+            offset += len(segments)
+        return results
+
+    def _bulk_tokens(
+        self, pipeline: Any, segments: list[str]
+    ) -> list[tuple[list[str], bool]]:
+        """Tokenize one bounded batch of segments; bulk failure retries per
+        segment, and a per-segment failure falls back to whitespace tokens
+        (flagged so the doc is not token-cached)."""
         try:
-            docs = pipeline.bulk_process(list(texts))
+            docs = pipeline.bulk_process(segments)
             return [(self._doc_tokens(doc), False) for doc in docs]
         except Exception as bulk_exc:
             logger.warning(
-                "Stanza bulk_process failed (%s) — retrying per chunk", bulk_exc
+                "Stanza bulk_process failed (%s) — retrying per segment", bulk_exc
             )
         results: list[tuple[list[str], bool]] = []
-        for text in texts:
+        for segment in segments:
             try:
-                results.append((self._doc_tokens(pipeline(text)), False))
+                results.append((self._doc_tokens(pipeline(segment)), False))
             except Exception as exc:
                 logger.warning(
-                    "Stanza failed on chunk (%.60r): %s — whitespace fallback "
+                    "Stanza failed on segment (%.60r): %s — whitespace fallback "
                     "(this chunk will not be token-cached)",
-                    text,
+                    segment,
                     exc,
                 )
-                results.append((whitespace_tokens(text), True))
+                results.append((whitespace_tokens(segment), True))
         return results

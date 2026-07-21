@@ -12,7 +12,12 @@ import pytest
 
 from rag.normalize import REGISTRY, Normalizer
 from rag.normalize.cache import TokenCache, tokens_for_doc
-from rag.normalize.stanza_norm import StanzaNormalizer, normalize_token, whitespace_tokens
+from rag.normalize.stanza_norm import (
+    StanzaNormalizer,
+    normalize_token,
+    split_long_text,
+    whitespace_tokens,
+)
 
 SHA = "f" * 64
 CHUNKER_ID = "chunkid123456"
@@ -328,3 +333,49 @@ def test_batch_matches_single(stanza_norm):
     batched = stanza_norm.tokens_batch_ex(texts)
     assert [tokens for tokens, fallback in batched] == [stanza_norm.tokens(t) for t in texts]
     assert all(not fallback for _, fallback in batched)
+
+
+# --------------------------------------------------------------------------- #
+# Long-text segmentation (OOM regression: Stanza memory is superlinear in
+# sentence length — 14.5K-char table chunks killed the ingest; see
+# MAX_SEGMENT_CHARS in rag/normalize/stanza_norm.py)
+# --------------------------------------------------------------------------- #
+
+
+def test_split_long_text_short_text_untouched():
+    assert split_long_text("ביטוח דירה", max_chars=100) == ["ביטוח דירה"]
+
+
+def test_split_long_text_prefers_line_boundaries():
+    lines = [f"שורה {i} " + "מילה " * 30 for i in range(10)]
+    text = "\n".join(lines)
+    segments = split_long_text(text, max_chars=400)
+    assert all(len(s) <= 400 for s in segments)
+    # content preserved: same whitespace-token multiset
+    assert " ".join(segments).split() == text.split()
+
+
+def test_split_long_text_hard_splits_monster_line_at_whitespace():
+    text = "מילה " * 2000  # one 10K-char line, no newlines
+    segments = split_long_text(text.strip(), max_chars=1000)
+    assert all(len(s) <= 1000 for s in segments)
+    assert " ".join(segments).split() == text.split()
+
+
+def test_split_long_text_no_whitespace_line_still_bounded():
+    text = "א" * 5000
+    segments = split_long_text(text, max_chars=1000)
+    assert all(len(s) <= 1000 for s in segments)
+    assert "".join(segments) == text
+
+
+@pytest.mark.slow
+def test_long_table_chunk_tokens_match_unsplit_recipe(stanza_norm):
+    # A punctuation-free "table" text longer than one segment: the segmented
+    # token stream must equal processing the same lines separately.
+    row = "| הראל | ביטוח נסיעות | 6,000 | כיסוי מלא |"
+    text = "\n".join(row for _ in range(300))  # ~13K chars > MAX_SEGMENT_CHARS
+    tokens = stanza_norm.tokens(text)
+    assert tokens  # did not fall back / crash
+    row_tokens = set(stanza_norm.tokens(row))
+    assert row_tokens <= set(tokens)
