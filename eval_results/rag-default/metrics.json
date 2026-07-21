@@ -1,0 +1,317 @@
+{
+  "meta": {
+    "run_name": "rag-default",
+    "date": "2026-07-21",
+    "questions_file": "reference_questions.json",
+    "answers_file": "rag_answers.jsonl",
+    "judges": [
+      "deepseek-ai/DeepSeek-V4-Pro"
+    ],
+    "prompt_variant": "rubric",
+    "est_cost_usd": 0.07200000000000001
+  },
+  "metrics": {
+    "overall": {
+      "n": 48,
+      "judged": 48,
+      "correctness": 2.17,
+      "completeness": 2.1,
+      "conversational_quality": 6.21,
+      "hallucination_rate": 0,
+      "refusal_rate": 0.75,
+      "verdicts": {
+        "correct": 9,
+        "partially_correct": 2,
+        "incorrect": 1,
+        "refusal": 36
+      },
+      "citation_recall": 0.1,
+      "citation_precision": 0.15,
+      "full_citation_credit_rate": 0.1,
+      "latency_ms_p50": 42901,
+      "latency_ms_p95": 83519,
+      "latency_ms_mean": 49876
+    },
+    "by_difficulty": {
+      "easy": {
+        "n": 16,
+        "judged": 16,
+        "correctness": 3.38,
+        "completeness": 3.19,
+        "conversational_quality": 6.75,
+        "hallucination_rate": 0,
+        "refusal_rate": 0.62,
+        "verdicts": {
+          "correct": 4,
+          "partially_correct": 2,
+          "incorrect": 0,
+          "refusal": 10
+        },
+        "citation_recall": 0.12,
+        "citation_precision": 0.07,
+        "full_citation_credit_rate": 0.12,
+        "latency_ms_p50": 44292,
+        "latency_ms_p95": 74527,
+        "latency_ms_mean": 50030
+      },
+      "medium": {
+        "n": 16,
+        "judged": 16,
+        "correctness": 1.88,
+        "completeness": 1.88,
+        "conversational_quality": 6.06,
+        "hallucination_rate": 0,
+        "refusal_rate": 0.75,
+        "verdicts": {
+          "correct": 3,
+          "partially_correct": 0,
+          "incorrect": 1,
+          "refusal": 12
+        },
+        "citation_recall": 0.19,
+        "citation_precision": 0.33,
+        "full_citation_credit_rate": 0.19,
+        "latency_ms_p50": 41271,
+        "latency_ms_p95": 61546,
+        "latency_ms_mean": 48920
+      },
+      "hard": {
+        "n": 16,
+        "judged": 16,
+        "correctness": 1.25,
+        "completeness": 1.25,
+        "conversational_quality": 5.81,
+        "hallucination_rate": 0,
+        "refusal_rate": 0.88,
+        "verdicts": {
+          "correct": 2,
+          "partially_correct": 0,
+          "incorrect": 0,
+          "refusal": 14
+        },
+        "citation_recall": 0.0,
+        "citation_precision": 0.0,
+        "full_citation_credit_rate": 0,
+        "latency_ms_p50": 42901,
+        "latency_ms_p95": 81830,
+        "latency_ms_mean": 50678
+      }
+    },
+    "by_domain": {
+      "apartment": {
+        "n": 6,
+        "judged": 6,
+        "correctness": 8.33,
+        "completeness": 8.33,
+        "conversational_quality": 9.67,
+        "hallucination_rate": 0,
+        "refusal_rate": 0.17,
+        "verdicts": {
+          "correct": 5,
+          "partially_correct": 0,
+          "incorrect": 0,
+          "refusal": 1
+        },
+        "citation_recall": 0.67,
+        "citation_precision": 0.26,
+        "full_citation_credit_rate": 0.67,
+        "latency_ms_p50": 52119,
+        "latency_ms_p95": 55611,
+        "latency_ms_mean": 50384
+      },
+      "business": {
+        "n": 6,
+        "judged": 6,
+        "correctness": 0,
+        "completeness": 0,
+        "conversational_quality": 5,
+        "hallucination_rate": 0,
+        "refusal_rate": 1,
+        "verdicts": {
+          "correct": 0,
+          "partially_correct": 0,
+          "incorrect": 0,
+          "refusal": 6
+        },
+        "citation_recall": 0.0,
+        "citation_precision": null,
+        "full_citation_credit_rate": 0,
+        "latency_ms_p50": 37574,
+        "latency_ms_p95": 113572,
+        "latency_ms_mean": 50872
+      },
+      "car": {
+        "n": 6,
+        "judged": 6,
+        "correctness": 0,
+        "completeness": 0,
+        "conversational_quality": 5,
+        "hallucination_rate": 0,
+        "refusal_rate": 1,
+        "verdicts": {
+          "correct": 0,
+          "partially_correct": 0,
+          "incorrect": 0,
+          "refusal": 6
+        },
+        "citation_recall": 0.0,
+        "citation_precision": null,
+        "full_citation_credit_rate": 0,
+        "latency_ms_p50": 40694,
+        "latency_ms_p95": 125153,
+        "latency_ms_mean": 62431
+      },
+      "dental": {
+        "n": 6,
+        "judged": 6,
+        "correctness": 0,
+        "completeness": 0,
+        "conversational_quality": 5,
+        "hallucination_rate": 0,
+        "refusal_rate": 1,
+        "verdicts": {
+          "correct": 0,
+          "partially_correct": 0,
+          "incorrect": 0,
+          "refusal": 6
+        },
+        "citation_recall": 0.0,
+        "citation_precision": null,
+        "full_citation_credit_rate": 0,
+        "latency_ms_p50": 39677,
+        "latency_ms_p95": 74527,
+        "latency_ms_mean": 45699
+      },
+      "health": {
+        "n": 6,
+        "judged": 6,
+        "correctness": 0,
+        "completeness": 0,
+        "conversational_quality": 5,
+        "hallucination_rate": 0,
+        "refusal_rate": 1,
+        "verdicts": {
+          "correct": 0,
+          "partially_correct": 0,
+          "incorrect": 0,
+          "refusal": 6
+        },
+        "citation_recall": 0.0,
+        "citation_precision": null,
+        "full_citation_credit_rate": 0,
+        "latency_ms_p50": 39926,
+        "latency_ms_p95": 61546,
+        "latency_ms_mean": 43905
+      },
+      "life": {
+        "n": 6,
+        "judged": 6,
+        "correctness": 0,
+        "completeness": 0,
+        "conversational_quality": 5,
+        "hallucination_rate": 0,
+        "refusal_rate": 1,
+        "verdicts": {
+          "correct": 0,
+          "partially_correct": 0,
+          "incorrect": 0,
+          "refusal": 6
+        },
+        "citation_recall": 0.0,
+        "citation_precision": null,
+        "full_citation_credit_rate": 0,
+        "latency_ms_p50": 40303,
+        "latency_ms_p95": 45944,
+        "latency_ms_mean": 41040
+      },
+      "mortgage": {
+        "n": 6,
+        "judged": 6,
+        "correctness": 4.5,
+        "completeness": 4.17,
+        "conversational_quality": 7.33,
+        "hallucination_rate": 0,
+        "refusal_rate": 0.5,
+        "verdicts": {
+          "correct": 2,
+          "partially_correct": 1,
+          "incorrect": 0,
+          "refusal": 3
+        },
+        "citation_recall": 0.0,
+        "citation_precision": 0.0,
+        "full_citation_credit_rate": 0,
+        "latency_ms_p50": 47759,
+        "latency_ms_p95": 83519,
+        "latency_ms_mean": 51970
+      },
+      "travel": {
+        "n": 6,
+        "judged": 6,
+        "correctness": 4.5,
+        "completeness": 4.33,
+        "conversational_quality": 7.67,
+        "hallucination_rate": 0,
+        "refusal_rate": 0.33,
+        "verdicts": {
+          "correct": 2,
+          "partially_correct": 1,
+          "incorrect": 1,
+          "refusal": 2
+        },
+        "citation_recall": 0.17,
+        "citation_precision": 0.12,
+        "full_citation_credit_rate": 0.17,
+        "latency_ms_p50": 49312,
+        "latency_ms_p95": 66242,
+        "latency_ms_mean": 52708
+      }
+    },
+    "by_source_groups": {
+      "1": {
+        "n": 38,
+        "judged": 38,
+        "correctness": 2.74,
+        "completeness": 2.66,
+        "conversational_quality": 6.45,
+        "hallucination_rate": 0,
+        "refusal_rate": 0.68,
+        "verdicts": {
+          "correct": 9,
+          "partially_correct": 2,
+          "incorrect": 1,
+          "refusal": 26
+        },
+        "citation_recall": 0.13,
+        "citation_precision": 0.15,
+        "full_citation_credit_rate": 0.13,
+        "latency_ms_p50": 41271,
+        "latency_ms_p95": 83519,
+        "latency_ms_mean": 50903
+      },
+      "2": {
+        "n": 10,
+        "judged": 10,
+        "correctness": 0,
+        "completeness": 0,
+        "conversational_quality": 5.3,
+        "hallucination_rate": 0,
+        "refusal_rate": 1,
+        "verdicts": {
+          "correct": 0,
+          "partially_correct": 0,
+          "incorrect": 0,
+          "refusal": 10
+        },
+        "citation_recall": 0.0,
+        "citation_precision": null,
+        "full_citation_credit_rate": 0,
+        "latency_ms_p50": 38891,
+        "latency_ms_p95": 81830,
+        "latency_ms_mean": 45973
+      }
+    },
+    "disagreement_rate": 0,
+    "judge_failures": []
+  }
+}
