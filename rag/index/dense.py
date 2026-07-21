@@ -132,6 +132,20 @@ class QdrantIndex:
             for point in response.points
         ]
 
+    def fetch(self, chunk_ids: list[str]) -> dict[str, Chunk]:
+        """Fetch chunk metadata by chunk_id (the payload is the single chunk
+        metadata store — the sparse index returns bare chunk_ids, and fusion
+        survivors that came only from BM25 need their Chunk hydrated)."""
+        if not chunk_ids:
+            return {}
+        records = self._client.retrieve(
+            collection_name=self.collection,
+            ids=[point_id(chunk_id) for chunk_id in chunk_ids],
+            with_payload=True,
+        )
+        chunks = (Chunk.model_validate(record.payload) for record in records)
+        return {chunk.chunk_id: chunk for chunk in chunks}
+
     def close(self) -> None:
         """Release the client (local mode: frees the single-process lock)."""
         self._client.close()

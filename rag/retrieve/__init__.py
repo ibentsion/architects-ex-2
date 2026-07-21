@@ -14,7 +14,8 @@ from rag.types import RetrievedChunk
 @runtime_checkable
 class Reranker(Protocol):
     """Score (question, chunk_text) pairs; sigmoid score doubles as the
-    relevance-gate signal. (Method set is provisional until wave E4/T7.)"""
+    relevance-gate signal. Returns the candidates (input order) with
+    ``rerank_score`` populated."""
 
     def score(self, question: str, candidates: list[RetrievedChunk]) -> list[RetrievedChunk]: ...
 
