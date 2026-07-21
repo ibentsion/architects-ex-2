@@ -20,8 +20,14 @@ BASE_URL = os.environ.get("NEBIUS_BASE_URL", "https://api.tokenfactory.nebius.co
 EST_PRICE = (0.5, 2.0)
 
 
-def chat(messages, model, max_tokens=1024, temperature=0.2, quiet=False, **kw):
-    """OpenAI-compatible chat completion via litellm; prints a per-call cost estimate."""
+def chat(messages, model, max_tokens=1024, temperature=0.2, quiet=False, return_usage=False, **kw):
+    """OpenAI-compatible chat completion via litellm; prints a per-call cost estimate.
+
+    return_usage=True additionally returns (content, {"prompt": n, "completion": n}, cost)
+    instead of just content, for callers that need real token accounting (e.g.
+    rag/generate's Answer.cost_estimate). Default (False) is unchanged for existing
+    callers (evalharness/judge.py, etc.).
+    """
     key = os.environ.get("NEBIUS_API_KEY") or sys.exit("NEBIUS_API_KEY not set")
     # openai/ prefix: TF model ids contain "/" which litellm would misread as
     # a provider; force the openai-compatible route to BASE_URL instead
@@ -33,7 +39,10 @@ def chat(messages, model, max_tokens=1024, temperature=0.2, quiet=False, **kw):
     if not quiet:
         print(f"[tf_client] {u.prompt_tokens}+{u.completion_tokens} tokens "
               f"~${cost:.4f}", file=sys.stderr)
-    return resp.choices[0].message.content
+    content = resp.choices[0].message.content
+    if return_usage:
+        return content, {"prompt": u.prompt_tokens, "completion": u.completion_tokens}, cost
+    return content
 
 
 if __name__ == "__main__":
