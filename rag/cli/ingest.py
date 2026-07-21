@@ -35,6 +35,7 @@ from rag.config import (
     impl_id,
     load_config,
 )
+from rag.chunking.common import iter_reading_order, load_docling
 from rag.embed.cache import EmbeddingCache, embed_doc, embedder_cache_key
 from rag.index.manifest import build_manifest, write_manifest
 from rag.normalize.cache import TokenCache, tokens_for_doc
@@ -43,6 +44,10 @@ from rag.parsing.cache import CachedParser, ParseCache
 from rag.parsing.canary import CanaryError, run_canary
 from rag.parsing.docling_parser import ParseError
 from rag.parsing.txt_parser import TxtParser
+from rag.report import ReportBuilder, current_source, load_previous
+from rag.report import attach_collector, detach_collector
+from rag.report import render_markdown, render_summary_line
+from rag.report import save_report_history, write_report_files
 from rag.types import Chunk
 
 logger = logging.getLogger(__name__)
@@ -130,11 +135,12 @@ def _parse_batch(
             and parse_cache.path_for(source.sha256).is_file()
         )
         try:
-            doc = (
-                pdf_parser.parse(source)
-                if source.kind == "pdf"
-                else txt_parser.parse(source)
-            )
+            with current_source(source.rel_path, source.category):
+                doc = (
+                    pdf_parser.parse(source)
+                    if source.kind == "pdf"
+                    else txt_parser.parse(source)
+                )
         except ParseError as exc:
             logger.error("Parse FAILED (continuing): %s", exc)
             files_meta.append(
@@ -172,6 +178,18 @@ def _build_dense_index(config: RagConfig, build_dir: Path) -> Any:
     return registry[impl](**params)
 
 
+def _raw_chars(doc: ParsedDoc) -> int:
+    """Raw extracted character count, for the content-loss reconciliation
+    check (rag/report.py): "kept whole" and heading-prepend (per_table) only
+    grow the chunked/raw ratio, so a drop below it means a chunk/item was
+    actually dropped somewhere in the chunker."""
+    if doc.kind == "txt":
+        assert doc.text is not None
+        return len(doc.text)
+    dl_doc = load_docling(doc)
+    return sum(len(text) for _item, _page, text in iter_reading_order(dl_doc))
+
+
 def _swap_into_place(build_dir: Path, index_dir: Path) -> None:
     """Atomic activation: rename-old-away-then-rename-new-then-delete-old.
 
@@ -199,6 +217,27 @@ def run_ingestion(
     force_reparse: bool = False,
     skip_canary: bool = False,
     dry_run: bool = False,
+) -> int:
+    """Thin wrapper: owns the warning-collecting handler's lifetime so it is
+    detached on every exit path (return, exception) without re-indenting the
+    whole staged pipeline below."""
+    raw_warnings: list[dict[str, Any]] = []
+    handler = attach_collector(raw_warnings)
+    try:
+        return _run_ingestion(
+            config, categories, force_reparse, skip_canary, dry_run, raw_warnings
+        )
+    finally:
+        detach_collector(handler)
+
+
+def _run_ingestion(
+    config: RagConfig,
+    categories: list[str] | None,
+    force_reparse: bool,
+    skip_canary: bool,
+    dry_run: bool,
+    raw_warnings: list[dict[str, Any]],
 ) -> int:
     run_start = time.monotonic()
 
@@ -241,18 +280,34 @@ def run_ingestion(
     chunk_counts: Counter[str] = Counter()
     chunk_seconds = 0.0
     n_parsed = 0
+    report = ReportBuilder()
 
     def _chunk_doc(doc: ParsedDoc) -> None:
         nonlocal chunk_seconds, n_parsed
         n_parsed += 1
+        raw_chars = _raw_chars(doc)
         t_chunk = time.monotonic()
         chunks = chunker.chunk(doc)
         chunk_seconds += time.monotonic() - t_chunk
         if not chunks:
             logger.warning("Document produced no chunks: %s", doc.source.rel_path)
+            report.record_doc(
+                file=doc.source.rel_path,
+                category=doc.source.category,
+                chunker=chunker.name,
+                raw_chars=raw_chars,
+                chunks=[],
+            )
             return
         doc_chunks.append((doc.source, chunks))
         chunk_counts[doc.source.category] += len(chunks)
+        report.record_doc(
+            file=doc.source.rel_path,
+            category=doc.source.category,
+            chunker=chunker.name,
+            raw_chars=raw_chars,
+            chunks=[c.text for c in chunks],
+        )
 
     do_canary = bool(getattr(parser, "rtl_canary", True)) and not skip_canary and pdfs
     canary_info: dict[str, Any] | None = {"skipped": True}
@@ -311,14 +366,15 @@ def run_ingestion(
     all_chunk_ids: list[str] = []
     all_token_lists: list[list[str]] = []
     for source, chunks in doc_chunks:
-        token_lists = tokens_for_doc(
-            normalizer,
-            token_cache,
-            sha256=source.sha256,
-            chunker_id=chunker_id,
-            normalizer_id=normalizer_id,
-            texts=[c.text for c in chunks],
-        )
+        with current_source(source.rel_path, source.category):
+            token_lists = tokens_for_doc(
+                normalizer,
+                token_cache,
+                sha256=source.sha256,
+                chunker_id=chunker_id,
+                normalizer_id=normalizer_id,
+                texts=[c.text for c in chunks],
+            )
         all_chunk_ids.extend(c.chunk_id for c in chunks)
         all_token_lists.extend(token_lists)
     _stage(
@@ -388,6 +444,27 @@ def run_ingestion(
             canary=canary_info,
         )
         write_manifest(build_dir, manifest)
+
+        # ---- Ingestion report (rag/report.py) -------------------------- #
+        # Loaded BEFORE this run's history is saved, so the delta section
+        # compares against the run before this one.
+        previous_report = load_previous(config.cache_dir, config.index_dir)
+        ingest_report = report.finalize(
+            raw_warnings=raw_warnings,
+            config_identity=manifest["config_identity"],
+            impls=manifest["impls"],
+            categories_filter=categories,
+            files_meta=files_meta,
+            chunk_counts=dict(chunk_counts),
+            canary=canary_info,
+            embedding_tokens=usage,
+            wall_seconds=time.monotonic() - run_start,
+            stage_seconds={},
+        )
+        write_report_files(
+            build_dir, ingest_report, render_markdown(ingest_report, previous_report)
+        )
+        save_report_history(config.cache_dir, config.index_dir, ingest_report)
     except BaseException:
         if dense is not None:
             dense.close()
@@ -403,6 +480,13 @@ def run_ingestion(
         f"[stage 7/7 manifest] index live at {index_dir} — {total_chunks} chunks, "
         f"{n_failed} failed files (total {time.monotonic() - run_start:.1f}s)"
     )
+    _stage(f"[report] {render_summary_line(ingest_report)}")
+    if previous_report is not None:
+        _stage(
+            f"[report] vs previous run ({previous_report.get('created_at', '?')}): "
+            f"{previous_report.get('chunks', {}).get('total', '?')} -> {ingest_report['chunks']['total']} chunks"
+        )
+    _stage(f"[report] full report: {index_dir}/ingest_report.md")
     return EXIT_OK
 
 

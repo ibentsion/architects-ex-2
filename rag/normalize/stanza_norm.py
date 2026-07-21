@@ -21,6 +21,8 @@ import re
 import unicodedata
 from typing import Any
 
+from rag.report import EVENT_STANZA_FALLBACK
+
 logger = logging.getLogger(__name__)
 
 #: Hebrew-specific punctuation normalized to plain ASCII forms BEFORE the
@@ -258,6 +260,10 @@ class StanzaNormalizer:
                     "(this chunk will not be token-cached)",
                     segment,
                     exc,
+                    extra={
+                        "rag_event": EVENT_STANZA_FALLBACK,
+                        "rag_detail": {"error": str(exc), "segment_preview": segment[:120]},
+                    },
                 )
                 results.append((whitespace_tokens(segment), True))
         return results

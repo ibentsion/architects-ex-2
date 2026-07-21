@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from rag.parsing import ParsedDoc, Parser, SourceFile
+from rag.report import EVENT_CACHE_CORRUPT
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,12 @@ class ParseCache:
         try:
             return json.loads(path.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError) as exc:
-            logger.warning("Corrupt parse-cache entry %s (%s) — re-parsing", path, exc)
+            logger.warning(
+                "Corrupt parse-cache entry %s (%s) — re-parsing",
+                path,
+                exc,
+                extra={"rag_event": EVENT_CACHE_CORRUPT, "rag_detail": {"path": str(path), "cache": "parsed"}},
+            )
             return None
 
     def store(self, sha256: str, doc_dict: dict[str, Any]) -> None:

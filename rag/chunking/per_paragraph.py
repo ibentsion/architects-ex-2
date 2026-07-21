@@ -20,6 +20,7 @@ from rag.chunking.common import (
     load_docling,
 )
 from rag.parsing import ParsedDoc
+from rag.report import EVENT_NO_PAGE
 from rag.types import Chunk
 
 logger = logging.getLogger(__name__)
@@ -78,6 +79,13 @@ class PerParagraphChunker:
                     "Dropping HybridChunker chunk without page provenance (%s): %r",
                     doc.source.rel_path,
                     hybrid_chunk.text[:60],
+                    extra={
+                        "rag_event": EVENT_NO_PAGE,
+                        "rag_file": doc.source.rel_path,
+                        "rag_category": doc.source.category,
+                        "rag_chunker": self.name,
+                        "rag_detail": {"snippet": hybrid_chunk.text[:120]},
+                    },
                 )
                 continue
             pieces.append((hybrid_chunk.text, page))

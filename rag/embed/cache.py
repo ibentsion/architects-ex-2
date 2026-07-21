@@ -15,6 +15,8 @@ from typing import Any
 
 import numpy as np
 
+from rag.report import EVENT_CACHE_CORRUPT
+
 logger = logging.getLogger(__name__)
 
 
@@ -34,7 +36,12 @@ class EmbeddingCache:
             with np.load(path) as data:
                 return data["vectors"]
         except (OSError, KeyError, ValueError) as exc:
-            logger.warning("Corrupt embedding-cache entry %s (%s) — re-embedding", path, exc)
+            logger.warning(
+                "Corrupt embedding-cache entry %s (%s) — re-embedding",
+                path,
+                exc,
+                extra={"rag_event": EVENT_CACHE_CORRUPT, "rag_detail": {"path": str(path), "cache": "embeddings"}},
+            )
             return None
 
     def store(

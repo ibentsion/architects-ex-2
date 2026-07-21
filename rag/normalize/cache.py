@@ -17,6 +17,8 @@ import os
 from pathlib import Path
 from typing import Any
 
+from rag.report import EVENT_CACHE_CORRUPT
+
 logger = logging.getLogger(__name__)
 
 
@@ -34,10 +36,19 @@ class TokenCache:
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError) as exc:
-            logger.warning("Corrupt token-cache entry %s (%s) — re-normalizing", path, exc)
+            logger.warning(
+                "Corrupt token-cache entry %s (%s) — re-normalizing",
+                path,
+                exc,
+                extra={"rag_event": EVENT_CACHE_CORRUPT, "rag_detail": {"path": str(path), "cache": "tokens"}},
+            )
             return None
         if not isinstance(data, list):
-            logger.warning("Malformed token-cache entry %s — re-normalizing", path)
+            logger.warning(
+                "Malformed token-cache entry %s — re-normalizing",
+                path,
+                extra={"rag_event": EVENT_CACHE_CORRUPT, "rag_detail": {"path": str(path), "cache": "tokens"}},
+            )
             return None
         return data
 

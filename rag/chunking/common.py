@@ -14,6 +14,7 @@ import unicodedata
 from typing import Any, Iterable
 
 from rag.parsing import KNOWN_CATEGORIES, ParsedDoc
+from rag.report import EVENT_EMPTY_CHUNK, EVENT_LONG_PARAGRAPH
 from rag.types import Chunk
 
 logger = logging.getLogger(__name__)
@@ -126,11 +127,22 @@ def split_paragraphs(text: str) -> list[str]:
 
 
 def pack_paragraphs(
-    paragraphs: Iterable[str], max_tokens: int, counter: TokenCounter
+    paragraphs: Iterable[str],
+    max_tokens: int,
+    counter: TokenCounter,
+    *,
+    context: dict[str, Any] | None = None,
 ) -> list[str]:
     """Greedy paragraph packing: consecutive paragraphs are joined while the
     pack stays ≤ ``max_tokens``. A single over-long paragraph becomes its own
-    fragment (paragraph boundaries are the split unit — plan §5 stage 3)."""
+    fragment (paragraph boundaries are the split unit — plan §5 stage 3).
+
+    ``context`` (file/category/page/chunker), when given, is attached to the
+    long-paragraph warning for the ingestion report (rag/report.py) — the
+    paragraph text is never split further or dropped, just kept as one
+    oversized chunk, so this is a size-tuning signal, not a content-loss one.
+    """
+    ctx = context or {}
     packs: list[str] = []
     current: list[str] = []
     current_tokens = 0
@@ -141,7 +153,18 @@ def pack_paragraphs(
             current, current_tokens = [], 0
         if para_tokens > max_tokens and not current:
             logger.warning(
-                "Paragraph longer than max_tokens (%d > %d) kept whole", para_tokens, max_tokens
+                "Paragraph longer than max_tokens (%d > %d) kept whole [%s]",
+                para_tokens,
+                max_tokens,
+                ctx.get("file", "?"),
+                extra={
+                    "rag_event": EVENT_LONG_PARAGRAPH,
+                    "rag_file": ctx.get("file"),
+                    "rag_category": ctx.get("category"),
+                    "rag_page": ctx.get("page"),
+                    "rag_chunker": ctx.get("chunker"),
+                    "rag_detail": {"tokens": para_tokens, "max_tokens": max_tokens},
+                },
             )
             packs.append(para)
             continue
@@ -155,7 +178,13 @@ def pack_paragraphs(
 def chunk_txt(doc: ParsedDoc, max_tokens: int, counter: TokenCounter, chunker_name: str) -> list[Chunk]:
     """TXT files: paragraph-packed to ``max_tokens``; ``page=None`` always."""
     assert doc.text is not None
-    packs = pack_paragraphs(split_paragraphs(doc.text), max_tokens, counter)
+    ctx = {
+        "file": doc.source.rel_path,
+        "category": doc.source.category,
+        "page": None,
+        "chunker": chunker_name,
+    }
+    packs = pack_paragraphs(split_paragraphs(doc.text), max_tokens, counter, context=ctx)
     return build_chunks(doc, [(text, None) for text in packs], chunker_name)
 
 
@@ -185,7 +214,18 @@ def build_chunks(
     n = 0
     for text, page in pieces:
         if not text or not text.strip():
-            logger.warning("Dropping empty chunk (%s, page=%s)", source.rel_path, page)
+            logger.warning(
+                "Dropping empty chunk (%s, page=%s)",
+                source.rel_path,
+                page,
+                extra={
+                    "rag_event": EVENT_EMPTY_CHUNK,
+                    "rag_file": source.rel_path,
+                    "rag_category": source.category,
+                    "rag_page": page,
+                    "rag_chunker": chunker_name,
+                },
+            )
             continue
         if source.kind == "pdf" and (page is None or page < 1):
             raise ChunkInvariantError(

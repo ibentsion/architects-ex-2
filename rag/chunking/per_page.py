@@ -20,6 +20,7 @@ from rag.chunking.common import (
     pack_paragraphs,
 )
 from rag.parsing import ParsedDoc
+from rag.report import EVENT_NO_PAGE
 from rag.types import Chunk
 
 logger = logging.getLogger(__name__)
@@ -51,6 +52,13 @@ class PerPageChunker:
                     "Skipping PDF item without page provenance (%s): %r",
                     doc.source.rel_path,
                     text[:60],
+                    extra={
+                        "rag_event": EVENT_NO_PAGE,
+                        "rag_file": doc.source.rel_path,
+                        "rag_category": doc.source.category,
+                        "rag_chunker": self.name,
+                        "rag_detail": {"snippet": text[:120]},
+                    },
                 )
                 continue
             if text.strip():
@@ -64,6 +72,14 @@ class PerPageChunker:
                 pieces.append((page_text, page))
             else:
                 # Split at paragraph boundaries; all fragments keep this page.
-                for fragment in pack_paragraphs(paragraphs, self.max_tokens, self._counter):
+                ctx = {
+                    "file": doc.source.rel_path,
+                    "category": doc.source.category,
+                    "page": page,
+                    "chunker": self.name,
+                }
+                for fragment in pack_paragraphs(
+                    paragraphs, self.max_tokens, self._counter, context=ctx
+                ):
                     pieces.append((fragment, page))
         return build_chunks(doc, pieces, self.name)
