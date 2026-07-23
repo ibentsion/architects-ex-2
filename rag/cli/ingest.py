@@ -48,7 +48,6 @@ from rag.report import ReportBuilder, current_source, load_previous
 from rag.report import attach_collector, detach_collector
 from rag.report import render_markdown, render_summary_line
 from rag.report import save_report_history, write_report_files
-from rag.types import Chunk
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +64,28 @@ ANCHOR_PDF_REL = unicodedata.normalize(
 def _stage(msg: str) -> None:
     """Stage-level count+timing logs go to stderr (rag_plan.md §5)."""
     print(msg, file=sys.stderr, flush=True)
+
+
+def _rss_mb() -> float:
+    """Current resident set size in MB — read directly from the kernel's
+    per-process accounting (``/proc/self/status``), not just the historical
+    peak, so growth *and* recovery (e.g. after ``gc.collect()``) are both
+    visible. Falls back to ``resource.ru_maxrss`` (peak, not current) on
+    non-Linux platforms."""
+    try:
+        with open("/proc/self/status", encoding="ascii") as f:
+            for line in f:
+                if line.startswith("VmRSS:"):
+                    return int(line.split()[1]) / 1024  # kB -> MB
+    except OSError:
+        pass
+    import resource
+
+    return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
+
+
+def _log_rss(tag: str) -> None:
+    _stage(f"[mem] {tag}: RSS={_rss_mb():.0f}MB")
 
 
 # --------------------------------------------------------------------------- #
@@ -265,124 +286,26 @@ def _run_ingestion(
         )
         return EXIT_OK
 
-    # ---- Stages 2+3: parse (cache + RTL canary gate) + chunk ------------ #
-    # Interleaved per doc: DoclingDocument dicts are LARGE (tens of MB for
-    # policy books) — holding the whole corpus's parses in RAM alongside the
-    # Docling models OOM-kills this ~4GB-free machine. Each ParsedDoc is
-    # chunked immediately and discarded; only (source, chunks) survives.
+    # ---- Build every phase component BEFORE the per-doc loop ----------- #
+    # Chunk -> normalize -> embed -> dense-index run in ONE PASS per
+    # document (below), so at most one document's chunks/text are resident
+    # at a time. The old design chunked the WHOLE corpus first, then
+    # normalized the whole corpus, then embedded the whole corpus — holding
+    # every document's chunk text in RAM across all three passes. That OOM-
+    # killed a full 571-file/12-category run (silent SIGKILL right after
+    # chunking finished, no traceback — see ingest_report.md history/commit
+    # message for the incident). Only chunk_ids + token_lists now survive
+    # per-doc processing (needed for the one unavoidable full-corpus call:
+    # bm25s builds its scoring matrix in one shot; see rag/index/sparse.py).
     t0 = time.monotonic()
     parser = build("parser", config)
     cached_parser = CachedParser(parser, config.cache_dir, force_reparse=force_reparse)
     txt_parser = TxtParser()
     chunker = build("chunker", config)
-    files_meta: list[dict[str, Any]] = []
-    doc_chunks: list[tuple[SourceFile, list[Chunk]]] = []
-    chunk_counts: Counter[str] = Counter()
-    chunk_seconds = 0.0
-    n_parsed = 0
-    report = ReportBuilder()
-
-    def _chunk_doc(doc: ParsedDoc) -> None:
-        nonlocal chunk_seconds, n_parsed
-        n_parsed += 1
-        raw_chars = _raw_chars(doc)
-        t_chunk = time.monotonic()
-        chunks = chunker.chunk(doc)
-        chunk_seconds += time.monotonic() - t_chunk
-        if not chunks:
-            logger.warning("Document produced no chunks: %s", doc.source.rel_path)
-            report.record_doc(
-                file=doc.source.rel_path,
-                category=doc.source.category,
-                chunker=chunker.name,
-                raw_chars=raw_chars,
-                chunks=[],
-            )
-            return
-        doc_chunks.append((doc.source, chunks))
-        chunk_counts[doc.source.category] += len(chunks)
-        report.record_doc(
-            file=doc.source.rel_path,
-            category=doc.source.category,
-            chunker=chunker.name,
-            raw_chars=raw_chars,
-            chunks=[c.text for c in chunks],
-        )
-
-    do_canary = bool(getattr(parser, "rtl_canary", True)) and not skip_canary and pdfs
-    canary_info: dict[str, Any] | None = {"skipped": True}
-    if do_canary:
-        sample = _canary_sample(pdfs, int(getattr(parser, "canary_sample", 10)))
-        parsed_sample = _parse_batch(
-            sample, cached_parser, txt_parser, parse_cache, force_reparse, files_meta
-        )
-        anchor_doc = next(
-            (d for d in parsed_sample if d.source.rel_path == ANCHOR_PDF_REL), None
-        )
-        result = run_canary(parsed_sample, anchor_doc)  # raises CanaryError → exit 2
-        canary_info = result.model_dump(mode="json")
-        _stage(
-            f"[stage 2/7 canary] PASSED on {len(parsed_sample)} PDFs"
-            + (" (incl. ground-truth anchor)" if anchor_doc is not None else "")
-        )
-        while parsed_sample:
-            _chunk_doc(parsed_sample.pop(0))  # pop: free each parse as we go
-        remaining = [s for s in pdfs if s not in sample] + txts
-    else:
-        remaining = [*pdfs, *txts]
-        if skip_canary:
-            _stage("[stage 2/7 canary] SKIPPED (--skip-canary)")
-
-    for source in remaining:
-        for doc in _parse_batch(
-            [source], cached_parser, txt_parser, parse_cache, force_reparse, files_meta
-        ):
-            _chunk_doc(doc)
-
-    # Release the Docling converter + layout/table models BEFORE Stanza loads
-    # (they cannot coexist within this machine's RAM budget).
-    del cached_parser, parser
-    gc.collect()
-
-    n_failed = sum(1 for f in files_meta if f["status"] == "failed")
-    n_cached = sum(1 for f in files_meta if f["status"] == "cached")
-    _stage(
-        f"[stage 2/7 parse] {n_parsed} parsed ({n_cached} from cache, "
-        f"{n_failed} failed) ({time.monotonic() - t0 - chunk_seconds:.1f}s)"
-    )
-    total_chunks = sum(chunk_counts.values())
-    _stage(
-        f"[stage 3/7 chunk] {total_chunks} chunks from {len(doc_chunks)} docs "
-        f"({', '.join(f'{c}={n}' for c, n in sorted(chunk_counts.items()))}) "
-        f"({chunk_seconds:.1f}s)"
-    )
-
-    # ---- Stage 4: normalize (token cache) ------------------------------ #
-    t0 = time.monotonic()
     normalizer = build("normalizer", config)
     token_cache = TokenCache(config.cache_dir)
     chunker_id = impl_id(config.chunker)
     normalizer_id = impl_id(config.normalizer)
-    all_chunk_ids: list[str] = []
-    all_token_lists: list[list[str]] = []
-    for source, chunks in doc_chunks:
-        with current_source(source.rel_path, source.category):
-            token_lists = tokens_for_doc(
-                normalizer,
-                token_cache,
-                sha256=source.sha256,
-                chunker_id=chunker_id,
-                normalizer_id=normalizer_id,
-                texts=[c.text for c in chunks],
-            )
-        all_chunk_ids.extend(c.chunk_id for c in chunks)
-        all_token_lists.extend(token_lists)
-    _stage(
-        f"[stage 4/7 normalize] {len(all_token_lists)} chunk token lists "
-        f"({time.monotonic() - t0:.1f}s)"
-    )
-
-    # ---- Stages 5+6: embed (cache) + index dense/sparse ---------------- #
     embedder = build("embedder", config)
     embedding_cache = EmbeddingCache(config.cache_dir)
     dims = config.embedder.params.get("dimensions") or getattr(
@@ -401,30 +324,124 @@ def _run_ingestion(
         shutil.rmtree(build_dir)
     build_dir.mkdir(parents=True)
 
+    files_meta: list[dict[str, Any]] = []
+    chunk_counts: Counter[str] = Counter()
+    all_chunk_ids: list[str] = []
+    all_token_lists: list[list[str]] = []
+    chunk_seconds = normalize_seconds = embed_seconds = dense_seconds = 0.0
+    n_parsed = 0
+    n_docs_with_chunks = 0
+    report = ReportBuilder()
+    _log_rss("before per-doc loop")
+
     dense = None
     try:
         dense = _build_dense_index(config, build_dir)
-        embed_seconds = 0.0
-        dense_seconds = 0.0
-        for source, chunks in doc_chunks:
-            t0 = time.monotonic()
+
+        def _process_doc(doc: ParsedDoc) -> None:
+            """Chunk -> normalize -> embed -> dense.add() for ONE document;
+            its chunks/text go out of scope when this call returns."""
+            nonlocal chunk_seconds, normalize_seconds, embed_seconds, dense_seconds
+            nonlocal n_parsed, n_docs_with_chunks
+            n_parsed += 1
+            raw_chars = _raw_chars(doc)
+
+            t = time.monotonic()
+            chunks = chunker.chunk(doc)
+            chunk_seconds += time.monotonic() - t
+            report.record_doc(
+                file=doc.source.rel_path,
+                category=doc.source.category,
+                chunker=chunker.name,
+                raw_chars=raw_chars,
+                chunks=[c.text for c in chunks],
+            )
+            if not chunks:
+                logger.warning("Document produced no chunks: %s", doc.source.rel_path)
+                return
+            chunk_counts[doc.source.category] += len(chunks)
+            n_docs_with_chunks += 1
+
+            with current_source(doc.source.rel_path, doc.source.category):
+                t = time.monotonic()
+                token_lists = tokens_for_doc(
+                    normalizer,
+                    token_cache,
+                    sha256=doc.source.sha256,
+                    chunker_id=chunker_id,
+                    normalizer_id=normalizer_id,
+                    texts=[c.text for c in chunks],
+                )
+                normalize_seconds += time.monotonic() - t
+            all_chunk_ids.extend(c.chunk_id for c in chunks)
+            all_token_lists.extend(token_lists)
+
+            t = time.monotonic()
             vectors = embed_doc(
                 embedder,
                 embedding_cache,
-                sha256=source.sha256,
+                sha256=doc.source.sha256,
                 chunker_id=chunker_id,
                 embedder_key=embedder_key,
                 texts=[c.text for c in chunks],
             )
-            embed_seconds += time.monotonic() - t0
-            t0 = time.monotonic()
+            embed_seconds += time.monotonic() - t
+            t = time.monotonic()
             dense.add(chunks, vectors.tolist())
-            dense_seconds += time.monotonic() - t0
+            dense_seconds += time.monotonic() - t
+
+            if n_parsed % 25 == 0:
+                _log_rss(f"after {n_parsed} docs")
+
+        do_canary = bool(getattr(parser, "rtl_canary", True)) and not skip_canary and pdfs
+        canary_info: dict[str, Any] | None = {"skipped": True}
+        if do_canary:
+            sample = _canary_sample(pdfs, int(getattr(parser, "canary_sample", 10)))
+            parsed_sample = _parse_batch(
+                sample, cached_parser, txt_parser, parse_cache, force_reparse, files_meta
+            )
+            anchor_doc = next(
+                (d for d in parsed_sample if d.source.rel_path == ANCHOR_PDF_REL), None
+            )
+            result = run_canary(parsed_sample, anchor_doc)  # raises CanaryError → exit 2
+            canary_info = result.model_dump(mode="json")
+            _stage(
+                f"[stage 2/6 canary] PASSED on {len(parsed_sample)} PDFs"
+                + (" (incl. ground-truth anchor)" if anchor_doc is not None else "")
+            )
+            while parsed_sample:
+                _process_doc(parsed_sample.pop(0))  # pop: free each parse as we go
+            remaining = [s for s in pdfs if s not in sample] + txts
+        else:
+            remaining = [*pdfs, *txts]
+            if skip_canary:
+                _stage("[stage 2/6 canary] SKIPPED (--skip-canary)")
+
+        for source in remaining:
+            for doc in _parse_batch(
+                [source], cached_parser, txt_parser, parse_cache, force_reparse, files_meta
+            ):
+                _process_doc(doc)
+
+        # Release the Docling converter + layout/table models — the parse
+        # cache means a re-run never needs them again this session.
+        del cached_parser, parser
+        gc.collect()
+        _log_rss("after per-doc loop (parse+chunk+normalize+embed+dense-index)")
+
+        n_failed = sum(1 for f in files_meta if f["status"] == "failed")
+        n_cached = sum(1 for f in files_meta if f["status"] == "cached")
+        total_chunks = sum(chunk_counts.values())
         usage = getattr(embedder, "total_input_tokens", 0)
         _stage(
-            f"[stage 5/7 embed] {total_chunks} chunks embedded "
-            f"({usage} API input tokens this run; cached docs cost 0) "
-            f"({embed_seconds:.1f}s)"
+            f"[stage 3/6 parse+chunk+normalize+embed+index] {n_parsed} parsed "
+            f"({n_cached} from cache, {n_failed} failed), {total_chunks} chunks from "
+            f"{n_docs_with_chunks} docs "
+            f"({', '.join(f'{c}={n}' for c, n in sorted(chunk_counts.items()))}) "
+            f"— parse+chunk {chunk_seconds:.1f}s, normalize {normalize_seconds:.1f}s, "
+            f"embed {embed_seconds:.1f}s ({usage} API input tokens this run; cached "
+            f"docs cost 0), dense-index {dense_seconds:.1f}s "
+            f"(total {time.monotonic() - t0:.1f}s)"
         )
 
         t0 = time.monotonic()
@@ -432,11 +449,12 @@ def _run_ingestion(
         sparse.add(all_chunk_ids, all_token_lists)
         sparse.save(build_dir / "bm25")
         _stage(
-            f"[stage 6/7 index] dense ({dense_seconds:.1f}s) + sparse "
-            f"({time.monotonic() - t0:.1f}s) written to {build_dir.name}"
+            f"[stage 4/6 sparse-index] written to {build_dir.name} "
+            f"({time.monotonic() - t0:.1f}s)"
         )
+        _log_rss("after sparse index build")
 
-        # ---- Stage 7: manifest ---------------------------------------- #
+        # ---- Stage 5/6: manifest ---------------------------------------- #
         manifest = build_manifest(
             config,
             chunk_counts=dict(chunk_counts),
@@ -459,7 +477,12 @@ def _run_ingestion(
             canary=canary_info,
             embedding_tokens=usage,
             wall_seconds=time.monotonic() - run_start,
-            stage_seconds={},
+            stage_seconds={
+                "parse_chunk": chunk_seconds,
+                "normalize": normalize_seconds,
+                "embed": embed_seconds,
+                "dense_index": dense_seconds,
+            },
         )
         write_report_files(
             build_dir, ingest_report, render_markdown(ingest_report, previous_report)
@@ -477,9 +500,11 @@ def _run_ingestion(
 
     _swap_into_place(build_dir, index_dir)
     _stage(
-        f"[stage 7/7 manifest] index live at {index_dir} — {total_chunks} chunks, "
-        f"{n_failed} failed files (total {time.monotonic() - run_start:.1f}s)"
+        f"[stage 5/6 manifest] + [stage 6/6 swap] index live at {index_dir} — "
+        f"{total_chunks} chunks, {n_failed} failed files "
+        f"(total {time.monotonic() - run_start:.1f}s)"
     )
+    _log_rss("run complete")
     _stage(f"[report] {render_summary_line(ingest_report)}")
     if previous_report is not None:
         _stage(
