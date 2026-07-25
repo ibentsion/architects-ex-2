@@ -71,6 +71,14 @@ class GenerationConfig(BaseModel):
     max_tokens: int = 1024
     temperature: float = 0.2
     retry_on_citation_failure: bool = True
+    extra_params: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Passed straight through to tf_client.chat -> litellm.completion "
+        "(e.g. reasoning_effort + allowed_openai_params for gpt-oss's Harmony template, "
+        "or extra_body: {chat_template_kwargs: {enable_thinking: false}} for Nemotron/Qwen3-"
+        "style hybrid-reasoning models) — this is retrieval-grounded QA, not open-ended "
+        "reasoning, so capping reasoning effort trades unneeded 'thinking' tokens for latency.",
+    )
 
 
 class RagConfig(BaseModel):

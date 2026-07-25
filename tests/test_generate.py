@@ -425,6 +425,29 @@ def test_generator_rejects_unknown_params():
         make_generator(bogus_param=1)
 
 
+def test_generator_forwards_extra_params_to_tf_chat(monkeypatch):
+    retrieved = [make_retrieved(file=ANCHOR_FILE, page=1)]
+    reply = f"תשובה.\n\n{_sources_block(ANCHOR_FILE, 1)}"
+    seen_kwargs = {}
+
+    def fake_chat(messages, **kw):
+        seen_kwargs.update(kw)
+        return reply, {"prompt": 10, "completion": 10}, 0.0001
+
+    monkeypatch.setattr("rag.generate.generator.tf_chat", fake_chat)
+    generator = make_generator(
+        extra_params={"reasoning_effort": "low", "allowed_openai_params": ["reasoning_effort"]}
+    )
+    generator.generate("שאלה", retrieved)
+    assert seen_kwargs["reasoning_effort"] == "low"
+    assert seen_kwargs["allowed_openai_params"] == ["reasoning_effort"]
+
+
+def test_generator_default_extra_params_is_empty():
+    generator = make_generator()
+    assert generator.extra_params == {}
+
+
 # --------------------------------------------------------------------------- #
 # One live smoke call via tf_client on the real index (slow + llm).
 # --------------------------------------------------------------------------- #

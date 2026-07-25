@@ -88,6 +88,7 @@ class Generator:
         max_tokens: int = 1024,
         temperature: float = 0.2,
         retry_on_citation_failure: bool = True,
+        extra_params: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:
         if prompt not in PROMPT_REGISTRY:
@@ -101,6 +102,7 @@ class Generator:
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.retry_on_citation_failure = retry_on_citation_failure
+        self.extra_params = extra_params or {}
 
     def _call(self, messages: list[dict[str, str]]) -> tuple[str, dict[str, int], float, str | None]:
         text, usage, cost = tf_chat(
@@ -110,6 +112,7 @@ class Generator:
             temperature=self.temperature,
             quiet=False,
             return_usage=True,
+            **self.extra_params,
         )
         finish_reason = usage.pop("finish_reason", None)
         if finish_reason == "length":

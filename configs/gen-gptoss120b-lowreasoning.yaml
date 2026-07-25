@@ -1,0 +1,13 @@
+extends: configs/default.yaml
+generation:
+  model: openai/gpt-oss-120b
+  max_tokens: 4096
+  extra_params:
+    reasoning_effort: low          # Harmony template only accepts high/medium/low (not
+                                    #   minimal/none) -- verified live: cuts completion
+                                    #   tokens ~34% and latency ~20% on a test question
+                                    #   vs the default (implicit "medium"/"high"?) effort.
+                                    #   This is retrieval-grounded QA, not open-ended
+                                    #   reasoning -- low effort should be plenty.
+    allowed_openai_params: [reasoning_effort]   # litellm gates this param on the
+                                    #   generic "openai/" provider route otherwise

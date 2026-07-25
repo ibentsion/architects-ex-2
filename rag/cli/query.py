@@ -55,6 +55,7 @@ class QueryEngine:
             max_tokens=config.generation.max_tokens,
             temperature=config.generation.temperature,
             retry_on_citation_failure=config.generation.retry_on_citation_failure,
+            extra_params=config.generation.extra_params,
         )
 
     def answer(self, question: str, category: str | None = None) -> Answer:

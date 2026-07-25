@@ -1,0 +1,13 @@
+extends: configs/default.yaml
+generation:
+  model: nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B
+  max_tokens: 4096
+  extra_params:
+    extra_body:
+      chat_template_kwargs: {enable_thinking: false}   # Nemotron doesn't honor
+        # reasoning_effort at all (tested, no effect) -- this is the vLLM/Qwen3-
+        # style hybrid-reasoning toggle it actually responds to. Verified live:
+        # cuts completion tokens ~36% and latency ~34% on a test question, BUT
+        # got one fact wrong (2 years vs correct 3 years) that "thinking on" got
+        # right, on a single sample -- needs the real 48-question eval to know
+        # if this is a real accuracy cost or noise.
