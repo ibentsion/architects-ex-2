@@ -6,8 +6,14 @@ page chunks are long). The sigmoid score doubles as the relevance-gate
 signal: zero survivors above ``gate_threshold`` → the caller skips
 generation entirely and returns the "not enough information" fallback.
 
-CPU cost is ~1-3 s for 20 pairs (measured in T7); the first ``score`` call
-lazily downloads + loads the model (~2.2 GB for bge-reranker-v2-m3, one-time).
+CPU cost is ~1.7 s/pair (re-measured post-T7 on this machine -- the original
+"~1-3s for 20 pairs" T7 estimate was stale/optimistic) -- ~18-34s for the
+default 20-candidate pool, and it DOMINATES total query latency regardless
+of chunker choice (candidate count is fixed by dense_top_k/sparse_top_k, not
+by chunk granularity). No config fix available on this hardware short of
+fewer candidates, a smaller/faster reranker, or GPU. The first ``score``
+call lazily downloads + loads the model (~2.2 GB for bge-reranker-v2-m3,
+one-time).
 """
 from __future__ import annotations
 
