@@ -23,9 +23,11 @@ EST_PRICE = (0.5, 2.0)
 def chat(messages, model, max_tokens=1024, temperature=0.2, quiet=False, return_usage=False, **kw):
     """OpenAI-compatible chat completion via litellm; prints a per-call cost estimate.
 
-    return_usage=True additionally returns (content, {"prompt": n, "completion": n}, cost)
+    return_usage=True additionally returns
+    (content, {"prompt": n, "completion": n, "finish_reason": "stop"|"length"|...}, cost)
     instead of just content, for callers that need real token accounting (e.g.
-    rag/generate's Answer.cost_estimate). Default (False) is unchanged for existing
+    rag/generate's Answer.cost_estimate) or to detect max_tokens truncation
+    (finish_reason == "length"). Default (False) is unchanged for existing
     callers (evalharness/judge.py, etc.).
     """
     key = os.environ.get("NEBIUS_API_KEY") or sys.exit("NEBIUS_API_KEY not set")
@@ -39,9 +41,14 @@ def chat(messages, model, max_tokens=1024, temperature=0.2, quiet=False, return_
     if not quiet:
         print(f"[tf_client] {u.prompt_tokens}+{u.completion_tokens} tokens "
               f"~${cost:.4f}", file=sys.stderr)
-    content = resp.choices[0].message.content
+    choice = resp.choices[0]
+    content = choice.message.content
     if return_usage:
-        return content, {"prompt": u.prompt_tokens, "completion": u.completion_tokens}, cost
+        return content, {
+            "prompt": u.prompt_tokens,
+            "completion": u.completion_tokens,
+            "finish_reason": choice.finish_reason,
+        }, cost
     return content
 
 

@@ -21,6 +21,7 @@ from rag.report import (
     render_markdown,
     render_summary_line,
     save_report_history,
+    write_report_files,
 )
 
 logger = logging.getLogger("rag.report.test_helper")
@@ -172,3 +173,23 @@ def test_report_history_round_trip(tmp_path) -> None:
     md = render_markdown(report_v2, previous)
     assert "Comparison to previous run" in md
     assert "New categories since previous run: travel" in md
+
+
+def test_write_report_files_keeps_timestamped_copy_alongside_latest(tmp_path) -> None:
+    build_dir = tmp_path / "build"
+    build_dir.mkdir()
+    report = ReportBuilder().finalize(
+        raw_warnings=[], config_identity="id1", impls={}, categories_filter=None,
+        files_meta=[], chunk_counts={"apartment": 5}, canary=None,
+        embedding_tokens=0, wall_seconds=1.0, stage_seconds={},
+    )
+    write_report_files(build_dir, report, render_markdown(report, None))
+
+    names = {f.name for f in build_dir.iterdir()}
+    assert {"ingest_report.md", "ingest_report.json"} <= names
+    timestamped = [n for n in names if n not in ("ingest_report.md", "ingest_report.json")]
+    assert len(timestamped) == 2  # one .md + one .json, both stamped with the same run timestamp
+    assert all(n.startswith("ingest_report_") for n in timestamped)
+    # timestamped and "latest" content are byte-identical for this run
+    ts_md = next(n for n in timestamped if n.endswith(".md"))
+    assert (build_dir / ts_md).read_text(encoding="utf-8") == (build_dir / "ingest_report.md").read_text(encoding="utf-8")

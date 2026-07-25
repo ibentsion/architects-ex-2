@@ -18,7 +18,7 @@ INGESTION (rag.cli.ingest — offline, run once per config)
 │                              gate on first 10 PDFs — HARD STOP on failure)   │
 │ corpus/<cat>/pages/*.txt ─► UTF-8 read (no parser; page = null) ──────┐      │
 │                                                                       ▼      │
-│        Chunker (per_page default │ per_paragraph │ per_table)                │
+│        Chunker (per_table default │ per_page │ per_paragraph)               │
 │        every chunk: {file: category-relative path (NFC), page: int|null,     │
 │                      category, chunk_id, text, source_url?}                  │
 │              │                                                               │
@@ -165,13 +165,20 @@ parser:
     canary_sample: 10         # PDFs sampled for the gate, spread across categories
 
 chunker:
-  impl: per_page              # alternatives: per_paragraph, per_table
+  impl: per_table               # DEFAULT; alternatives: per_page, per_paragraph. Bare
+                                #   per_paragraph (HybridChunker) truncates/summarizes
+                                #   large tables instead of the full grid -- verified
+                                #   26.3% raw-text retention on a table-heavy file vs
+                                #   99.1% for per_table's atomic Markdown tables.
   params:
-    max_tokens: 1800          # per_page: pages longer than this are split (token-counted
-                              #   with the embedder tokenizer); bge-m3 tolerates full pages
-    txt_max_tokens: 512       # TXT files have no pages -> paragraph-packed to this size
-    # per_paragraph params: max_tokens: 512, merge_peers: true
-    # per_table params: prose_max_tokens: 512 (non-table text falls back to per_paragraph)
+    prose_max_tokens: 512      # <=512: keeps compatibility with 512-token-limit embedders
+    merge_peers: true
+    txt_max_tokens: 512        # TXT pages are single unbroken lines (no paragraph breaks)
+                                #   -> sentence-window chunked instead of paragraph-packed
+    txt_sentence_count: 7      # sentences per TXT chunk
+    txt_sentence_overlap: 2    # sentences shared with the next chunk (stride 5)
+    # per_page params: max_tokens: 1800 (bge-m3/Qwen3 tolerate full pages)
+    # per_paragraph params: max_tokens: 512, merge_peers: true (no table atomicity)
 
 normalizer:
   impl: stanza                # alternatives: trankit, yap (same interface; optional deps)
@@ -252,10 +259,10 @@ Cache: before parsing, check `cache/parsed/<sha256>.json`; on miss, run Docling 
 
 **Stage 3 — Chunk.**
 *In:* ParsedDocs + chunker config. *Out:* `list[Chunk]` (schema in §8).
-- `per_page` (default): iterate `DoclingDocument` items grouped by `prov.page_no`; one chunk per page; pages exceeding `max_tokens` split at paragraph boundaries (all fragments keep the same `page`). Simple, and citations are correct by construction.
-- `per_paragraph`: Docling `HybridChunker(tokenizer=<embedder model id>, merge_peers=True)` — hierarchical structure-aware chunking with tokenizer-fitted split/merge; page taken from the chunk's `doc_items[].prov[].page_no` (first item's page).
-- `per_table`: every `TableItem` becomes one **atomic** chunk serialized as Markdown with its section-heading context prepended (orphaned table cells are useless to both retrieval and the reader); non-table prose falls back to per_paragraph.
-- TXT: paragraph-packed to `txt_max_tokens`; `page=None` always.
+- `per_table` (default): every `TableItem` becomes one **atomic** chunk serialized as full Markdown with its section-heading context prepended (orphaned table cells are useless to both retrieval and the reader, and Docling's `HybridChunker` on its own truncates/summarizes large tables rather than keeping the full grid — verified 26.3% raw-text retention on a table-heavy file vs 99.1% here); non-table prose falls back to `per_paragraph`, capped at `prose_max_tokens` (<=512, so 512-token-limit embedders stay usable).
+- `per_paragraph`: Docling `HybridChunker(tokenizer=<embedder model id>, merge_peers=True)` — hierarchical structure-aware chunking with tokenizer-fitted split/merge, capped at `max_tokens`; page taken from the chunk's `doc_items[].prov[].page_no` (first item's page). No table atomicity — large tables get diluted (see `per_table` above).
+- `per_page`: iterate `DoclingDocument` items grouped by `prov.page_no`; one chunk per page; pages exceeding `max_tokens` split at paragraph boundaries (all fragments keep the same `page`). Simple, and citations are correct by construction.
+- TXT: sentence-window chunked (`txt_sentence_count` sentences per chunk, `txt_sentence_overlap` shared with the next), capped at `txt_max_tokens`; `page=None` always. TXT pages are single unbroken lines scraped from the site with no blank-line paragraph breaks, so paragraph-packing degenerates to one giant chunk — sentences are the split unit instead.
 All strategies consume the DoclingDocument dict — **never** Markdown (rule §1.1). *Failure:* chunk with empty text → dropped with warning; invariant checks (§9) run here.
 
 **Stage 4 — Normalize (for sparse indexing only).**

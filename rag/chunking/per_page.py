@@ -1,10 +1,10 @@
-"""per_page chunker (default) — rag_plan.md §5 stage 3.
+"""per_page chunker (alternative to the default per_table) — rag_plan.md §5 stage 3.
 
 One chunk per PDF page (citations correct by construction: the chunk's page
 IS the citation page). Pages exceeding ``max_tokens`` are split at paragraph
 boundaries — every fragment keeps the same ``page``. Tables stay whole within
-their page (serialized as Markdown inline). TXT files are paragraph-packed to
-``txt_max_tokens`` with ``page=None``.
+their page (serialized as Markdown inline). TXT files are sentence-window
+chunked (see ``rag.chunking.common.chunk_txt``) with ``page=None``.
 """
 from __future__ import annotations
 
@@ -33,15 +33,26 @@ class PerPageChunker:
         self,
         max_tokens: int = 1800,
         txt_max_tokens: int = 512,
+        txt_sentence_count: int = 7,
+        txt_sentence_overlap: int = 2,
         tokenizer: str = DEFAULT_TOKENIZER_ID,
     ) -> None:
         self.max_tokens = max_tokens
         self.txt_max_tokens = txt_max_tokens
+        self.txt_sentence_count = txt_sentence_count
+        self.txt_sentence_overlap = txt_sentence_overlap
         self._counter = TokenCounter(tokenizer)
 
     def chunk(self, doc: ParsedDoc) -> list[Chunk]:
         if doc.kind == "txt":
-            return chunk_txt(doc, self.txt_max_tokens, self._counter, self.name)
+            return chunk_txt(
+                doc,
+                self.txt_max_tokens,
+                self._counter,
+                self.name,
+                sentence_count=self.txt_sentence_count,
+                sentence_overlap=self.txt_sentence_overlap,
+            )
 
         dl_doc = load_docling(doc)
         # Group item texts by page, preserving reading order within each page.

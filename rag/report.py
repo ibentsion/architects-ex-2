@@ -457,10 +457,17 @@ def load_previous(cache_dir: Path, index_dir: Path) -> dict[str, Any] | None:
         return None
 
 
+def _ts_slug(report: dict[str, Any]) -> str:
+    """Filesystem-safe timestamp from ``report["created_at"]`` (UTC ISO8601),
+    shared by the cache-dir history snapshots and the index_dir report files
+    so both name the same run identically."""
+    return report["created_at"].replace(":", "").replace("+00:00", "Z")
+
+
 def save_report_history(cache_dir: Path, index_dir: Path, report: dict[str, Any]) -> None:
     hist_dir = _history_dir(cache_dir, index_dir)
     hist_dir.mkdir(parents=True, exist_ok=True)
-    ts = report["created_at"].replace(":", "").replace("+00:00", "Z")
+    ts = _ts_slug(report)
     payload = json.dumps(report, ensure_ascii=False, indent=2)
     (hist_dir / f"{ts}.json").write_text(payload, encoding="utf-8")
     tmp = hist_dir / "latest.json.tmp"
@@ -469,7 +476,12 @@ def save_report_history(cache_dir: Path, index_dir: Path, report: dict[str, Any]
 
 
 def write_report_files(build_dir: Path, report: dict[str, Any], markdown: str) -> None:
+    """Writes both a timestamped, permanent pair (``ingest_report_<ts>.{md,json}``
+    -- never overwritten by a later run) and the stable ``ingest_report.{md,json}``
+    "latest" pointer that existing log messages/docs reference by name."""
+    ts = _ts_slug(report)
+    payload = json.dumps(report, ensure_ascii=False, indent=2)
+    (build_dir / f"ingest_report_{ts}.md").write_text(markdown, encoding="utf-8")
+    (build_dir / f"ingest_report_{ts}.json").write_text(payload, encoding="utf-8")
     (build_dir / "ingest_report.md").write_text(markdown, encoding="utf-8")
-    (build_dir / "ingest_report.json").write_text(
-        json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    (build_dir / "ingest_report.json").write_text(payload, encoding="utf-8")

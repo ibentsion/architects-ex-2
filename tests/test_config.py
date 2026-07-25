@@ -54,8 +54,14 @@ def test_default_config_loads_and_validates(default_config_path: Path):
     assert cfg.cache_dir == Path("cache")
     assert cfg.parser.impl == "docling"
     assert cfg.parser.params["rtl_canary"] is True
-    assert cfg.chunker.impl == "per_page"
-    assert cfg.chunker.params == {"max_tokens": 1800, "txt_max_tokens": 512}
+    assert cfg.chunker.impl == "per_table"
+    assert cfg.chunker.params == {
+        "prose_max_tokens": 512,
+        "merge_peers": True,
+        "txt_max_tokens": 512,
+        "txt_sentence_count": 7,
+        "txt_sentence_overlap": 2,
+    }
     assert cfg.normalizer.impl == "stanza"
     assert cfg.normalizer.params["index_surface_forms"] is True
     assert cfg.embedder.impl == "tokenfactory"
@@ -118,7 +124,7 @@ def test_extends_deep_merge(swap_config_path: Path):
     assert cfg.corpus_dir == Path("corpus")
     assert cfg.cache_dir == Path("cache")
     assert cfg.parser.impl == "docling"
-    assert cfg.chunker.params["max_tokens"] == 1800
+    assert cfg.chunker.params["prose_max_tokens"] == 512
     assert cfg.retrieval.rrf_k == 60
     assert cfg.retrieval.rerank.gate_threshold == pytest.approx(0.35)
     assert cfg.generation.model == "deepseek-ai/DeepSeek-V4-Pro"  # merged, not replaced
@@ -192,11 +198,13 @@ def test_unknown_phase_name_helpful_error(default_config_path: Path):
 def test_build_resolves_default_chunker(default_config_path: Path):
     cfg = load_config(default_config_path)
     chunker = build("chunker", cfg)
-    from rag.chunking.per_page import PerPageChunker
+    from rag.chunking.per_table import PerTableChunker
 
-    assert isinstance(chunker, PerPageChunker)
-    assert chunker.max_tokens == 1800
-    assert chunker.txt_max_tokens == 512
+    assert isinstance(chunker, PerTableChunker)
+    assert chunker._prose.max_tokens == 512
+    assert chunker._prose.txt_max_tokens == 512
+    assert chunker._prose.txt_sentence_count == 7
+    assert chunker._prose.txt_sentence_overlap == 2
 
 
 # --------------------------------------------------------------------------- #

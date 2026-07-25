@@ -17,7 +17,9 @@ from rag.chunking.common import (
     TokenCounter,
     build_chunks,
     chunk_id_for,
+    pack_sentences,
     split_paragraphs,
+    split_sentences,
 )
 from rag.chunking.per_page import PerPageChunker
 from rag.chunking.per_paragraph import PerParagraphChunker
@@ -107,10 +109,12 @@ def table_parsed() -> ParsedDoc:
     return ParsedDoc(source=make_source(), docling=doc.export_to_dict())
 
 
-def txt_parsed(paragraph_count: int = 6) -> ParsedDoc:
-    text = "\n\n".join(
-        f"פסקה מספר {i} עם תוכן על ביטול פוליסת ביטוח דירה ותנאי ההחזר הכספי"
-        for i in range(paragraph_count)
+def txt_parsed(sentence_count: int = 20) -> ParsedDoc:
+    """Single unbroken line, no blank-line paragraph breaks -- matches the
+    real corpus's scraped .txt pages (see rag/chunking/common.py split_sentences)."""
+    text = " ".join(
+        f"משפט מספר {i} על ביטול פוליסת ביטוח דירה ותנאי ההחזר הכספי."
+        for i in range(sentence_count)
     )
     return ParsedDoc(source=make_source("apartment/pages/cancellation.txt", kind="txt"), text=text)
 
@@ -118,6 +122,69 @@ def txt_parsed(paragraph_count: int = 6) -> ParsedDoc:
 @pytest.fixture(scope="module")
 def counter() -> TokenCounter:
     return TokenCounter()
+
+
+# --------------------------------------------------------------------------- #
+# split_sentences / pack_sentences (TXT chunking primitives)
+# --------------------------------------------------------------------------- #
+
+
+def test_split_sentences_splits_on_terminal_punctuation():
+    text = "משפט ראשון. משפט שני! משפט שלישי?"
+    assert split_sentences(text) == ["משפט ראשון.", "משפט שני!", "משפט שלישי?"]
+
+
+def test_split_sentences_drops_empty_and_strips_whitespace():
+    text = "  משפט אחד.   \n\n  משפט שני.  "
+    assert split_sentences(text) == ["משפט אחד.", "משפט שני."]
+
+
+def test_split_sentences_single_run_on_line_stays_one_sentence():
+    # This corpus's real .txt pages are single unbroken lines with no
+    # terminal punctuation between some clauses -- no split point means
+    # no split, which is exactly what exposed the old paragraph-packing bug.
+    assert split_sentences("אין כאן סימני פיסוק בסוף") == ["אין כאן סימני פיסוק בסוף"]
+
+
+def test_pack_sentences_rejects_overlap_ge_sentence_count(counter):
+    with pytest.raises(ValueError, match="must be > overlap"):
+        pack_sentences(["א", "ב"], sentence_count=2, overlap=2, max_tokens=512, counter=counter)
+
+
+def test_pack_sentences_empty_input_returns_empty(counter):
+    assert pack_sentences([], sentence_count=7, overlap=2, max_tokens=512, counter=counter) == []
+
+
+def test_pack_sentences_fewer_than_window_returns_one_pack(counter):
+    sentences = ["משפט אחד.", "משפט שני.", "משפט שלישי."]
+    packs = pack_sentences(sentences, sentence_count=7, overlap=2, max_tokens=512, counter=counter)
+    assert packs == [" ".join(sentences)]
+
+
+def test_pack_sentences_stride_and_overlap():
+    sentences = [f"משפט{i}" for i in range(20)]  # no internal spaces -> 1 "word" each
+
+    class _WordCounter:
+        def count(self, text):
+            return len(text.split())
+
+    packs = pack_sentences(sentences, sentence_count=7, overlap=2, max_tokens=10_000, counter=_WordCounter())
+    windows = [p.split(" ") for p in packs]
+    starts = [sentences.index(w[0]) for w in windows]
+    assert starts == [0, 5, 10, 15]  # stride = sentence_count - overlap = 5
+    assert [len(w) for w in windows] == [7, 7, 7, 5]
+
+
+def test_pack_sentences_max_tokens_shrinks_window_and_advance_without_skipping():
+    sentences = [f"משפט{i}" for i in range(10)]  # 1 "word"/sentence
+
+    class _WordCounter:
+        def count(self, text):
+            return len(text.split())
+
+    # cap=1 word forces every window down to a single sentence
+    packs = pack_sentences(sentences, sentence_count=7, overlap=2, max_tokens=1, counter=_WordCounter())
+    assert packs == sentences  # one sentence per chunk, none skipped, none duplicated
 
 
 # --------------------------------------------------------------------------- #
@@ -141,14 +208,33 @@ def test_per_page_overlong_page_splits_at_paragraph_boundaries_same_page():
     assert all(c.page == 1 for c in page1)  # fragments keep the same page
 
 
-def test_per_page_txt_paragraph_packed_page_none(counter):
-    doc = txt_parsed()
+def test_per_page_txt_sentence_windowed_with_overlap():
+    # 20 sentences, default window=7/overlap=2 (stride 5) -> 4 windows:
+    # [0:7], [5:12], [10:17], [15:20] (tail, shorter).
+    doc = txt_parsed(sentence_count=20)
+    chunks = PerPageChunker(txt_max_tokens=512).chunk(doc)
+    assert all(c.page is None for c in chunks)
+    assert len(chunks) == 4
+    windows = [split_sentences(c.text) for c in chunks]
+    assert [len(w) for w in windows] == [7, 7, 7, 5]
+    # consecutive windows share exactly the configured 2-sentence overlap
+    assert windows[0][-2:] == windows[1][:2]
+    assert windows[1][-2:] == windows[2][:2]
+    assert windows[2][-2:] == windows[3][:2]
+    # nothing lost: every sentence appears in at least one chunk
+    all_sentences = split_sentences(doc.text)
+    assert set(s for w in windows for s in w) == set(all_sentences)
+
+
+def test_txt_sentence_window_shrinks_under_tight_max_tokens_without_losing_sentences(counter):
+    # max_tokens too small for even 2 sentences together -> every window
+    # shrinks to 1 sentence; advance must shrink too, or sentences get skipped.
+    doc = txt_parsed(sentence_count=20)
     chunks = PerPageChunker(txt_max_tokens=40).chunk(doc)
-    assert len(chunks) > 1
     assert all(c.page is None for c in chunks)
     assert all(counter.count(c.text) <= 40 for c in chunks)
-    # nothing lost: every paragraph lands in exactly one chunk
-    assert sum(len(split_paragraphs(c.text)) for c in chunks) == 6
+    all_sentences = split_sentences(doc.text)
+    assert [c.text for c in chunks] == all_sentences  # one sentence per chunk, none skipped
 
 
 def test_chunk_metadata_and_id_format():
@@ -216,11 +302,11 @@ def test_per_paragraph_chunks_within_max_tokens(counter):
         assert counter.count(c.text) <= 64
 
 
-def test_per_paragraph_txt_falls_back_to_packing(counter):
-    chunks = PerParagraphChunker(txt_max_tokens=40).chunk(txt_parsed())
+def test_per_paragraph_txt_sentence_windowed():
+    chunks = PerParagraphChunker(txt_max_tokens=512).chunk(txt_parsed(sentence_count=20))
     assert chunks
     assert all(c.page is None for c in chunks)
-    assert all(counter.count(c.text) <= 40 for c in chunks)
+    assert len(chunks) == 4  # default sentence_count=7, overlap=2 -> same windowing as per_page
 
 
 # --------------------------------------------------------------------------- #

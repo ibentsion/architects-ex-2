@@ -326,6 +326,72 @@ def test_generate_missing_sources_block_treated_as_citation_failure(monkeypatch)
     assert result.citation_fallback is False
 
 
+def test_generate_tracks_max_tokens_hit(monkeypatch):
+    retrieved = [make_retrieved(file=ANCHOR_FILE, page=1)]
+    reply = f"תשובה חלקית שנקטעה\n\n{_sources_block(ANCHOR_FILE, 1)}"
+    monkeypatch.setattr(
+        "rag.generate.generator.tf_chat",
+        lambda messages, **kw: (reply, {"prompt": 50, "completion": 20, "finish_reason": "length"}, 0.001),
+    )
+    generator = make_generator()
+    result = generator.generate("שאלה", retrieved)
+    assert result.max_tokens_hit is True
+    assert result.n_retries == 0
+    assert result.tokens == {"prompt": 50, "completion": 20}  # finish_reason popped out, not summed
+
+
+def test_generate_no_max_tokens_hit_on_normal_stop(monkeypatch):
+    retrieved = [make_retrieved(file=ANCHOR_FILE, page=1)]
+    reply = f"תשובה מלאה.\n\n{_sources_block(ANCHOR_FILE, 1)}"
+    monkeypatch.setattr(
+        "rag.generate.generator.tf_chat",
+        lambda messages, **kw: (reply, {"prompt": 50, "completion": 20, "finish_reason": "stop"}, 0.001),
+    )
+    generator = make_generator()
+    result = generator.generate("שאלה", retrieved)
+    assert result.max_tokens_hit is False
+
+
+def test_generate_n_retries_counts_the_corrective_retry(monkeypatch):
+    retrieved = [make_retrieved(file=ANCHOR_FILE, page=1)]
+    replies = [
+        f"תשובה שגויה.\n\n{_sources_block('apartment/files/fabricated.pdf', 99)}",
+        f"תשובה מתוקנת.\n\n{_sources_block(ANCHOR_FILE, 1)}",
+    ]
+    calls = []
+
+    def fake_chat(messages, **kw):
+        calls.append(messages)
+        return replies[len(calls) - 1], {"prompt": 10, "completion": 10}, 0.0005
+
+    monkeypatch.setattr("rag.generate.generator.tf_chat", fake_chat)
+    generator = make_generator()
+    result = generator.generate("שאלה", retrieved)
+    assert result.n_retries == 1
+    assert result.max_tokens_hit is False
+
+
+def test_generate_max_tokens_hit_on_retry_call_is_still_tracked(monkeypatch):
+    retrieved = [make_retrieved(file=ANCHOR_FILE, page=1)]
+    replies = [
+        (f"תשובה שגויה.\n\n{_sources_block('apartment/files/fabricated.pdf', 99)}",
+         {"prompt": 10, "completion": 10, "finish_reason": "stop"}, 0.0005),
+        (f"תשובה מתוקנת.\n\n{_sources_block(ANCHOR_FILE, 1)}",
+         {"prompt": 10, "completion": 10, "finish_reason": "length"}, 0.0005),
+    ]
+    calls = []
+
+    def fake_chat(messages, **kw):
+        calls.append(messages)
+        return replies[len(calls) - 1]
+
+    monkeypatch.setattr("rag.generate.generator.tf_chat", fake_chat)
+    generator = make_generator()
+    result = generator.generate("שאלה", retrieved)
+    assert result.n_retries == 1
+    assert result.max_tokens_hit is True  # hit on the retry call, not the first
+
+
 def test_generator_rejects_unknown_prompt_variant():
     with pytest.raises(ValueError, match="Unknown prompt variant"):
         make_generator(prompt="does-not-exist")

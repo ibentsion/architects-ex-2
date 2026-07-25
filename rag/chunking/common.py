@@ -126,6 +126,85 @@ def split_paragraphs(text: str) -> list[str]:
     return [p.strip() for p in re.split(r"\n\s*\n", text) if p.strip()]
 
 
+#: Sentence end = ".", "!", or "?" followed by whitespace. Good enough for
+#: this corpus's scraped .txt pages (Hebrew/English prose, no abbreviation
+#: list needed in practice) -- never used on PDFs, which keep Docling's
+#: structure-aware paragraph/page split instead.
+_SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
+
+
+def split_sentences(text: str) -> list[str]:
+    """Split on sentence-ending punctuation; strips whitespace, drops empties."""
+    return [s.strip() for s in _SENTENCE_SPLIT_RE.split(text.strip()) if s.strip()]
+
+
+def pack_sentences(
+    sentences: list[str],
+    sentence_count: int,
+    overlap: int,
+    max_tokens: int,
+    counter: TokenCounter,
+    *,
+    context: dict[str, Any] | None = None,
+) -> list[str]:
+    """Sliding window over sentences: ``sentence_count`` sentences per chunk,
+    the last ``overlap`` of which are repeated at the start of the next chunk
+    (stride = ``sentence_count - overlap``) -- the fix for TXT sources that
+    have no blank-line paragraph breaks at all (this corpus's scraped pages
+    are single unbroken lines; ``pack_paragraphs`` degenerates to one
+    giant chunk on them).
+
+    Each window is additionally capped at ``max_tokens`` by dropping trailing
+    sentences (never split mid-sentence); a single sentence alone over
+    ``max_tokens`` is kept whole and warned about, same as
+    ``pack_paragraphs``. If the cap shrinks a window, the advance to the next
+    window shrinks with it (never the fixed stride) so no sentence is ever
+    skipped without landing in some chunk -- content-loss safety takes
+    priority over exact overlap width in that degenerate case.
+    """
+    if sentence_count <= overlap:
+        raise ValueError(f"sentence_count ({sentence_count}) must be > overlap ({overlap})")
+    if not sentences:
+        return []
+    ctx = context or {}
+    packs: list[str] = []
+    n = len(sentences)
+    start = 0
+    while start < n:
+        window = sentences[start : start + sentence_count]
+        while len(window) > 1 and counter.count(" ".join(window)) > max_tokens:
+            window = window[:-1]
+        text = " ".join(window)
+        if len(window) == 1 and counter.count(text) > max_tokens:
+            logger.warning(
+                "Sentence longer than max_tokens (%d > %d) kept whole [%s]",
+                counter.count(text),
+                max_tokens,
+                ctx.get("file", "?"),
+                extra={
+                    "rag_event": EVENT_LONG_PARAGRAPH,
+                    "rag_file": ctx.get("file"),
+                    "rag_category": ctx.get("category"),
+                    "rag_page": ctx.get("page"),
+                    "rag_chunker": ctx.get("chunker"),
+                    "rag_detail": {"tokens": counter.count(text), "max_tokens": max_tokens},
+                },
+            )
+        packs.append(text)
+        # Break once THIS window's actual coverage (not the intended
+        # sentence_count) reaches the end -- a max_tokens-shrunk window
+        # covers fewer sentences than intended, so checking the intended
+        # size here would break early and silently drop the tail.
+        if start + len(window) >= n:
+            break
+        # Advance by (this window's actual length - overlap): equals the
+        # configured stride in the common case (full-size window); if
+        # max_tokens forced a smaller window, the advance shrinks with it so
+        # no sentence is ever skipped without landing in some chunk.
+        start += max(1, len(window) - overlap)
+    return packs
+
+
 def pack_paragraphs(
     paragraphs: Iterable[str],
     max_tokens: int,
@@ -175,8 +254,19 @@ def pack_paragraphs(
     return packs
 
 
-def chunk_txt(doc: ParsedDoc, max_tokens: int, counter: TokenCounter, chunker_name: str) -> list[Chunk]:
-    """TXT files: paragraph-packed to ``max_tokens``; ``page=None`` always."""
+def chunk_txt(
+    doc: ParsedDoc,
+    max_tokens: int,
+    counter: TokenCounter,
+    chunker_name: str,
+    *,
+    sentence_count: int = 7,
+    sentence_overlap: int = 2,
+) -> list[Chunk]:
+    """TXT files: sentence-window chunked (``sentence_count`` sentences per
+    chunk, ``sentence_overlap`` shared with the next -- this corpus's .txt
+    pages are single unbroken lines with no paragraph breaks to pack on),
+    capped at ``max_tokens``; ``page=None`` always."""
     assert doc.text is not None
     ctx = {
         "file": doc.source.rel_path,
@@ -184,7 +274,9 @@ def chunk_txt(doc: ParsedDoc, max_tokens: int, counter: TokenCounter, chunker_na
         "page": None,
         "chunker": chunker_name,
     }
-    packs = pack_paragraphs(split_paragraphs(doc.text), max_tokens, counter, context=ctx)
+    packs = pack_sentences(
+        split_sentences(doc.text), sentence_count, sentence_overlap, max_tokens, counter, context=ctx
+    )
     return build_chunks(doc, [(text, None) for text in packs], chunker_name)
 
 

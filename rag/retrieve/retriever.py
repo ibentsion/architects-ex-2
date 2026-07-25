@@ -26,6 +26,21 @@ def _category_of(chunk_id: str) -> str:
     return chunk_id.split("/", 1)[0]
 
 
+def _file_of(chunk_id: str) -> str:
+    """§8 invariant: ``chunk_id = f"{file}#p{page-or-null}#c{n}"``
+    (``rag.chunking.common.chunk_id_for``) — recovers the source file without
+    needing the chunk hydrated, so per-stage document counts can be computed
+    for sparse/fused hits before they've been fetched from the dense store."""
+    return chunk_id.rsplit("#p", 1)[0]
+
+
+def _stage_counts(chunk_ids: list[str]) -> dict[str, int]:
+    """``{n_chunks, n_documents}`` for one retrieval stage — the raw signal
+    for measuring how much each stage (dense/sparse/fusion/rerank+gate)
+    filters or re-ranks the candidate pool."""
+    return {"n_chunks": len(chunk_ids), "n_documents": len({_file_of(cid) for cid in chunk_ids})}
+
+
 class Retriever:
     def __init__(
         self,
@@ -51,6 +66,9 @@ class Retriever:
         self.rrf_k = rrf_k
         self.gate_threshold = gate_threshold
         self.top_n = top_n
+        #: Per-stage {n_chunks, n_documents} from the most recent retrieve()
+        #: call -- read by the query CLI to log/attach filtering-impact stats.
+        self.last_stats: dict[str, dict[str, int]] = {}
 
     # ------------------------------------------------------------------ #
 
@@ -74,7 +92,13 @@ class Retriever:
         # Stage 2 — dual search.
         dense_hits = self._dense_search(question, category)
         sparse_hits = self._sparse_search(question, category)
+        stats = {
+            "dense": _stage_counts([chunk.chunk_id for chunk, _ in dense_hits]),
+            "sparse": _stage_counts([chunk_id for chunk_id, _ in sparse_hits]),
+        }
         if not dense_hits and not sparse_hits:
+            stats["fused"] = stats["gated"] = _stage_counts([])
+            self._log_stats(stats)
             return []
         dense_scores = {chunk.chunk_id: score for chunk, score in dense_hits}
         sparse_scores = dict(sparse_hits)
@@ -88,6 +112,7 @@ class Retriever:
             ],
             k=self.rrf_k,
         )[: max(self.dense_top_k, self.sparse_top_k)]
+        stats["fused"] = _stage_counts([chunk_id for chunk_id, _ in fused])
 
         # Hydrate sparse-only survivors from the dense payload store.
         missing = [cid for cid, _ in fused if cid not in chunks_by_id]
@@ -110,7 +135,21 @@ class Retriever:
 
         # Stage 4 — rerank + relevance gate (empty list = gate fail).
         scored = self.reranker.score(question, candidates)
-        return apply_gate(scored, self.gate_threshold, self.top_n)
+        gated = apply_gate(scored, self.gate_threshold, self.top_n)
+        stats["gated"] = _stage_counts([c.chunk.chunk_id for c in gated])
+        self._log_stats(stats)
+        return gated
+
+    def _log_stats(self, stats: dict[str, dict[str, int]]) -> None:
+        self.last_stats = stats
+        logger.info(
+            "retrieval stage counts: dense=%s sparse=%s fused=%s gated=%s",
+            stats["dense"],
+            stats["sparse"],
+            stats["fused"],
+            stats["gated"],
+            extra={"rag_event": "retrieval_stage_counts", "rag_detail": stats},
+        )
 
     def close(self) -> None:
         """Release backend resources (Qdrant local single-process lock)."""

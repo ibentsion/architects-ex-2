@@ -1,11 +1,13 @@
-"""per_table chunker — rag_plan.md §5 stage 3.
+"""per_table chunker (DEFAULT) — rag_plan.md §5 stage 3.
 
 Every ``TableItem`` becomes one ATOMIC chunk: the table serialized as
 Markdown with its section-heading context prepended (orphaned table cells
-are useless to both retrieval and the reader). Non-table prose falls back to
-per_paragraph (HybridChunker), with table-bearing hybrid chunks dropped so
-table content is never indexed twice. TXT files are paragraph-packed with
-``page=None``.
+are useless to both retrieval and the reader, and Docling's bare
+``HybridChunker`` truncates/summarizes large tables instead of keeping the
+full grid -- verified 26.3% raw-text retention on a table-heavy file vs
+99.1% here). Non-table prose falls back to per_paragraph (HybridChunker),
+with table-bearing hybrid chunks dropped so table content is never indexed
+twice. TXT files are sentence-window chunked with ``page=None``.
 """
 from __future__ import annotations
 
@@ -34,19 +36,30 @@ class PerTableChunker:
         prose_max_tokens: int = 512,
         merge_peers: bool = True,
         txt_max_tokens: int = 512,
+        txt_sentence_count: int = 7,
+        txt_sentence_overlap: int = 2,
         tokenizer: str = DEFAULT_TOKENIZER_ID,
     ) -> None:
         self._prose = PerParagraphChunker(
             max_tokens=prose_max_tokens,
             merge_peers=merge_peers,
             txt_max_tokens=txt_max_tokens,
+            txt_sentence_count=txt_sentence_count,
+            txt_sentence_overlap=txt_sentence_overlap,
             tokenizer=tokenizer,
         )
         self._counter = self._prose._counter
 
     def chunk(self, doc: ParsedDoc) -> list[Chunk]:
         if doc.kind == "txt":
-            return chunk_txt(doc, self._prose.txt_max_tokens, self._counter, self.name)
+            return chunk_txt(
+                doc,
+                self._prose.txt_max_tokens,
+                self._counter,
+                self.name,
+                sentence_count=self._prose.txt_sentence_count,
+                sentence_overlap=self._prose.txt_sentence_overlap,
+            )
 
         from docling_core.types.doc import DocItemLabel
         from docling_core.types.doc.document import SectionHeaderItem, TableItem, TitleItem

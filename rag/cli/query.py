@@ -68,6 +68,8 @@ class QueryEngine:
         writer; ``answer()`` is the public single-value API."""
         t0 = time.monotonic()
         retrieved = self.retriever.retrieve(question, category=category)
+        retrieval_ms = (time.monotonic() - t0) * 1000
+        retrieval_stats = self.retriever.last_stats or None
         if not retrieved:
             # Gate fail (rag_plan.md §6 stage 4): zero LLM cost.
             answer = Answer(
@@ -75,22 +77,32 @@ class QueryEngine:
                 citations=[],
                 category=category,
                 confidence=0.0,
-                latency_ms=(time.monotonic() - t0) * 1000,
+                latency_ms=retrieval_ms,
                 cost_estimate=0.0,
                 retrieved=[],
+                retrieval_stats=retrieval_stats,
+                retrieval_ms=retrieval_ms,
+                generation_ms=0.0,
             )
             return answer, None
 
+        t1 = time.monotonic()
         result = self.generator.generate(question, retrieved)
+        generation_ms = (time.monotonic() - t1) * 1000
         answer = Answer(
             text=result.text,
             citations=result.citations,
             category=category,
             confidence=_confidence(retrieved),
-            latency_ms=(time.monotonic() - t0) * 1000,
+            latency_ms=retrieval_ms + generation_ms,
             cost_estimate=result.cost_estimate,
             citation_fallback=result.citation_fallback,
             retrieved=retrieved,
+            retrieval_stats=retrieval_stats,
+            retrieval_ms=retrieval_ms,
+            generation_ms=generation_ms,
+            max_tokens_hit=result.max_tokens_hit,
+            n_retries=result.n_retries,
         )
         return answer, result.tokens
 
@@ -170,11 +182,27 @@ def _run_batch(engine: QueryEngine, questions_path: Path, out_path: Path, catego
                 "answer": answer.text,
                 "citations": [c.model_dump(mode="json") for c in answer.citations],
                 "latency_ms": answer.latency_ms,
+                "retrieval_ms": answer.retrieval_ms,
+                "generation_ms": answer.generation_ms,
+                "retrieval_stats": answer.retrieval_stats,
+                "max_tokens_hit": answer.max_tokens_hit,
+                "n_retries": answer.n_retries,
             }
             if tokens is not None:
                 record["tokens"] = tokens
             out.write(json.dumps(record, ensure_ascii=False) + "\n")
-            print(f"  [{i}/{n}] {q['id']}: {answer.text[:70]!r}... ({answer.latency_ms:.0f} ms)", file=sys.stderr)
+            gated_n = (answer.retrieval_stats or {}).get("gated", {}).get("n_chunks", 0)
+            flags = []
+            if answer.max_tokens_hit:
+                flags.append("max_tokens_hit")
+            if answer.n_retries:
+                flags.append(f"retries={answer.n_retries}")
+            flag_str = f" [{', '.join(flags)}]" if flags else ""
+            print(
+                f"  [{i}/{n}] {q['id']}: {answer.text[:70]!r}... "
+                f"({answer.latency_ms:.0f} ms, {gated_n} chunks){flag_str}",
+                file=sys.stderr,
+            )
     print(f"\nwrote {out_path}", file=sys.stderr)
 
 

@@ -14,13 +14,25 @@ parser:
     canary_sample: 10         # PDFs sampled for the gate, spread across categories
 
 chunker:
-  impl: per_page              # alternatives: per_paragraph, per_table
+  impl: per_table               # DEFAULT: every TableItem -> one atomic full-Markdown
+                              #   chunk (verified: 99.1% raw-text retention on the worst
+                              #   table-heavy file, vs 26.3% under bare per_paragraph --
+                              #   Docling's HybridChunker truncates/summarizes large
+                              #   tables instead of the full grid); non-table prose falls
+                              #   back to per_paragraph (HybridChunker, structure-aware
+                              #   split/merge) capped at prose_max_tokens so any
+                              #   512-token-limit embedder (bge-m3, e5, etc.) stays usable.
+                              #   alternatives: per_paragraph (no table atomicity),
+                              #   per_page (max_tokens: 1800, page-atomic citations)
   params:
-    max_tokens: 1800          # per_page: pages longer than this are split (token-counted
-                              #   with the embedder tokenizer); bge-m3 tolerates full pages
-    txt_max_tokens: 512       # TXT files have no pages -> paragraph-packed to this size
-    # per_paragraph params: max_tokens: 512, merge_peers: true
-    # per_table params: prose_max_tokens: 512 (non-table text falls back to per_paragraph)
+    prose_max_tokens: 512     # <=512: keeps compatibility with 512-token-limit embedders
+    merge_peers: true
+    txt_max_tokens: 512       # TXT pages have no blank-line paragraphs to pack on (single
+                              #   unbroken line per file) -> sentence-window chunked instead
+    txt_sentence_count: 7     # sentences per TXT chunk
+    txt_sentence_overlap: 2   # sentences shared with the next chunk (stride 5)
+    # per_page params: max_tokens: 1800 (bge-m3/Qwen3 tolerate full pages)
+    # per_paragraph params: max_tokens: 512, merge_peers: true (no table atomicity)
 
 normalizer:
   impl: stanza                # alternatives: trankit, yap (same interface; optional deps)

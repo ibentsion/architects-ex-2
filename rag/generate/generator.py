@@ -63,6 +63,8 @@ class GenerationResult:
     citation_fallback: bool
     cost_estimate: float
     tokens: dict[str, int]
+    max_tokens_hit: bool = False
+    n_retries: int = 0
 
 
 def _zero_tokens() -> dict[str, int]:
@@ -100,8 +102,8 @@ class Generator:
         self.temperature = temperature
         self.retry_on_citation_failure = retry_on_citation_failure
 
-    def _call(self, messages: list[dict[str, str]]) -> tuple[str, dict[str, int], float]:
-        return tf_chat(
+    def _call(self, messages: list[dict[str, str]]) -> tuple[str, dict[str, int], float, str | None]:
+        text, usage, cost = tf_chat(
             messages,
             model=self.model,
             max_tokens=self.max_tokens,
@@ -109,6 +111,18 @@ class Generator:
             quiet=False,
             return_usage=True,
         )
+        finish_reason = usage.pop("finish_reason", None)
+        if finish_reason == "length":
+            logger.warning(
+                "LLM call hit max_tokens (%d) — answer may be truncated (model=%s)",
+                self.max_tokens,
+                self.model,
+                extra={
+                    "rag_event": "generation_max_tokens_hit",
+                    "rag_detail": {"max_tokens": self.max_tokens, "model": self.model},
+                },
+            )
+        return text, usage, cost, finish_reason
 
     def generate(
         self, question: str, retrieved: list[RetrievedChunk]
@@ -130,9 +144,11 @@ class Generator:
             {"role": "user", "content": user_message},
         ]
 
-        text, usage, cost = self._call(messages)
+        text, usage, cost, finish_reason = self._call(messages)
         total_tokens = dict(usage)
         total_cost = cost
+        max_tokens_hit = finish_reason == "length"
+        n_retries = 0
 
         if FALLBACK_TEXT in text:
             # The model itself declared it can't answer -- a legitimate
@@ -144,6 +160,8 @@ class Generator:
                 citation_fallback=False,
                 cost_estimate=total_cost,
                 tokens=total_tokens,
+                max_tokens_hit=max_tokens_hit,
+                n_retries=n_retries,
             )
 
         citations = validate_citations(parse_sources_block(text), retrieved)
@@ -151,7 +169,10 @@ class Generator:
         if not citations and self.retry_on_citation_failure:
             messages.append({"role": "assistant", "content": text})
             messages.append({"role": "user", "content": CORRECTIVE_NUDGE})
-            text, usage, cost = self._call(messages)
+            logger.info("Citation validation failed; retrying with corrective nudge")
+            text, usage, cost, finish_reason = self._call(messages)
+            n_retries += 1
+            max_tokens_hit = max_tokens_hit or finish_reason == "length"
             total_tokens = {k: total_tokens[k] + usage[k] for k in total_tokens}
             total_cost += cost
             if FALLBACK_TEXT in text:
@@ -161,6 +182,8 @@ class Generator:
                     citation_fallback=False,
                     cost_estimate=total_cost,
                     tokens=total_tokens,
+                    max_tokens_hit=max_tokens_hit,
+                    n_retries=n_retries,
                 )
             citations = validate_citations(parse_sources_block(text), retrieved)
 
@@ -171,6 +194,8 @@ class Generator:
                 citation_fallback=False,
                 cost_estimate=total_cost,
                 tokens=total_tokens,
+                max_tokens_hit=max_tokens_hit,
+                n_retries=n_retries,
             )
 
         # Still failing (or missing/all invalid, retry disabled): keep the
@@ -186,4 +211,6 @@ class Generator:
             citation_fallback=True,
             cost_estimate=total_cost,
             tokens=total_tokens,
+            max_tokens_hit=max_tokens_hit,
+            n_retries=n_retries,
         )

@@ -87,3 +87,14 @@ class Answer(BaseModel):
     retrieved: list[RetrievedChunk] = Field(
         default_factory=list, description="Chunks that survived the relevance gate (retrieval debugging / eval)"
     )
+    retrieval_stats: dict[str, dict[str, int]] | None = Field(
+        None,
+        description="Per-stage {n_chunks, n_documents} (dense/sparse/fused/gated) — "
+        "measures how much each stage filters/re-ranks the candidate pool",
+    )
+    max_tokens_hit: bool = Field(
+        False, description="True if any LLM call in this answer hit max_tokens (possible truncation)"
+    )
+    n_retries: int = Field(0, description="Number of corrective-nudge LLM retries used for this answer")
+    retrieval_ms: float | None = Field(None, description="Wall time spent in Retriever.retrieve() (dense+sparse+rerank+gate)")
+    generation_ms: float | None = Field(None, description="Wall time spent in Generator.generate() (0.0 on gate-fail, no LLM call)")

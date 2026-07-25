@@ -268,6 +268,52 @@ def test_retriever_no_hits_returns_empty():
 
 
 # --------------------------------------------------------------------------- #
+# Per-stage stats (last_stats) -- measures filtering/ranking impact
+# --------------------------------------------------------------------------- #
+
+
+def test_retriever_last_stats_tracks_each_stage():
+    apt1, apt2 = make_chunk(APT1), make_chunk(APT2)
+    retriever = make_retriever(
+        dense_hits=[(apt1, 0.9)],
+        sparse_hits=[(APT2, 7.5), (APT1, 3.0)],
+        store={APT2: apt2},
+        rerank_scores={APT1: 0.8, APT2: 0.6},
+    )
+    retriever.retrieve("מה תקופת ההתיישנות?")
+    stats = retriever.last_stats
+    assert stats["dense"] == {"n_chunks": 1, "n_documents": 1}
+    assert stats["sparse"] == {"n_chunks": 2, "n_documents": 2}
+    assert stats["fused"] == {"n_chunks": 2, "n_documents": 2}
+    assert stats["gated"] == {"n_chunks": 2, "n_documents": 2}  # both pass the 0.35 default gate
+
+
+def test_retriever_last_stats_reflects_gate_filtering():
+    apt1 = make_chunk(APT1)
+    retriever = make_retriever(
+        dense_hits=[(apt1, 0.9)],
+        sparse_hits=[(APT1, 3.0)],
+        store={},
+        rerank_scores={APT1: 0.1},  # below gate_threshold=0.35
+    )
+    assert retriever.retrieve("מה מזג האוויר?") == []
+    stats = retriever.last_stats
+    assert stats["fused"] == {"n_chunks": 1, "n_documents": 1}
+    assert stats["gated"] == {"n_chunks": 0, "n_documents": 0}  # gate rejected everything
+
+
+def test_retriever_last_stats_all_zero_on_no_hits():
+    retriever = make_retriever([], [], {}, {})
+    retriever.retrieve("שאלה")
+    assert retriever.last_stats == {
+        "dense": {"n_chunks": 0, "n_documents": 0},
+        "sparse": {"n_chunks": 0, "n_documents": 0},
+        "fused": {"n_chunks": 0, "n_documents": 0},
+        "gated": {"n_chunks": 0, "n_documents": 0},
+    }
+
+
+# --------------------------------------------------------------------------- #
 # Retrieval smoke check on the REAL apartment+travel index (T6 output).
 # Live TF query embedding + local CrossEncoder — slow + llm.
 # --------------------------------------------------------------------------- #
