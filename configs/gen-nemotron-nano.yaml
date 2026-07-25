@@ -1,0 +1,6 @@
+extends: configs/default.yaml
+generation: {model: nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B, max_tokens: 4096}
+# max_tokens bumped from the default 1024: Nemotron is a reasoning model that
+# spends part of its budget on hidden chain-of-thought before visible output
+# (same reason evalharness/judge.py uses 4096 for reasoning-model judges) --
+# 1024 caused a content=None completion on the very first question.

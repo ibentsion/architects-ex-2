@@ -122,6 +122,18 @@ class Generator:
                     "rag_detail": {"max_tokens": self.max_tokens, "model": self.model},
                 },
             )
+        if text is None:
+            # Reasoning models (gpt-oss, Nemotron, ...) can spend the entire
+            # max_tokens budget on hidden chain-of-thought and return no
+            # visible content at all -- always a "length" finish_reason.
+            # Normalize to "" so downstream string ops (FALLBACK_TEXT in
+            # text, parse_sources_block) never crash on None; the citation-
+            # retry path treats it exactly like any other citation-less reply.
+            logger.warning(
+                "LLM returned no content (reasoning budget exhausted?) — model=%s",
+                self.model,
+            )
+            text = ""
         return text, usage, cost, finish_reason
 
     def generate(

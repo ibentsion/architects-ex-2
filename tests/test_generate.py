@@ -371,6 +371,29 @@ def test_generate_n_retries_counts_the_corrective_retry(monkeypatch):
     assert result.max_tokens_hit is False
 
 
+def test_generate_none_content_normalized_never_crashes(monkeypatch):
+    # Reasoning models (gpt-oss, Nemotron) can return content=None with
+    # finish_reason="length" when the whole budget went to hidden reasoning.
+    # This must not crash the batch (regression: TypeError on `FALLBACK_TEXT
+    # in text` when text is None) -- it should behave like any other
+    # citation-less reply: retry once, then fall back to top-3 citations.
+    retrieved = [make_retrieved(file=ANCHOR_FILE, page=1)]
+    calls = []
+
+    def fake_chat(messages, **kw):
+        calls.append(messages)
+        return None, {"prompt": 50, "completion": 1024, "finish_reason": "length"}, 0.002
+
+    monkeypatch.setattr("rag.generate.generator.tf_chat", fake_chat)
+    generator = make_generator()
+    result = generator.generate("שאלה", retrieved)
+    assert len(calls) == 2  # citation-retry still attempted
+    assert result.max_tokens_hit is True
+    assert result.citation_fallback is True
+    assert result.citations == [Citation(file=ANCHOR_FILE, page=1)]
+    assert result.text == ""
+
+
 def test_generate_max_tokens_hit_on_retry_call_is_still_tracked(monkeypatch):
     retrieved = [make_retrieved(file=ANCHOR_FILE, page=1)]
     replies = [

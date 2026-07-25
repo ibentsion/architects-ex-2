@@ -1,0 +1,6 @@
+extends: configs/default.yaml
+generation: {model: google/gemma-3-27b-it, max_tokens: 4096}
+# max_tokens matched to the other two generation-model configs in this
+# comparison (gpt-oss-120b, nemotron-nano) for a fair, budget-equalized
+# comparison -- gemma-3-27b-it isn't a reasoning model and didn't need it,
+# but keeping the ceiling equal isolates model quality, not budget luck.
