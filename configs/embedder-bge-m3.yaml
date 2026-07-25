@@ -1,0 +1,11 @@
+extends: configs/default.yaml
+index_dir: rag_index/bge-m3
+embedder:
+  impl: sentence_transformers
+  params: {model: BAAI/bge-m3, batch_size: 16}
+  # Fully local/offline (no Token Factory cost) -- flagged in this repo's own
+  # research notes as "best published Hebrew-stability evidence" among the
+  # embedder options considered. Genuinely different vector space (1024-dim,
+  # MIT) from Qwen3-Embedding-8B (4096-dim), so this is a real from-scratch
+  # embed pass -- chunker/normalizer/parse caches still apply, only the
+  # embedding cache misses.
