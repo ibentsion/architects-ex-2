@@ -1,0 +1,22 @@
+extends: configs/embedder-bge-m3.yaml
+# Same best-of generation/embedder combo as final-per_table-bgem3-gptoss-low,
+# but with per_page as the chunker for comparison -- per_page scored highest
+# on raw correctness in the chunker comparison (6.15 vs per_table's 5.71),
+# even though per_table is the data-safety-preferred default (no table
+# dilution risk). Needs a fresh ingest: this exact (chunker, embedder) pair
+# was never combined before, though the per_page chunker_id's token cache
+# should already be warm from the very first (pre-CR) full-corpus ingest.
+index_dir: rag_index/per_page-bgem3
+chunker:
+  impl: per_page
+  params: {max_tokens: 1800, txt_max_tokens: 512}   # old-style params (no
+    # sentence_count/overlap keys) so this matches the chunker_id already
+    # cached from the original per_page ingest -- per user's earlier decision
+    # to reuse it as-is for the chunker comparison (per_page's TXT chunks
+    # here use the pre-CR paragraph-packing, not the sentence-window fix).
+generation:
+  model: openai/gpt-oss-120b
+  max_tokens: 4096
+  extra_params:
+    reasoning_effort: low
+    allowed_openai_params: [reasoning_effort]

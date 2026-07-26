@@ -1,0 +1,13 @@
+extends: configs/embedder-bge-m3.yaml
+# Best-of-all-three-axes combo: per_table chunker (data-safe default) + bge-m3
+# embedder (beat Qwen3-Embedding-8B on correctness/completeness/latency,
+# zero API cost) + gpt-oss-120b at low reasoning effort (faster AND slightly
+# better than full reasoning on this eval). No re-ingest needed here --
+# rag_index/bge-m3 already has per_table chunks + bge-m3 embeddings from the
+# Stage 3 trial; generation.model is query-time only.
+generation:
+  model: openai/gpt-oss-120b
+  max_tokens: 4096
+  extra_params:
+    reasoning_effort: low
+    allowed_openai_params: [reasoning_effort]
