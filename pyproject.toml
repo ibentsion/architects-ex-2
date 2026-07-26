@@ -1,0 +1,34 @@
+[project]
+name = "apex-ex2-3"
+version = "0.1.0"
+description = "Harel Insurance customer-support RAG agent"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "bm25s~=0.3.9",
+    "docling~=2.113",
+    "fastapi",
+    "huggingface-hub",
+    "langchain~=1.3",
+    "langchain-docling~=2.0",
+    "langchain-huggingface~=1.2",
+    "langchain-qdrant~=1.1",
+    "litellm",
+    "pydantic>=2",
+    "python-dotenv~=1.0",
+    "pyyaml~=6.0",
+    "qdrant-client~=1.18",
+    "requests",
+    "sentence-transformers~=5.6",
+    "stanza~=1.14",
+    "uvicorn",
+]
+
+[dependency-groups]
+dev = [
+    "pytest~=8.0",
+    "ty>=0.0.63",
+]
+
+[tool.uv]
+package = false
