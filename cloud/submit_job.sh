@@ -7,6 +7,8 @@
 #   cloud/submit_job.sh smoke                 # setup (fast no-op) + cloud/smoke_test.py
 #   cloud/submit_job.sh run '<shell command>' # setup + arbitrary command in repo root
 #   options: --timeout 45m   --name my-job    --branch main
+#            --platform gpu-l40s-a --preset 1gpu-16vcpu-64gb   (fallbacks when
+#            the default pool has no capacity: gpu-l40s-a, gpu-h100-sxm/h200)
 #
 # Every job: clone-or-update the repo at /mnt/data/ex2/repo, run
 # cloud/setup_node.sh (idempotent), then the mode's command — so a job always
@@ -42,9 +44,11 @@ NAME=""
 BRANCH="main"
 while [ $# -gt 0 ]; do
     case "$1" in
-        --timeout) TIMEOUT="$2"; shift 2 ;;
-        --name)    NAME="$2"; shift 2 ;;
-        --branch)  BRANCH="$2"; shift 2 ;;
+        --timeout)  TIMEOUT="$2"; shift 2 ;;
+        --name)     NAME="$2"; shift 2 ;;
+        --branch)   BRANCH="$2"; shift 2 ;;
+        --platform) PLATFORM="$2"; shift 2 ;;
+        --preset)   PRESET="$2"; shift 2 ;;
         *) echo "unknown option: $1"; exit 2 ;;
     esac
 done

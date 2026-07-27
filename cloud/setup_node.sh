@@ -16,17 +16,28 @@ ARTIFACTS_REPO="${ARTIFACTS_REPO:-ibentsion/apex-ex2-artifacts}"
 mkdir -p "$EX2_ROOT"
 
 # --- 1. venv ---------------------------------------------------------------
+# requirements.lock was resolved on Python 3.12 (numpy 2.5.1 needs >=3.12) but
+# the job image ships 3.11, so the interpreter comes from uv's managed CPython,
+# stored on the volume alongside uv itself and its cache.
+export UV_PYTHON_INSTALL_DIR="$EX2_ROOT/uv-python"
+export UV_CACHE_DIR="$EX2_ROOT/uv-cache"
+export PATH="$EX2_ROOT/bin:$PATH"
+if ! command -v uv >/dev/null; then
+    echo "[setup] installing uv to $EX2_ROOT/bin"
+    curl -LsSf https://astral.sh/uv/install.sh \
+        | env UV_INSTALL_DIR="$EX2_ROOT/bin" UV_NO_MODIFY_PATH=1 sh \
+        || python3 -m pip install --quiet uv
+fi
 if [ ! -x "$EX2_ROOT/venv/bin/python" ]; then
-    echo "[setup] creating venv at $EX2_ROOT/venv"
-    python3 -m venv "$EX2_ROOT/venv"
+    echo "[setup] creating venv (python 3.12) at $EX2_ROOT/venv"
+    uv venv --python 3.12 "$EX2_ROOT/venv"
 fi
 source cloud/env.sh
 
 STAMP="$EX2_ROOT/venv/.requirements.lock.sha256"
 if [ ! -f "$STAMP" ] || ! sha256sum -c "$STAMP" --status; then
     echo "[setup] installing requirements.lock (this takes a few minutes on first run)"
-    pip install --quiet --upgrade pip
-    pip install --quiet -r requirements.lock
+    uv pip install --quiet --python "$EX2_ROOT/venv/bin/python" -r requirements.lock
     sha256sum requirements.lock > "$STAMP"
 else
     echo "[setup] venv up to date (requirements.lock unchanged)"
