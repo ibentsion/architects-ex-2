@@ -23,13 +23,13 @@ export UV_PYTHON_INSTALL_DIR="$EX2_ROOT/uv-python"
 export UV_CACHE_DIR="$EX2_ROOT/uv-cache"
 export PATH="$EX2_ROOT/bin:$PATH"
 if ! command -v uv >/dev/null; then
-    echo "[setup] installing uv to $EX2_ROOT/bin"
-    curl -LsSf https://astral.sh/uv/install.sh \
-        | env UV_INSTALL_DIR="$EX2_ROOT/bin" UV_NO_MODIFY_PATH=1 sh \
-        || python3 -m pip install --quiet uv
+    echo "[setup] installing uv"
+    # the pytorch image has no curl/wget — pip is the reliable path
+    python3 -m pip install --quiet --root-user-action=ignore uv
 fi
-if [ ! -x "$EX2_ROOT/venv/bin/python" ]; then
-    echo "[setup] creating venv (python 3.12) at $EX2_ROOT/venv"
+if ! "$EX2_ROOT/venv/bin/python" -c 'import sys; sys.exit(sys.version_info[:2] != (3, 12))' 2>/dev/null; then
+    echo "[setup] (re)creating venv (python 3.12) at $EX2_ROOT/venv"
+    rm -rf "$EX2_ROOT/venv"
     uv venv --python 3.12 "$EX2_ROOT/venv"
 fi
 source cloud/env.sh
