@@ -28,13 +28,17 @@ class SentenceTransformersEmbedder:
         self,
         model: str,
         batch_size: int = 16,
-        device: str = "cpu",
+        device: str | None = None,
         **params: Any,
     ) -> None:
         if params:
             raise TypeError(f"Unknown sentence_transformers embedder params: {sorted(params)}")
         self.model_name = model
         self.batch_size = batch_size
+        if device is None:
+            import torch
+
+            device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = device
         self._model: Any = None
         # e5 prefix handling (rag_plan.md: lives inside this adapter)
