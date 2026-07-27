@@ -7,6 +7,8 @@
 #   2. artifacts (corpus/ cache/ rag_index/) from the private HF dataset
 #      $ARTIFACTS_REPO, extracted into the repo root  (needs HF_TOKEN)
 #   3. local models pre-downloaded into $HF_HOME / $STANZA_RESOURCES_DIR
+#
+# --venv-only stops after step 1 (used by the no-HF-token probe job).
 set -euo pipefail
 
 EX2_ROOT="${EX2_ROOT:-/mnt/data/ex2}"
@@ -28,6 +30,11 @@ if [ ! -f "$STAMP" ] || ! sha256sum -c "$STAMP" --status; then
     sha256sum requirements.lock > "$STAMP"
 else
     echo "[setup] venv up to date (requirements.lock unchanged)"
+fi
+
+if [ "${1:-}" = "--venv-only" ]; then
+    echo "[setup] --venv-only: skipping artifacts and model downloads"
+    exit 0
 fi
 
 # --- 2. artifacts ----------------------------------------------------------

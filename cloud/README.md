@@ -27,6 +27,7 @@ needed between CPU and GPU machines.
 
 ```bash
 cloud/upload_artifacts.sh            # once, or after cache/index changes
+cloud/submit_job.sh probe            # optional: venv + GPU/torch/reranker check, no tokens needed
 cloud/submit_job.sh setup            # once: venv + artifacts + models (~15 min)
 cloud/submit_job.sh smoke            # GPU check, reranker bench, unit tests, 3-question E2E
 cloud/submit_job.sh run 'python -m rag.cli.query --config configs/default.yaml \

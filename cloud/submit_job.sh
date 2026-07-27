@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Submit an ex-2 job to the Nebius GPU node (run from this machine, not the node).
 #
+#   cloud/submit_job.sh probe                 # venv build + GPU/torch/reranker check
+#                                             # (no HF token or API key needed)
 #   cloud/submit_job.sh setup                 # build venv + fetch artifacts/models
 #   cloud/submit_job.sh smoke                 # setup (fast no-op) + cloud/smoke_test.py
 #   cloud/submit_job.sh run '<shell command>' # setup + arbitrary command in repo root
@@ -47,22 +49,37 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-# Secrets: NEBIUS_API_KEY from env or repo .env; HF_TOKEN from env or the hf CLI cache.
-if [ -z "${NEBIUS_API_KEY:-}" ] && [ -f .env ]; then
-    NEBIUS_API_KEY=$(grep -oP '^NEBIUS_API_KEY=\K.*' .env || true)
+ENV_FLAGS=()
+if [ "$MODE" != "probe" ]; then
+    # Secrets: NEBIUS_API_KEY from env or repo .env; HF_TOKEN from env or the hf CLI cache.
+    if [ -z "${NEBIUS_API_KEY:-}" ] && [ -f .env ]; then
+        NEBIUS_API_KEY=$(grep -oP '^NEBIUS_API_KEY=\K.*' .env || true)
+    fi
+    [ -n "${NEBIUS_API_KEY:-}" ] || { echo "NEBIUS_API_KEY not set (env or .env)"; exit 2; }
+    if [ -z "${HF_TOKEN:-}" ] && [ -f "$HOME/.cache/huggingface/token" ]; then
+        HF_TOKEN=$(cat "$HOME/.cache/huggingface/token")
+    fi
+    [ -n "${HF_TOKEN:-}" ] || { echo "HF_TOKEN not set (env or ~/.cache/huggingface/token)"; exit 2; }
+    ENV_FLAGS=(
+        --env NEBIUS_API_KEY="$NEBIUS_API_KEY"
+        --env HF_TOKEN="$HF_TOKEN"
+        --env OPENAI_BASE_URL="$TF_BASE_URL"
+        --env OPENAI_API_KEY="$NEBIUS_API_KEY"
+    )
 fi
-[ -n "${NEBIUS_API_KEY:-}" ] || { echo "NEBIUS_API_KEY not set (env or .env)"; exit 2; }
-if [ -z "${HF_TOKEN:-}" ] && [ -f "$HOME/.cache/huggingface/token" ]; then
-    HF_TOKEN=$(cat "$HOME/.cache/huggingface/token")
-fi
-[ -n "${HF_TOKEN:-}" ] || { echo "HF_TOKEN not set (env or ~/.cache/huggingface/token)"; exit 2; }
 
+SETUP_ARGS=""
+[ "$MODE" = "probe" ] && SETUP_ARGS=" --venv-only"
 BOOTSTRAP="mkdir -p $EX2_ROOT && \
 if [ -d $EX2_ROOT/repo/.git ]; then git -C $EX2_ROOT/repo fetch origin $BRANCH && git -C $EX2_ROOT/repo reset --hard origin/$BRANCH; \
 else git clone -b $BRANCH $REPO_URL $EX2_ROOT/repo; fi && \
-cd $EX2_ROOT/repo && bash cloud/setup_node.sh"
+cd $EX2_ROOT/repo && bash cloud/setup_node.sh$SETUP_ARGS"
 
 case "$MODE" in
+    probe)
+        REMOTE_CMD="$BOOTSTRAP && source cloud/env.sh && nvidia-smi && python cloud/smoke_test.py --gpu-only"
+        TIMEOUT="${TIMEOUT:-30m}"
+        ;;
     setup)
         REMOTE_CMD="$BOOTSTRAP"
         TIMEOUT="${TIMEOUT:-45m}"
@@ -89,8 +106,5 @@ nebius ai job create \
     --platform "$PLATFORM" \
     --preset "$PRESET" \
     --timeout "$TIMEOUT" \
-    --env NEBIUS_API_KEY="$NEBIUS_API_KEY" \
-    --env HF_TOKEN="$HF_TOKEN" \
-    --env OPENAI_BASE_URL="$TF_BASE_URL" \
-    --env OPENAI_API_KEY="$NEBIUS_API_KEY" \
+    "${ENV_FLAGS[@]}" \
     --volume "$VOLUME"

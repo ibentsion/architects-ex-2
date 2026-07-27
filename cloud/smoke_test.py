@@ -112,6 +112,9 @@ def run_e2e() -> None:
 if __name__ == "__main__":
     check_gpu()
     bench_reranker()
+    if "--gpu-only" in sys.argv:  # probe mode: no artifacts/API key on the node yet
+        print("\nGPU PROBE PASSED")
+        sys.exit(0)
     run_unit_tests()
     run_e2e()
     print("\nSMOKE TEST PASSED")
