@@ -11,7 +11,7 @@
 # --venv-only stops after step 1 (used by the no-HF-token probe job).
 set -euo pipefail
 
-EX2_ROOT="${EX2_ROOT:-/mnt/data/ex2}"
+EX2_ROOT="${EX2_ROOT:-/mnt/data/ex2/ibentsion}"
 ARTIFACTS_REPO="${ARTIFACTS_REPO:-ibentsion/apex-ex2-artifacts}"
 mkdir -p "$EX2_ROOT"
 

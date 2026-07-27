@@ -2,7 +2,7 @@
 #   source cloud/env.sh
 # Everything persistent lives on the mounted compute filesystem so models,
 # venv, caches and indexes survive across jobs.
-export EX2_ROOT="${EX2_ROOT:-/mnt/data/ex2}"
+export EX2_ROOT="${EX2_ROOT:-/mnt/data/ex2/ibentsion}"
 export HF_HOME="$EX2_ROOT/hf"
 export STANZA_RESOURCES_DIR="$EX2_ROOT/stanza"
 # Tokenizer-parallelism warning noise from transformers inside forked workers.

@@ -1,10 +1,10 @@
 # Cloud dev/eval environment (Nebius, 1× L40S)
 
 Everything persistent lives on the compute filesystem
-(`computefilesystem-e00hnnpfn5rr5aavma`, mounted at `/mnt/data`):
+(`computefilesystem-e00hnnpfn5rr5aavma`, mounted at `/mnt/data`; shared across users — everything of ours stays under `/mnt/data/ex2/ibentsion`):
 
 ```
-/mnt/data/ex2/
+/mnt/data/ex2/ibentsion/
   venv/     python env, built once from requirements.lock
   hf/       HF_HOME — bge-m3, bge-reranker-v2-m3, anything lazily downloaded
   stanza/   STANZA_RESOURCES_DIR — Hebrew stanza models
@@ -54,5 +54,5 @@ Notes
 - Docling layout models are not pre-downloaded (parses are cached); a fresh
   parse of new PDFs will lazily fetch them into `$HF_HOME` on first use.
 - To force a fresh artifact copy on the node, delete the dir in
-  `/mnt/data/ex2/repo` (e.g. `rm -rf rag_index`) and re-run any job —
+  `/mnt/data/ex2/ibentsion/repo` (e.g. `rm -rf rag_index`) and re-run any job —
   setup re-downloads missing dirs only.

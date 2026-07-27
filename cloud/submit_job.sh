@@ -10,7 +10,7 @@
 #            --platform gpu-l40s-a --preset 1gpu-16vcpu-64gb   (fallbacks when
 #            the default pool has no capacity: gpu-l40s-a, gpu-h100-sxm/h200)
 #
-# Every job: clone-or-update the repo at /mnt/data/ex2/repo, run
+# Every job: clone-or-update the repo at /mnt/data/ex2/ibentsion/repo, run
 # cloud/setup_node.sh (idempotent), then the mode's command — so a job always
 # lands on a ready node no matter what ran before it. The run-mode command is
 # passed inside double quotes end-to-end: use single quotes and avoid double
@@ -25,7 +25,7 @@ PLATFORM="gpu-l40s-d"
 PRESET="1gpu-16vcpu-96gb"
 VOLUME="computefilesystem-e00hnnpfn5rr5aavma:/mnt/data"
 REPO_URL="https://github.com/ibentsion/architects-ex-2.git"
-EX2_ROOT="/mnt/data/ex2"
+EX2_ROOT="/mnt/data/ex2/ibentsion"
 TF_BASE_URL="https://api.tokenfactory.nebius.com/v1"
 
 MODE="${1:-}"
