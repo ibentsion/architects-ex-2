@@ -59,7 +59,9 @@ for name in corpus cache rag_index; do
         continue
     fi
     echo "[setup] fetching $name.tar.gz from $ARTIFACTS_REPO"
-    tarball=$(hf download "$ARTIFACTS_REPO" "$name.tar.gz" --repo-type dataset)
+    # hf_hub_download instead of the hf CLI: the CLI decorates its stdout
+    # (colors + multi-line "Downloaded" banner), not a clean path
+    tarball=$(python -c "from huggingface_hub import hf_hub_download; print(hf_hub_download('$ARTIFACTS_REPO', '$name.tar.gz', repo_type='dataset'))")
     tar xzf "$tarball"
 done
 
