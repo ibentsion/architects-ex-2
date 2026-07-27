@@ -1,5 +1,5 @@
 [project]
-name = "apex-ex2-3"
+name = "harel-rag"
 version = "0.1.0"
 description = "Harel Insurance customer-support RAG agent"
 readme = "README.md"
