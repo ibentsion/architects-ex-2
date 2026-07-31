@@ -40,7 +40,7 @@ rest:
     citation_accuracy = credit (1.0 / 0.5 / 0.0) × (citations resolving to a real page ÷ citations made)
 
 ```bash
-python -m evalharness.run \
+uv run -m evalharness.run \
     --questions reference_questions.json \
     --answers baseline_answers.jsonl \
     --out eval_results/baseline
@@ -62,16 +62,16 @@ reports are English.
 ## Quickstart
 
 ```bash
-pip install -r requirements.txt
+uv sync
 export NEBIUS_API_KEY=...               # the shared course Token Factory key
 export OPENAI_BASE_URL=https://api.tokenfactory.nebius.com/v1
 export OPENAI_API_KEY=$NEBIUS_API_KEY
 
 # Stage 1: baseline answers, then score them with YOUR harness
-python baseline_runner.py --model deepseek-ai/DeepSeek-V4-Pro
+uv run baseline_runner.py --model deepseek-ai/DeepSeek-V4-Pro
 ```
 
-The document corpus: `python get_corpus.py` downloads the frozen snapshot
+The document corpus: `uv run get_corpus.py` downloads the frozen snapshot
 from the public HF dataset `orik/apex-ex2-harel-corpus` into a local `corpus/`
 dir (gitignored). Ground-truth answers are anchored to that snapshot, not the
 live site.
