@@ -26,13 +26,19 @@ def summarize(records: list) -> dict:
     scores = lambda f: [r["judgment"][f] for r in judged]
     verdicts = [r["judgment"]["verdict"] for r in judged]
     latencies = [r["latency_ms"] for r in records if r.get("latency_ms") is not None]
-    # Citation accuracy counts every answer, uncited and refusals included:
-    # an answer that cites nothing establishes nothing.
-    accuracies = [r["citations"]["accuracy"] for r in records]
-    cited = sum(r["citations"]["cited_count"] for r in records)
-    invalid = sum(r["citations"]["invalid_count"] for r in records)
+    # Citation accuracy counts every answerable question, uncited and refusals
+    # included: an answer that cites nothing establishes nothing. Unanswerable
+    # questions score None — there is no evidence to cite.
+    scored = [r for r in records if r["citations"]["accuracy"] is not None]
+    accuracies = [r["citations"]["accuracy"] for r in scored]
+    cited = sum(r["citations"]["cited_count"] for r in scored)
+    invalid = sum(r["citations"]["invalid_count"] for r in scored)
     gt_hits = [r["gt_source_hit"]["hit_rate"] for r in records
                if r["gt_source_hit"]["hit_rate"] is not None]
+    # Abstention: on a question the corpus cannot answer, correct = declined.
+    unanswerable = [r for r in records if r.get("answerable") is False]
+    abstained = [r["judgment"]["verdict"] == "correct" for r in unanswerable
+                 if "error" not in r["judgment"]]
     return {
         "n": len(records),
         "judged": len(judged),
@@ -45,7 +51,10 @@ def summarize(records: list) -> dict:
                      ("correct", "partially_correct", "incorrect", "refusal")},
         "citation_accuracy": _mean(accuracies),
         "full_citation_credit_rate": _mean([a == 1.0 for a in accuracies]),
-        "uncited_rate": _mean([r["citations"]["cited_count"] == 0 for r in records]),
+        "uncited_rate": _mean([r["citations"]["cited_count"] == 0 for r in scored]),
+        "abstention_rate": _mean(abstained),
+        "unanswerable_citation_rate": _mean(
+            [r["citations"]["cited_count"] > 0 for r in unanswerable]),
         "invalid_citation_rate": round(invalid / cited, 2) if cited else None,
         "gt_source_hit_rate": _mean(gt_hits),
         "latency_ms_p50": round(_pct(latencies, 50)) if latencies else None,
@@ -54,10 +63,11 @@ def summarize(records: list) -> dict:
     }
 
 
-def _by(records, key):
+def _by(records, key, default=None):
     buckets = {}
     for r in records:
-        buckets.setdefault(r[key], []).append(r)
+        buckets.setdefault(r.get(key, default) if default is not None else r[key],
+                           []).append(r)
     return {k: summarize(v) for k, v in sorted(buckets.items())}
 
 
@@ -71,6 +81,9 @@ def aggregate(records: list) -> dict:
                           if k in by_difficulty},
         "by_domain": _by(records, "domain"),
         "by_source_groups": _by(records, "n_source_groups"),
+        # v2 datasets label each question standard / multi_source / unanswerable;
+        # v1 has no kinds, so this collapses to a single "standard" bucket.
+        "by_kind": _by(records, "kind", default="standard"),
         "disagreement_rate": _mean([bool(r["judgment"].get("disagreement"))
                                     for r in judged]),
         "judge_failures": [r["id"] for r in records if "error" in r["judgment"]],

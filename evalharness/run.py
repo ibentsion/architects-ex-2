@@ -62,7 +62,11 @@ def main(argv=None):
     store = PageStore(args.corpus, args.cache_dir)
     resolved_by_id = {q["id"]: citations.resolve_citations(
         answers_by_id[q["id"]].get("citations"), store) for q in questions}
-    judgeable = {qid: [c for c in r if c["invalid_reason"] is None]
+    # An unanswerable question has no evidence to establish, so its citations
+    # are never judged — the answer judge grades the abstention instead.
+    answerable = {q["id"]: q.get("answerable", True) for q in questions}
+    judgeable = {qid: ([c for c in r if c["invalid_reason"] is None]
+                       if answerable[qid] else [])
                  for qid, r in resolved_by_id.items()}
     n_pages = sum(len(v) for v in judgeable.values())
     n_invalid = sum(len(r) - len(judgeable[qid]) for qid, r in resolved_by_id.items())
@@ -92,12 +96,15 @@ def main(argv=None):
             "id": q["id"],
             "domain": q["domain"],
             "difficulty": q["difficulty"],
+            "kind": q.get("kind", "standard"),
+            "answerable": q.get("answerable", True),
             "n_source_groups": len(q["ground_truth_sources"]),
             "judgment": result["aggregate"],
             "judges": result["judgments"],
             "citations": citations.score_citations(
                 resolved_by_id[q["id"]],
-                cite_result["aggregate"] if cite_result else None),
+                cite_result["aggregate"] if cite_result else None,
+                answerable=answerable[q["id"]]),
             "citation_judgment": cite_result["aggregate"] if cite_result else None,
             "citation_judges": cite_result["judgments"] if cite_result else [],
             "gt_source_hit": citations.gt_source_hit(answer.get("citations"),

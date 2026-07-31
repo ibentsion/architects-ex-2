@@ -42,12 +42,17 @@ def resolve_citations(citations: list, store) -> list:
     return out
 
 
-def score_citations(resolved: list, judgment: dict | None) -> dict:
+def score_citations(resolved: list, judgment: dict | None,
+                    answerable: bool = True) -> dict:
     """Score one answer's citations from its resolution + the judge's ruling.
 
     `resolved` is the full list from `resolve_citations`; `judgment` is the
     aggregated citation judgment over the *valid* subset (None when nothing
     resolved, so no judge ran).
+
+    An unanswerable question has no evidence to cite, so citation accuracy is
+    `None` (excluded from the mean) — citing anything at all is a failure of
+    abstention, which the answer judge grades, not of citation accuracy.
     """
     valid = [c for c in resolved if c["invalid_reason"] is None]
     invalid_reasons = [c["invalid_reason"] for c in resolved if c["invalid_reason"]]
@@ -61,6 +66,9 @@ def score_citations(resolved: list, judgment: dict | None) -> dict:
         "accuracy": 0.0,
         "labels": [],
     }
+    if not answerable:
+        score["accuracy"] = None
+        return score
     if judgment is None or "error" in judgment:
         # Nothing cited, nothing resolvable, or every judge failed. The first
         # two are honest zeros; a judge failure is flagged so it can't be read

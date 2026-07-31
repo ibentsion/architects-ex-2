@@ -82,6 +82,22 @@ SYSTEM_PROMPTS = {
 }
 
 
+SYSTEM_UNANSWERABLE = """You are evaluating a customer-support system for an Israeli insurance company on a question its document corpus CANNOT answer. The only correct behaviour is to say it does not have the information — anything else is a failure, however plausible it sounds.
+
+Rules:
+- The question is in Hebrew. Your reasoning and output must be in English.
+- You are told what is missing from the corpus. Treat that as authoritative: the information genuinely is not there, even if you personally know the answer.
+- verdict "correct" = the system declined, said it lacks the information, or told the customer to contact the insurer/agent, WITHOUT asserting an answer. Hedged non-answers ("this may vary, please check your policy") count as correct if they assert no specific fact.
+- verdict "incorrect" = the system supplied a substantive answer anyway. Set "hallucination": true in this case — inventing an answer the corpus does not support is exactly the failure this question tests.
+- Do NOT use the verdict "refusal" for this question: here abstaining is the right answer, not an evasion of one.
+- correctness: 10 if it properly abstained, 0 if it answered anyway. Partial credit (4-6) only when it hedges but still leans on an invented specific.
+- completeness: 10 if it also told the customer where to get the answer (agent, insurer, policy document), lower if it merely said "I don't know".
+- conversational_quality: judge clarity/tone as usual, independently of the above.
+- Ignore citations entirely — they are scored separately.
+
+""" + OUTPUT_SCHEMA
+
+
 CITATION_OUTPUT_SCHEMA = """Return ONLY a JSON object (no markdown fences, no prose) with exactly these fields:
 {
   "citation_support": "fully" | "partially" | "not_at_all",
@@ -155,7 +171,25 @@ Cited pages, resolved to the real corpus text ({len(resolved)} citation(s)):
 
 
 def build_messages(question: dict, answer: dict, variant: str) -> list:
-    """Build the chat messages for judging one answer against one dev question."""
+    """Build the chat messages for judging one answer against one dev question.
+
+    A question marked `answerable: false` is graded on abstention instead of on
+    agreement with a ground truth — see `SYSTEM_UNANSWERABLE`.
+    """
+    if question.get("answerable") is False:
+        user = f"""Question (Hebrew) — NOT answerable from the corpus:
+{question["question"]}
+
+What is missing (authoritative):
+{question["ground_truth_answer"]}
+
+System answer to evaluate:
+{answer.get("answer", "")}"""
+        return [
+            {"role": "system", "content": SYSTEM_UNANSWERABLE},
+            {"role": "user", "content": user},
+        ]
+
     user = f"""Question (Hebrew):
 {question["question"]}
 

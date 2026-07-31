@@ -216,6 +216,26 @@ def render(metrics: dict, records: list, meta: dict) -> str:
         "",
     ]
 
+    if len(metrics["by_kind"]) > 1:
+        lines += ["## By question kind", "", _table(metrics["by_kind"], "Kind"), ""]
+
+    if overall["abstention_rate"] is not None:
+        unanswerable = [r for r in records if r.get("answerable") is False]
+        answered = [r for r in unanswerable if r["citations"]["cited_count"] > 0]
+        lines += [
+            "## Abstention (unanswerable questions)",
+            "",
+            f"{len(unanswerable)} questions in this set have no answer anywhere in "
+            "the corpus. The only correct behaviour is to say so.",
+            "",
+            f"- **Abstained correctly:** {_fmt(overall['abstention_rate'])}",
+            f"- **Cited evidence anyway:** {_fmt(overall['unanswerable_citation_rate'])} "
+            f"({len(answered)} of {len(unanswerable)}) — a system citing pages for a "
+            "question the corpus cannot answer is retrieving-and-answering regardless "
+            "of relevance.",
+            "",
+        ]
+
     supports = [r["citations"]["support"] for r in records]
     lines += [
         "## Citation accuracy",
