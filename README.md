@@ -21,11 +21,23 @@ measure (relevance, hallucination rate, citation accuracy, latency).
 
 Our Stage 1 harness. Scores an answers JSONL against the dev set with an
 LLM-as-judge (numeric 0–10 grades for correctness / completeness /
-conversational quality, plus verdict and hallucination flags), deterministic
-citation accuracy (`any_of` group matching), and latency stats. Writes
-`judgments.jsonl`, `metrics.json`, and a markdown `report.md` with per-domain /
-per-difficulty / per-source-count breakdowns and prioritized improvement
-suggestions.
+conversational quality, plus verdict and hallucination flags), LLM-judged
+citation accuracy, and latency stats. Writes `judgments.jsonl`, `metrics.json`,
+and a markdown `report.md` with per-domain / per-difficulty / per-source-count
+breakdowns and prioritized improvement suggestions.
+
+**Citation accuracy** — does the cited evidence actually establish the answer?
+Every cited `{file, page}` is resolved to the *actual* corpus page (corpus walk
+→ sha256 → Docling parse cache; no search), and a judge rules whether the cited
+pages establish the ground-truth answer: fully / partially / not at all. The
+same fact appears in several corpus documents, so any page that truly
+establishes it earns credit — there is no fixed list of "correct" sources.
+`ground_truth_sources` records where each reference answer was authored from
+and is kept only as an unscored retrieval diagnostic (`gt_source_hit_rate`).
+A citation pointing at a nonexistent file or page earns nothing and dilutes the
+rest:
+
+    citation_accuracy = credit (1.0 / 0.5 / 0.0) × (citations resolving to a real page ÷ citations made)
 
 ```bash
 python -m evalharness.run \
@@ -35,8 +47,13 @@ python -m evalharness.run \
 
 # options: --prompt {rubric,strict,claims}   judge prompt variant (default rubric)
 #          --judges MODEL [MODEL ...]        several models = judging committee
+#          --corpus DIR --cache-dir DIR      where cited pages are resolved from
 #          --limit N --workers N
 ```
+
+Citation judging needs `corpus/` and the `cache/parsed/` Docling parses the
+index was built from (`get_corpus.py`, then any ingest run). It costs one extra
+judge call per answer that cited at least one resolvable page.
 
 The judge is pinned to `deepseek-ai/DeepSeek-V4-Pro` at temperature 0 for
 run-to-run comparability. Questions/answers are Hebrew; judge output and
