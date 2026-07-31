@@ -223,9 +223,14 @@ def retry_message(reason: str) -> dict:
 
 
 def parse_generation(raw: dict) -> dict:
-    """Validate a generator reply: either a skip or a well-formed item."""
+    """Validate a generator reply: either a skip or a well-formed item.
+
+    A skip is a valid reply, not an error — raising here would send it through
+    `_call_judge`'s retry loop and spend two more calls arguing with a model
+    that has already told us the page is unusable.
+    """
     if "skip" in raw:
-        raise Skip(str(raw["skip"])[:200])
+        return {"skip": str(raw["skip"])[:200]}
     question = str(raw.get("question", "")).strip()
     answer = str(raw.get("ground_truth_answer", "")).strip()
     if len(question) < 20:
@@ -234,10 +239,6 @@ def parse_generation(raw: dict) -> dict:
         raise ValueError(f"ground_truth_answer too short: {answer!r}")
     return {"question": question, "ground_truth_answer": answer,
             "rationale": str(raw.get("rationale", "")).strip()}
-
-
-class Skip(Exception):
-    """The generator declined this page — resample rather than retry."""
 
 
 def parse_verdict(raw: dict) -> dict:
