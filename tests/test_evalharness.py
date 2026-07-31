@@ -324,6 +324,70 @@ def test_run_skips_the_citation_judge_when_nothing_resolves(tmp_path, corpus, mo
     assert overall["uncited_rate"] == 1.0
 
 
+def test_unanswerable_question_is_judged_on_abstention(tmp_path, corpus, monkeypatch):
+    """A question the corpus cannot answer is scored on whether the system
+    declined — and its citations are not judged at all."""
+    corpus_dir, cache_dir = corpus
+    questions = [{
+        "id": "v2-001-apartment-medium", "domain": "apartment", "difficulty": "medium",
+        "kind": "unanswerable", "answerable": False,
+        "question": "כמה זמן לוקח לטפל בתביעה הספציפית שלי?",
+        "ground_truth_answer": "המסמכים אינם כוללים מידע על משך הטיפול בתביעה פרטנית.",
+        "ground_truth_sources": [],
+    }]
+    q_path, a_path = tmp_path / "q.json", tmp_path / "a.jsonl"
+    q_path.write_text(json.dumps(questions, ensure_ascii=False), encoding="utf-8")
+    # The system answered anyway, and cited a page to back it up.
+    a_path.write_text(json.dumps({"id": "v2-001-apartment-medium",
+                                  "answer": "הטיפול אורך 14 ימים.",
+                                  "citations": [{"file": ANCHOR, "page": 1}]}),
+                      encoding="utf-8")
+
+    seen = []
+
+    def fake_chat(messages, model, **kw):
+        seen.append(messages[0]["content"])
+        assert "CANNOT answer" in messages[0]["content"], \
+            "the unanswerable prompt must be used, not the rubric"
+        return json.dumps({"verdict": "incorrect", "hallucination": True,
+                           "correctness": 0, "completeness": 0,
+                           "conversational_quality": 7,
+                           "reasoning": "invented a duration"})
+
+    monkeypatch.setattr(judge, "chat", fake_chat)
+    out_dir = tmp_path / "out"
+    run.main(["--questions", str(q_path), "--answers", str(a_path),
+              "--out", str(out_dir), "--corpus", str(corpus_dir),
+              "--cache-dir", str(cache_dir), "--workers", "1"])
+
+    assert len(seen) == 1, "citations of an unanswerable question are never judged"
+    overall = json.loads((out_dir / "metrics.json").read_text())["metrics"]["overall"]
+    assert overall["citation_accuracy"] is None, "excluded, not scored zero"
+    assert overall["abstention_rate"] == 0.0, "it answered instead of abstaining"
+    assert overall["unanswerable_citation_rate"] == 1.0
+    report = (out_dir / "report.md").read_text(encoding="utf-8")
+    assert "## Abstention (unanswerable questions)" in report
+
+
+def test_abstention_counts_a_refusal_as_correct():
+    def record(answerable, verdict, cited):
+        return {"id": "x", "domain": "d", "difficulty": "easy", "kind": "unanswerable",
+                "answerable": answerable, "n_source_groups": 0,
+                "judgment": {"correctness": 10, "completeness": 5,
+                             "conversational_quality": 5, "verdict": verdict,
+                             "hallucination": False, "reasoning": ""},
+                "citations": {"accuracy": None if not answerable else 1.0,
+                              "cited_count": cited, "invalid_count": 0,
+                              "invalid_reasons": []},
+                "gt_source_hit": {"hit_rate": None}, "latency_ms": 10}
+
+    agg = metrics.aggregate([record(False, "correct", 0), record(False, "incorrect", 2)])
+    assert agg["overall"]["abstention_rate"] == 0.5
+    assert agg["overall"]["unanswerable_citation_rate"] == 0.5
+    assert agg["overall"]["citation_accuracy"] is None
+    assert set(agg["by_kind"]) == {"unanswerable"}
+
+
 def test_metrics_average_citation_accuracy_over_every_answer():
     def record(accuracy, cited, invalid):
         return {"id": "x", "domain": "d", "difficulty": "easy", "n_source_groups": 1,

@@ -69,7 +69,8 @@ def main(argv=None):
                        if answerable[qid] else [])
                  for qid, r in resolved_by_id.items()}
     n_pages = sum(len(v) for v in judgeable.values())
-    n_invalid = sum(len(r) - len(judgeable[qid]) for qid, r in resolved_by_id.items())
+    n_invalid = sum(1 for r in resolved_by_id.values()
+                    for c in r if c["invalid_reason"] is not None)
     print(f"Resolved {n_pages} cited pages ({n_invalid} citation(s) point at no "
           f"real page)", file=sys.stderr)
 

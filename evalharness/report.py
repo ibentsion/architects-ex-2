@@ -297,12 +297,17 @@ def render(metrics: dict, records: list, meta: dict) -> str:
         reasoning = j["reasoning"] if isinstance(j["reasoning"], str) \
             else next(iter(j["reasoning"].values()))
         cite = r["citations"]
+        # Unanswerable questions have no citation accuracy — nothing to cite.
+        citation_note = (
+            f"citation accuracy {cite['accuracy']:.2f} "
+            f"({cite['support'] or 'no resolvable citation'})"
+            if cite["accuracy"] is not None
+            else f"unanswerable, cited {cite['cited_count']}")
         lines += [
             f"- **`{r['id']}`** ({r['domain']}, {r['difficulty']}) — "
             f"correctness {j['correctness']}, verdict {j['verdict']}, "
             f"hallucination {str(j['hallucination']).lower()}, "
-            f"citation accuracy {cite['accuracy']:.2f} "
-            f"({cite['support'] or 'no resolvable citation'}). Judge: {reasoning}",
+            f"{citation_note}. Judge: {reasoning}",
         ]
 
     lines += ["", "## Improvement suggestions (prioritized)", ""]
