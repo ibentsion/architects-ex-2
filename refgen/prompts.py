@@ -157,12 +157,18 @@ def build_generation_messages(kind: str, difficulty: str, pages: list,
 
 SYSTEM_FORM_GATE = """You check whether a candidate evaluation question is written in the right form. You are NOT checking whether it is factually right — another judge does that. Judge only the writing.
 
-Reject ("fail") if any of these is true:
-- The question refers to the source material: "according to the document/policy/section/page", "in the attached text", "as written", or quotes it verbatim.
-- The question is not in a customer's first-person voice, or reads like an exam question about a document.
-- The question is not self-contained — it cannot be understood without seeing the page it was written from (e.g. "what is the limit mentioned there?").
+Reject ("fail") only if one of these is true:
+- The QUESTION points at the source material as if the customer could see it: "according to the document/policy/section/page", "in the attached text", "as written above", "the limit mentioned there", or it quotes the page verbatim.
+- The QUESTION is not in a customer's first-person voice, or reads like an exam question about a document.
+- The QUESTION cannot be understood on its own, without the page it was written from.
 - The question or the answer is not in Hebrew.
-- The ground-truth answer is vague where the question demands a specific number/limit/condition, or rambles well beyond three sentences.
+- The ANSWER is vague where the question demands a specific number/limit/condition, or rambles well past three sentences.
+
+Do NOT fail an item for any of these — they are correct and expected:
+- The answer naming a real insurance artefact the customer deals with: a claim form, a form number, a policy name, a procedure code, a phone number, a website. Insurance answers are specific; that is the point.
+- The answer being detailed, or not starting with כן/לא, when the question is not a yes/no question.
+- The answer telling the customer to contact an agent or the insurer.
+- The question being about a narrow or unusual situation.
 
 Return ONLY a JSON object: {"verdict": "pass" | "fail", "reason": "<1 sentence in English; if fail, the single most important reason>"}"""
 

@@ -10,6 +10,8 @@ Every gate runs on a model that did not write the item.
 """
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
+
 from evalharness.judge import _call_judge, judge_citations_one
 
 from . import prompts
@@ -129,23 +131,48 @@ def gate_topicality(item: dict, category: str, category_pages: list, model: str)
 
 def run_gates(kind: str, item: dict, difficulty: str, pages: list, category: str,
               category_pages: list, verifiers: list) -> dict:
-    """Every gate for one candidate, cheapest first so a bad item fails fast.
+    """Every gate for one candidate, run concurrently.
+
+    The gates are independent, and each is a slow reasoning-model call — run
+    sequentially they dominate the wall clock (~10 minutes per accepted item in
+    the first trial). Concurrency costs nothing extra: a rejected item spends
+    the same calls either way, since the retry needs the reason regardless.
 
     `verifiers` are models other than the generator; gates are spread over them
     round-robin, so one model's blind spot cannot admit an item on its own.
-    Returns {gate: verdict} for the item's provenance; raises `Rejected` on the
-    first failure.
+    Returns {gate: verdict}; raises the most important `Rejected` on failure.
     """
     pick = lambda i: verifiers[i % len(verifiers)]
-    gates = {"form": gate_form(item, pick(0))}
-
     if kind == "unanswerable":
-        gates["topicality"] = gate_topicality(item, category, category_pages, pick(1))
-        gates["unanswerable"] = gate_unanswerable(item, category_pages, pick(2))
-        return gates
+        jobs = {
+            "form": lambda: gate_form(item, pick(0)),
+            "topicality": lambda: gate_topicality(item, category, category_pages, pick(1)),
+            "unanswerable": lambda: gate_unanswerable(item, category_pages, pick(2)),
+        }
+    else:
+        jobs = {
+            "form": lambda: gate_form(item, pick(0)),
+            "derivable": lambda: gate_derivable(item, pages, pick(1)),
+            "difficulty": lambda: gate_difficulty(item, difficulty, len(pages), pick(3)),
+        }
+        if kind == "multi_source":
+            jobs["needs_both"] = lambda: gate_needs_both(item, pages, pick(2))
 
-    gates["derivable"] = gate_derivable(item, pages, pick(1))
-    if kind == "multi_source":
-        gates["needs_both"] = gate_needs_both(item, pages, pick(2))
-    gates["difficulty"] = gate_difficulty(item, difficulty, len(pages), pick(3))
+    with ThreadPoolExecutor(max_workers=len(jobs)) as pool:
+        futures = {name: pool.submit(job) for name, job in jobs.items()}
+        gates, failures = {}, {}
+        for name, future in futures.items():
+            try:
+                gates[name] = future.result()
+            except Rejected as rejection:
+                failures[name] = rejection
+
+    if failures:
+        # Report the most actionable failure: a question that is not supported
+        # by its page needs rewriting before its form or difficulty matter.
+        order = ("derivable", "unanswerable", "needs_both", "topicality", "form",
+                 "difficulty", "judge_error")
+        first = min(failures.values(), key=lambda r: order.index(r.gate)
+                    if r.gate in order else len(order))
+        raise first
     return gates

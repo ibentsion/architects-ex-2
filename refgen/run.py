@@ -18,6 +18,7 @@ import sys
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from threading import Lock
 
 from evalharness.pages import PageStore
 from rag.parsing import KNOWN_CATEGORIES
@@ -37,7 +38,8 @@ def _examples_for(v1_items: list, difficulty: str, category: str, rng: random.Ra
 
 
 def build_category(category: str, index: int, store: PageStore, v1_items: list,
-                   v1_pages: set, existing: list, seed: int, progress) -> tuple:
+                   v1_pages: set, existing: list, seed: int, progress,
+                   checkpoint=None) -> tuple:
     """Every item for one category. Returns (items, attempts, failures)."""
     rng = random.Random(seed + index)
     pages = build_inventory(category, store)
@@ -62,6 +64,8 @@ def build_category(category: str, index: int, store: PageStore, v1_items: list,
         else:
             items.append(outcome.item)
             used.update(outcome.item.pages())
+            if checkpoint:
+                checkpoint(outcome.item)
         progress(category, len(items), len(slots))
     return items, attempts, failures
 
@@ -95,9 +99,19 @@ def main(argv=None):
     def progress(category, done, total):
         print(f"  [{category}] {done}/{total}", file=sys.stderr)
 
+    # Every accepted item is appended to a JSONL checkpoint as it is produced.
+    # Generation is slow and paid for; a run that is killed at minute 29 must
+    # not throw away what it already verified.
+    checkpoint_path = Path(args.out).with_suffix(".partial.jsonl")
+    checkpoint_lock = Lock()
+
+    def checkpoint(item):
+        with checkpoint_lock, open(checkpoint_path, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(item.model_dump(), ensure_ascii=False) + "\n")
+
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         futures = [pool.submit(build_category, category, index, store, v1_items,
-                               v1_pages, v1_questions, args.seed, progress)
+                               v1_pages, v1_questions, args.seed, progress, checkpoint)
                    for index, category in enumerate(args.categories)]
         results = [f.result() for f in futures]
 

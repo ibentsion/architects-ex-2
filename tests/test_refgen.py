@@ -221,10 +221,22 @@ def test_unanswerable_item_rejected_when_the_corpus_does_answer_it(llm):
 
 
 def test_off_topic_unanswerable_item_is_rejected(llm):
+    """Unanswerable but off-topic tests nothing: the corpus is silent about
+    the weather too. Only the topicality gate may fail here."""
     llm["topicality"] = "fail"
+    llm["support"] = {n: "not_at_all" for n in range(1, 30)}
     outcome = build(kind="unanswerable", difficulty="easy")
     assert outcome.item is None
     assert {a.gate for a in outcome.attempts} == {"topicality"}
+
+
+def test_the_most_actionable_failure_is_the_one_reported(llm):
+    """Gates run concurrently, so several can fail at once. A question its own
+    page does not support needs rewriting before its wording matters."""
+    llm["form"] = "fail"
+    llm["support"] = {1: "not_at_all", 2: "not_at_all"}
+    outcome = build()
+    assert {a.gate for a in outcome.attempts} == {"derivable"}
 
 
 def test_duplicate_question_is_rejected_before_any_gate_runs(llm):
