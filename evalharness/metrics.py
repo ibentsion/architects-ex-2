@@ -1,9 +1,10 @@
 """Aggregate per-question records into overall and sliced metrics.
 
 A record (built in run.py) carries: id, domain, difficulty, n_source_groups,
-the aggregated judgment, the citation scores, and latency/token info from the
-answers file.
+the aggregated answer judgment, the citation scores, the ground-truth-source
+diagnostic, and latency/token info from the answers file.
 """
+import collections
 import statistics
 
 
@@ -25,10 +26,13 @@ def summarize(records: list) -> dict:
     scores = lambda f: [r["judgment"][f] for r in judged]
     verdicts = [r["judgment"]["verdict"] for r in judged]
     latencies = [r["latency_ms"] for r in records if r.get("latency_ms") is not None]
-    recalls = [r["citations"]["recall"] for r in records
-               if r["citations"]["recall"] is not None]
-    precisions = [r["citations"]["precision"] for r in records
-                  if r["citations"]["precision"] is not None]
+    # Citation accuracy counts every answer, uncited and refusals included:
+    # an answer that cites nothing establishes nothing.
+    accuracies = [r["citations"]["accuracy"] for r in records]
+    cited = sum(r["citations"]["cited_count"] for r in records)
+    invalid = sum(r["citations"]["invalid_count"] for r in records)
+    gt_hits = [r["gt_source_hit"]["hit_rate"] for r in records
+               if r["gt_source_hit"]["hit_rate"] is not None]
     return {
         "n": len(records),
         "judged": len(judged),
@@ -39,9 +43,11 @@ def summarize(records: list) -> dict:
         "refusal_rate": _mean([v == "refusal" for v in verdicts]),
         "verdicts": {v: verdicts.count(v) for v in
                      ("correct", "partially_correct", "incorrect", "refusal")},
-        "citation_recall": _mean(recalls),
-        "citation_precision": _mean(precisions) if precisions else None,
-        "full_citation_credit_rate": _mean([r == 1.0 for r in recalls]),
+        "citation_accuracy": _mean(accuracies),
+        "full_citation_credit_rate": _mean([a == 1.0 for a in accuracies]),
+        "uncited_rate": _mean([r["citations"]["cited_count"] == 0 for r in records]),
+        "invalid_citation_rate": round(invalid / cited, 2) if cited else None,
+        "gt_source_hit_rate": _mean(gt_hits),
         "latency_ms_p50": round(_pct(latencies, 50)) if latencies else None,
         "latency_ms_p95": round(_pct(latencies, 95)) if latencies else None,
         "latency_ms_mean": round(statistics.mean(latencies)) if latencies else None,
@@ -68,4 +74,11 @@ def aggregate(records: list) -> dict:
         "disagreement_rate": _mean([bool(r["judgment"].get("disagreement"))
                                     for r in judged]),
         "judge_failures": [r["id"] for r in records if "error" in r["judgment"]],
+        # Why citations failed to resolve — separates fabricated references
+        # from corpus/parse gaps (empty_page).
+        "invalid_citation_reasons": dict(sorted(collections.Counter(
+            reason for r in records
+            for reason in r["citations"]["invalid_reasons"]).items())),
+        "citation_judge_failures": [r["id"] for r in records
+                                    if r["citations"].get("judge_failed")],
     }

@@ -9,7 +9,7 @@ _METRIC_COLS = [
     ("conversational_quality", "Conv. quality"),
     ("hallucination_rate", "Halluc. rate"),
     ("refusal_rate", "Refusal rate"),
-    ("citation_recall", "Cite recall"),
+    ("citation_accuracy", "Cite accuracy"),
     ("latency_ms_p50", "Latency p50 (ms)"),
 ]
 
@@ -44,13 +44,47 @@ def suggestions(metrics: dict) -> list:
     by_domain = metrics["by_domain"]
     by_groups = metrics["by_source_groups"]
 
-    recall = overall["citation_recall"]
-    if recall is not None and recall < 0.3:
-        out.append((1, f"**Grounding is absent or broken** (citation recall "
-                       f"{recall:.2f}). Highest-leverage fix: build retrieval that "
-                       "returns file + page metadata and require the generator to "
-                       "cite every factual claim. Citation accuracy is a graded "
-                       "criterion and currently earns ~nothing."))
+    accuracy = overall["citation_accuracy"]
+    uncited = overall["uncited_rate"] or 0
+    if accuracy is not None and accuracy < 0.3:
+        cause = ("most answers cite nothing at all"
+                 if uncited >= 0.5 else
+                 "the cited pages do not establish the ground-truth answer")
+        out.append((1, f"**Grounding is absent or broken** (citation accuracy "
+                       f"{accuracy:.2f} — {cause}). Highest-leverage fix: build "
+                       "retrieval that returns file + page metadata and require "
+                       "the generator to cite the page each factual claim came "
+                       "from. Citation accuracy is a graded criterion and "
+                       "currently earns ~nothing."))
+    elif accuracy is not None and accuracy < 0.7:
+        out.append((2, f"**Citations under-support the answers** (citation "
+                       f"accuracy {accuracy:.2f}). The system cites real pages "
+                       "that only partly establish the answer — tighten the "
+                       "generator prompt so it cites the page carrying the "
+                       "decisive number/condition rather than the topically "
+                       "nearest chunk."))
+
+    invalid = overall["invalid_citation_rate"]
+    if invalid is not None and invalid >= 0.05:
+        reasons = ", ".join(f"{k}={v}" for k, v in
+                            metrics["invalid_citation_reasons"].items())
+        out.append((1, f"**Citations point at pages that do not exist** "
+                       f"({invalid:.2f} of all citations; {reasons}). Every one "
+                       "dilutes the score. `unknown_file`/`page_out_of_range` "
+                       "means the generator invents references — emit citations "
+                       "only from retrieved chunk metadata; `empty_page` means "
+                       "the page parsed to nothing and is a corpus/parsing "
+                       "problem, not a generation one."))
+
+    gt_hit = overall["gt_source_hit_rate"]
+    if (accuracy is not None and gt_hit is not None
+            and accuracy - gt_hit >= 0.3):
+        out.append((3, f"**Retrieval finds the fact elsewhere** (citation "
+                       f"accuracy {accuracy:.2f} vs ground-truth-source hit "
+                       f"rate {gt_hit:.2f}). Not a defect — the corpus repeats "
+                       "facts across documents and the judge credits any page "
+                       "that establishes the answer. Noted only as a retrieval "
+                       "debugging signal."))
 
     halluc = overall["hallucination_rate"]
     if halluc is not None and halluc >= 0.25:
@@ -153,8 +187,10 @@ def render(metrics: dict, records: list, meta: dict) -> str:
         f"conversational quality **{_fmt(overall['conversational_quality'])}/10**. "
         f"Hallucination rate **{_fmt(overall['hallucination_rate'])}**, "
         f"refusal rate **{_fmt(overall['refusal_rate'])}**, "
-        f"citation recall **{_fmt(overall['citation_recall'])}** "
-        f"(full-credit rate {_fmt(overall['full_citation_credit_rate'])}). "
+        f"citation accuracy **{_fmt(overall['citation_accuracy'])}** "
+        f"(full-credit rate {_fmt(overall['full_citation_credit_rate'])}, "
+        f"{_fmt(overall['invalid_citation_rate'])} of citations point at no real "
+        f"page, {_fmt(overall['uncited_rate'])} of answers cite nothing). "
         f"Latency p50 {_fmt(overall['latency_ms_p50'])} ms / "
         f"p95 {_fmt(overall['latency_ms_p95'])} ms.",
         "",
@@ -179,6 +215,41 @@ def render(metrics: dict, records: list, meta: dict) -> str:
                "Sources"),
         "",
     ]
+
+    supports = [r["citations"]["support"] for r in records]
+    lines += [
+        "## Citation accuracy",
+        "",
+        "Each cited `{file, page}` is resolved to the real corpus page and an "
+        "LLM judge rules whether the cited pages establish the ground-truth "
+        "answer. Any page that establishes the fact earns credit — the corpus "
+        "repeats facts across documents, so there is no fixed list of correct "
+        "sources. Score = credit (1.0 fully / 0.5 partially / 0 not at all) × "
+        "(citations resolving to a real page ÷ citations made).",
+        "",
+        f"- **Mean accuracy:** {_fmt(overall['citation_accuracy'])} "
+        f"(full credit on {_fmt(overall['full_citation_credit_rate'])} of questions)",
+        "- **Support ruling:** " + ", ".join(
+            f"{level} = {supports.count(level)}"
+            for level in ("fully", "partially", "not_at_all"))
+        + f", not judged (no resolvable citation) = {supports.count(None)}",
+        f"- **Invalid citations:** {_fmt(overall['invalid_citation_rate'])} of all "
+        "citations" + (f" ({', '.join(f'{k}={v}' for k, v in metrics['invalid_citation_reasons'].items())})"
+                       if metrics["invalid_citation_reasons"] else ""),
+        f"- **Answers citing nothing:** {_fmt(overall['uncited_rate'])}",
+        f"- **Ground-truth-source hit rate (diagnostic, not scored):** "
+        f"{_fmt(overall['gt_source_hit_rate'])} — how often the answer cited the "
+        "sources the reference answer was authored from.",
+        "",
+    ]
+
+    if metrics["citation_judge_failures"]:
+        lines += [
+            "The citation judge failed on: "
+            + ", ".join(f"`{i}`" for i in metrics["citation_judge_failures"])
+            + " (scored 0.0 — treat as missing data, not as a system failure).",
+            "",
+        ]
 
     if len(meta["judges"]) > 1:
         flagged = [r["id"] for r in judged if r["judgment"].get("disagreement")]
@@ -205,10 +276,13 @@ def render(metrics: dict, records: list, meta: dict) -> str:
         j = r["judgment"]
         reasoning = j["reasoning"] if isinstance(j["reasoning"], str) \
             else next(iter(j["reasoning"].values()))
+        cite = r["citations"]
         lines += [
             f"- **`{r['id']}`** ({r['domain']}, {r['difficulty']}) — "
             f"correctness {j['correctness']}, verdict {j['verdict']}, "
-            f"hallucination {str(j['hallucination']).lower()}. Judge: {reasoning}",
+            f"hallucination {str(j['hallucination']).lower()}, "
+            f"citation accuracy {cite['accuracy']:.2f} "
+            f"({cite['support'] or 'no resolvable citation'}). Judge: {reasoning}",
         ]
 
     lines += ["", "## Improvement suggestions (prioritized)", ""]
