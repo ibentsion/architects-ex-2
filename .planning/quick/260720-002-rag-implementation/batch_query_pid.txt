@@ -1,0 +1,9 @@
+PID: 205490
+Started: 2026-07-24
+Log: /tmp/claude-1000/-home-ido-git-architects-ex-2/56b653f2-4a1f-431d-ae89-d9df82b18606/scratchpad/batch_query_full.log
+Command: venv/bin/python -u -m rag.cli.query --config configs/default.yaml --questions reference_questions.json --out rag_answers_full.jsonl
+Purpose: batch-answer all 48 dev questions against the now-complete full
+12-category index (rag_index/default, 4087 chunks, ingested successfully
+2026-07-23 after the OOM fix in commit c0ccf56). Output feeds
+evalharness.run for the true full-corpus vs. baseline comparison.
+Check with: ps -p 205490 -o pid,etime,rss,cmd ; wc -l rag_answers_full.jsonl

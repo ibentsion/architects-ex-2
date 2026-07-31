@@ -1,0 +1,19 @@
+PID: 51400
+Started: 2026-07-25 06:52:29 UTC (timestamp: 20260725T065214Z)
+Log: /tmp/claude-1000/-home-ido-git-architects-ex-2/12f1280f-e8be-4310-b12f-cb08a496bdb6/scratchpad/ingest_full_20260725T065214Z.log
+Command: venv/bin/python -u -m rag.cli.ingest --config configs/default.yaml
+
+This is re-ingest #2 in this session. Re-ingest #1 (per_paragraph default,
+timestamp 20260724T151402Z) revealed a real content-loss regression: bare
+per_paragraph's Docling HybridChunker truncates/summarizes large tables
+(verified 26.3% raw-text retention on a table-heavy health-category file,
+vs 99.1% for per_table's atomic full-Markdown tables). Default chunker was
+switched to per_table (prose still per_paragraph/HybridChunker capped at
+512, but tables serialize atomically) -- see configs/default.yaml and
+rag_plan.md for the updated default + rationale.
+
+Report files this run will produce (rag/report.py, timestamped):
+  rag_index/default/ingest_report_<run-ts>.{md,json}  (permanent, this run)
+  rag_index/default/ingest_report.{md,json}            (latest pointer)
+
+Check with: ps -p 51400 -o pid,etime,rss,cmd ; tail -f /tmp/claude-1000/-home-ido-git-architects-ex-2/12f1280f-e8be-4310-b12f-cb08a496bdb6/scratchpad/ingest_full_20260725T065214Z.log
