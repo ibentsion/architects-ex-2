@@ -8,6 +8,25 @@
 
 Flags: --config (required), --category, --interactive/-i, --show-chunks,
 --json, --questions/--out (batch mode).
+
+Retrieval-stage tools (no generation) — for wiring an external harness:
+
+    python -m rag.cli.query dense "שאלה" --config C [--top-k N] [--category X]
+    python -m rag.cli.query sparse "שאלה" --config C [--top-k N] [--category X]
+    python -m rag.cli.query fuse "שאלה" --config C [--dense-top-k N] \
+        [--sparse-top-k N] [--rrf-k N] [--category X]
+    python -m rag.cli.query rerank "שאלה" --config C --candidates FILE|- \
+        [--gate-threshold F] [--top-n N]
+    python -m rag.cli.query retrieve "שאלה" --config C [fuse flags] \
+        [--gate-threshold F] [--top-n N]
+
+Tool commands are selected by the first positional argument; anything else is
+the classic answer flow. Every tool prints one JSON object to stdout
+(``results`` = RetrievedChunk dumps; ``stats`` for fuse/retrieve); parameter
+flags default to the config values. ``rerank --candidates`` accepts a JSON
+list of chunk_ids, of ``{chunk_id, ...scores}`` objects, or the output
+envelope of ``fuse``/``retrieve`` — texts are hydrated from the dense
+payload store.
 """
 from __future__ import annotations
 
@@ -208,6 +227,148 @@ def _run_batch(engine: QueryEngine, questions_path: Path, out_path: Path, catego
 
 
 # --------------------------------------------------------------------------- #
+# Retrieval-stage tools (no generation) — external-harness entry points
+# --------------------------------------------------------------------------- #
+
+TOOL_COMMANDS = ("dense", "sparse", "fuse", "rerank", "retrieve")
+
+
+def build_tools_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="python -m rag.cli.query",
+        description="Retrieval-stage tools: JSON to stdout, no LLM generation.",
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    def add_command(name: str, help_text: str) -> argparse.ArgumentParser:
+        p = sub.add_parser(name, help=help_text)
+        p.add_argument("question", help="query text")
+        p.add_argument("--config", required=True, help="YAML config path (must match the ingested index)")
+        return p
+
+    for name in ("dense", "sparse"):
+        p = add_command(name, f"{name} search only")
+        p.add_argument("--top-k", type=int, help=f"override retrieval.{name}_top_k")
+        p.add_argument("--category", help="restrict to one category")
+
+    fuse = add_command("fuse", "dense + sparse + RRF fusion (no rerank)")
+    retrieve = add_command("retrieve", "full retrieval pipeline (fusion + rerank + gate)")
+    for p in (fuse, retrieve):
+        p.add_argument("--dense-top-k", type=int, help="override retrieval.dense_top_k")
+        p.add_argument("--sparse-top-k", type=int, help="override retrieval.sparse_top_k")
+        p.add_argument("--rrf-k", type=int, help="override retrieval.rrf_k")
+        p.add_argument("--category", help="restrict to one category")
+
+    rerank = add_command("rerank", "rerank + gate an arbitrary candidate list")
+    rerank.add_argument(
+        "--candidates",
+        required=True,
+        help="JSON file of candidates ('-' for stdin): chunk_ids, {chunk_id,...} objects, or fuse/retrieve output",
+    )
+    for p in (rerank, retrieve):
+        p.add_argument("--gate-threshold", type=float, help="override retrieval.rerank.gate_threshold")
+        p.add_argument("--top-n", type=int, help="override retrieval.rerank.top_n")
+    return parser
+
+
+def _load_candidates(retriever: Retriever, spec: str) -> list[RetrievedChunk]:
+    """Parse a rerank candidate list; hydrate text-less entries by chunk_id
+    from the dense payload store (skew warnings on stderr, entries skipped)."""
+    raw = sys.stdin.read() if spec == "-" else Path(spec).read_text(encoding="utf-8")
+    data = json.loads(raw)
+    if isinstance(data, dict):  # fuse/retrieve output envelope
+        data = data["results"]
+    candidates: list[RetrievedChunk] = []
+    to_hydrate: list[tuple[str, dict[str, float]]] = []
+    for item in data:
+        if isinstance(item, str):
+            to_hydrate.append((item, {}))
+        elif isinstance(item, dict) and isinstance(item.get("chunk"), dict):
+            candidates.append(RetrievedChunk.model_validate(item))
+        elif isinstance(item, dict) and "chunk_id" in item:
+            scores = {
+                k: item[k]
+                for k in ("dense_score", "sparse_score", "rrf_score")
+                if item.get(k) is not None
+            }
+            to_hydrate.append((item["chunk_id"], scores))
+        else:
+            raise ValueError(f"Unrecognized candidate entry: {item!r}")
+    if to_hydrate:
+        fetched = retriever.dense.fetch([cid for cid, _ in to_hydrate])
+        for cid, scores in to_hydrate:
+            chunk = fetched.get(cid)
+            if chunk is None:
+                print(f"warning: chunk_id not in dense payload store, skipped: {cid}", file=sys.stderr)
+                continue
+            candidates.append(RetrievedChunk(chunk=chunk, **scores))
+    return candidates
+
+
+def _run_tool(retriever: Retriever, args: argparse.Namespace) -> dict[str, Any]:
+    def dumped(results: list[RetrievedChunk]) -> list[dict[str, Any]]:
+        return [r.model_dump(mode="json") for r in results]
+
+    if args.command == "dense":
+        hits = retriever.dense_search(args.question, top_k=args.top_k, category=args.category)
+        return {"results": dumped([RetrievedChunk(chunk=c, dense_score=s) for c, s in hits])}
+    if args.command == "sparse":
+        hits = retriever.sparse_search(args.question, top_k=args.top_k, category=args.category)
+        fetched = retriever.dense.fetch([cid for cid, _ in hits])
+        results = []
+        for cid, score in hits:
+            chunk = fetched.get(cid)
+            if chunk is None:
+                print(f"warning: chunk_id not in dense payload store, skipped: {cid}", file=sys.stderr)
+                continue
+            results.append(RetrievedChunk(chunk=chunk, sparse_score=score))
+        return {"results": dumped(results)}
+    if args.command == "fuse":
+        candidates = retriever.fuse(
+            args.question,
+            dense_top_k=args.dense_top_k,
+            sparse_top_k=args.sparse_top_k,
+            rrf_k=args.rrf_k,
+            category=args.category,
+        )
+        return {"results": dumped(candidates), "stats": retriever.last_stats}
+    if args.command == "rerank":
+        candidates = _load_candidates(retriever, args.candidates)
+        gated = retriever.rerank_candidates(
+            args.question, candidates, gate_threshold=args.gate_threshold, top_n=args.top_n
+        )
+        return {"results": dumped(gated)}
+    if args.command == "retrieve":
+        gated = retriever.retrieve(
+            args.question,
+            category=args.category,
+            dense_top_k=args.dense_top_k,
+            sparse_top_k=args.sparse_top_k,
+            rrf_k=args.rrf_k,
+            gate_threshold=args.gate_threshold,
+            top_n=args.top_n,
+        )
+        return {"results": dumped(gated), "stats": retriever.last_stats}
+    raise ValueError(f"Unknown tool command: {args.command}")
+
+
+def tools_main(argv: list[str]) -> int:
+    args = build_tools_parser().parse_args(argv)
+    try:
+        config = load_config(args.config)
+        retriever = load_retriever(config)
+    except (ConfigError, ManifestError, ManifestMismatchError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return EXIT_CONFIG_ERROR
+    try:
+        result = _run_tool(retriever, args)
+    finally:
+        retriever.close()
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return EXIT_OK
+
+
+# --------------------------------------------------------------------------- #
 # CLI entry
 # --------------------------------------------------------------------------- #
 
@@ -229,6 +390,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    if argv and argv[0] in TOOL_COMMANDS:
+        return tools_main(argv)
     args = build_arg_parser().parse_args(argv)
 
     if bool(args.questions) != bool(args.out):
