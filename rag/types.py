@@ -84,6 +84,13 @@ class Classification(BaseModel):
         default_factory=list, description="Ordered union of sub-question categories"
     )
     sub_questions: list[SubQuestion]
+    needs_calculation: bool = Field(
+        False, description="Query asks for arithmetic on numbers (agent must use the calculate tool)"
+    )
+    dependent: bool = Field(
+        False,
+        description="Sub-questions depend on each other's answers (forces the serial agent loop)",
+    )
     cost_estimate: float = Field(0.0, description="Estimated $ cost of the classification LLM call")
 
 

@@ -100,6 +100,28 @@ def test_classify_falls_back_when_chat_raises(monkeypatch):
     assert result.sub_questions[0].question == QUESTION
 
 
+def test_classify_parses_calculation_and_dependency_flags(monkeypatch):
+    reply = json.dumps(
+        {
+            "sub_questions": [{"question": "כמה זה 15% מההשתתפות העצמית?", "categories": ["car"]}],
+            "needs_calculation": True,
+            "dependent": True,
+        },
+        ensure_ascii=False,
+    )
+    monkeypatch.setattr(classify_mod, "tf_chat", fake_chat(reply))
+    result = QueryClassifier("m").classify("ש")
+    assert result.needs_calculation is True
+    assert result.dependent is True
+
+
+def test_classify_flags_default_false(monkeypatch):
+    reply = '{"sub_questions": [{"question": "ש", "categories": ["car"]}]}'
+    monkeypatch.setattr(classify_mod, "tf_chat", fake_chat(reply))
+    result = QueryClassifier("m").classify("ש")
+    assert result.needs_calculation is False and result.dependent is False
+
+
 def test_system_prompt_lists_all_corpus_categories():
     prompt = _system_prompt()
     assert len(CATEGORIES) == 12

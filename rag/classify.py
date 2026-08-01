@@ -50,8 +50,12 @@ def _system_prompt() -> str:
 
 {category_lines}
 
+3. קבע שני דגלים:
+   - needs_calculation: האם נדרש חישוב אריתמטי על מספרים (אחוזים, סכומים, הפרשים וכו').
+   - dependent: האם תת-שאלה תלויה בתשובה של תת-שאלה אחרת (לא ניתן לענות עליהן במקביל).
+
 החזר JSON בלבד, בדיוק בפורמט הבא, ללא טקסט נוסף:
-{{"sub_questions": [{{"question": "...", "categories": ["<id>"]}}]}}
+{{"sub_questions": [{{"question": "...", "categories": ["<id>"]}}], "needs_calculation": false, "dependent": false}}
 
 כללים:
 - השתמש רק ב-ids מהרשימה. אם אף תחום לא מתאים לתת-שאלה, החזר עבורה רשימת categories ריקה.
@@ -128,6 +132,8 @@ class QueryClassifier:
             mode="multi" if len(categories) > 1 else "single",
             categories=categories,
             sub_questions=sub_questions,
+            needs_calculation=bool(data.get("needs_calculation", False)),
+            dependent=bool(data.get("dependent", False)),
             cost_estimate=cost,
         )
 

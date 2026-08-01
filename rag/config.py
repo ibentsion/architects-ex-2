@@ -81,6 +81,24 @@ class GenerationConfig(BaseModel):
     )
 
 
+class HarnessConfig(BaseModel):
+    """Agent-harness (rag/agent) model roles and limits. Orchestration
+    (classifier, tool-calling loop, calculation expressions) runs on a fast
+    model; final answer synthesis stays on ``generation.model``."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    orchestrator_model: str = Field(..., description="Fast tool-calling model (classifier + agent loop)")
+    orchestrator_max_tokens: int = 2048
+    orchestrator_extra_params: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Passed through to tf_client.chat for orchestrator calls "
+        "(e.g. reasoning_effort: low for gpt-oss's Harmony template)",
+    )
+    max_hops: int = Field(4, description="Agent tool-calling loop iteration cap")
+    max_workers: int = Field(4, description="Thread pool size for concurrent sub-question retrievals")
+
+
 class RagConfig(BaseModel):
     """Root config. All blocks required — configs/default.yaml is the single
     source of truth for defaults; overrides extend it via ``extends:``."""
@@ -100,6 +118,7 @@ class RagConfig(BaseModel):
 
     retrieval: RetrievalConfig
     generation: GenerationConfig
+    harness: HarnessConfig
 
 
 # --------------------------------------------------------------------------- #

@@ -62,10 +62,10 @@ def _confidence(retrieved: list[RetrievedChunk]) -> float:
 
 
 def build_classifier(config: RagConfig, model: str | None = None) -> QueryClassifier:
-    """Classifier defaults to the generation model; generation.extra_params
-    (model-specific reasoning knobs) apply only when the model is unchanged."""
-    chosen = model or config.generation.model
-    extra = config.generation.extra_params if chosen == config.generation.model else {}
+    """Classifier runs on the fast orchestrator model (harness block);
+    its extra_params (reasoning knobs) apply only when the model is unchanged."""
+    chosen = model or config.harness.orchestrator_model
+    extra = config.harness.orchestrator_extra_params if chosen == config.harness.orchestrator_model else {}
     return QueryClassifier(chosen, extra_params=extra)
 
 

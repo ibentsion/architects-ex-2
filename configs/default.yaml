@@ -84,3 +84,15 @@ generation:
   max_tokens: 1024
   temperature: 0.2
   retry_on_citation_failure: true      # one retry with corrective system nudge
+
+harness:                      # agent engine (--engine agent): model roles + limits.
+                              #   Orchestration (classify, tool-calling loop, calculation
+                              #   expressions) on a fast model; final answer synthesis
+                              #   stays on generation.model.
+  orchestrator_model: openai/gpt-oss-120b
+  orchestrator_max_tokens: 2048
+  orchestrator_extra_params:
+    reasoning_effort: low     # structured tool calls, not open-ended reasoning
+    allowed_openai_params: [reasoning_effort]
+  max_hops: 4                 # agent tool-loop iteration cap
+  max_workers: 4              # concurrent sub-question retrievals (thread pool)
