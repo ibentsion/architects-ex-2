@@ -164,6 +164,23 @@ def test_never_invents_or_drops_characters(anchor_pdf: Path, anchor_page_line: s
     assert sorted(_key([doc_dict["texts"][0]["text"]])) == sorted(_key([reversed_text]))
 
 
+def test_rejects_a_letter_level_scramble(monkeypatch, anchor_pdf: Path) -> None:
+    """pdfium garbles some decorative footers into a letter-level scramble
+    ("סטודיו הראל" -> "לארה ויד וטס"). That has the same *characters* as the
+    original, so a character-multiset check accepts it and the RTL canary then
+    fails on the reversed הראל. Only the word bag may not change."""
+    from rag.parsing import rtl_repair
+
+    original = "סטודיו הראל 44311.27"
+    scrambled = "11344 .2 7 לארה ויד וטס"
+    monkeypatch.setattr(rtl_repair.PageOracle, "text_in", lambda self, bbox: scrambled)
+    oracle = PageOracle("", height=800.0)
+    assert rtl_repair.repair_item_text(original, {"l": 0, "t": 0, "r": 1, "b": 1}, oracle) == (
+        original,
+        "",
+    )
+
+
 def test_orig_field_is_left_untouched(anchor_pdf: Path, anchor_page_line: str) -> None:
     reversed_text = _reversed_words(anchor_page_line)
     doc_dict = {

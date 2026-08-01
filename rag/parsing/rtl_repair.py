@@ -108,6 +108,17 @@ def _key(words: Iterable[str]) -> str:
     return _NOISE.sub("", " ".join(words)).casefold()
 
 
+def _word_bag(text: str) -> list[str]:
+    """Sorted normalized words — the identity a repair must preserve.
+
+    Comparing *characters* is not enough: pdfium garbles some decorative
+    footers into a letter-level scramble ("סטודיו הראל" -> "לארה ויד וטס"),
+    which has exactly the same characters and would sail through a character
+    check. Word order may change; the words themselves may not.
+    """
+    return sorted(k for k in (_NOISE.sub("", w).casefold() for w in text.split()) if k)
+
+
 def has_hebrew(text: str) -> bool:
     return bool(_HEBREW.search(text))
 
@@ -215,12 +226,11 @@ def repair_item_text(text: str, bbox: dict[str, Any] | None, oracle: PageOracle)
         return text, ""
     from_bbox = oracle.text_in(bbox or {})
     if from_bbox is not None and from_bbox != text:
-        here, there = _key([text]), _key([from_bbox])
-        # Same characters (so this can only reorder, never invent or drop
-        # content) but a different sequence (so it is a real reordering, not
-        # pdfium and Docling merely disagreeing about spaces or decoration —
-        # in which case Docling's text is left alone, keeping markers like **).
-        if here != there and sorted(here) == sorted(there):
+        # Accept only a re-ordering of the very same words (so the pass can
+        # never invent, drop or re-spell content), and only when the order
+        # actually differs — if pdfium and Docling merely disagree about spaces
+        # or decoration, Docling's text stands, keeping markers like **.
+        if _word_bag(text) == _word_bag(from_bbox) and _key([text]) != _key([from_bbox]):
             return from_bbox, "bbox"
     repaired = repair_run(text, oracle)
     return (repaired, "segment") if repaired != text else (text, "")
