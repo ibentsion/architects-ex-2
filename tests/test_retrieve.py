@@ -268,6 +268,75 @@ def test_retriever_no_hits_returns_empty():
 
 
 # --------------------------------------------------------------------------- #
+# Public stage methods + per-call parameter overrides
+# --------------------------------------------------------------------------- #
+
+
+def test_stage_methods_use_instance_defaults():
+    apt1, apt2 = make_chunk(APT1), make_chunk(APT2)
+    retriever = make_retriever(
+        dense_hits=[(apt1, 0.9), (apt2, 0.8)],
+        sparse_hits=[(APT2, 7.5), (APT1, 3.0)],
+        store={},
+        rerank_scores={},
+    )
+    assert len(retriever.dense_search("שאלה")) == 2
+    assert retriever.sparse.requested_k is None
+    retriever.sparse_search("שאלה")
+    assert retriever.sparse.requested_k == 20  # instance default, no filter
+
+
+def test_dense_and_sparse_top_k_overrides():
+    apt1, apt2 = make_chunk(APT1), make_chunk(APT2)
+    retriever = make_retriever(
+        dense_hits=[(apt1, 0.9), (apt2, 0.8)],
+        sparse_hits=[(APT2, 7.5), (APT1, 3.0)],
+        store={},
+        rerank_scores={},
+    )
+    assert len(retriever.dense_search("שאלה", top_k=1)) == 1
+    hits = retriever.sparse_search("שאלה", top_k=1, category="apartment")
+    assert retriever.sparse.requested_k == 3  # 3x fetch with category filter
+    assert len(hits) == 1
+
+
+def test_fuse_returns_unreranked_candidates_and_partial_stats():
+    apt1, apt2 = make_chunk(APT1), make_chunk(APT2)
+    retriever = make_retriever(
+        dense_hits=[(apt1, 0.9)],
+        sparse_hits=[(APT2, 7.5), (APT1, 3.0)],
+        store={APT2: apt2},
+        rerank_scores={APT1: 0.8, APT2: 0.6},
+    )
+    candidates = retriever.fuse("מה תקופת ההתיישנות?")
+    assert [c.chunk.chunk_id for c in candidates] == [APT1, APT2]
+    assert all(c.rerank_score is None for c in candidates)
+    assert all(c.rrf_score is not None for c in candidates)
+    assert set(retriever.last_stats) == {"dense", "sparse", "fused"}  # no gated stage
+
+
+def test_rerank_candidates_overrides_gate_and_top_n():
+    retriever = make_retriever([], [], {}, rerank_scores={A: 0.3, B: 0.2, C: 0.1})
+    candidates = [make_candidate(cid) for cid in (A, B, C)]
+    assert retriever.rerank_candidates("שאלה", candidates) == []  # default 0.35 gate
+    survivors = retriever.rerank_candidates("שאלה", candidates, gate_threshold=0.0, top_n=2)
+    assert [c.chunk.chunk_id for c in survivors] == [A, B]
+
+
+def test_retrieve_per_call_overrides_leave_defaults_untouched():
+    apt1 = make_chunk(APT1)
+    retriever = make_retriever(
+        dense_hits=[(apt1, 0.9)],
+        sparse_hits=[(APT1, 3.0)],
+        store={},
+        rerank_scores={APT1: 0.1},  # below the 0.35 default gate
+    )
+    assert retriever.retrieve("שאלה", gate_threshold=0.05) != []
+    assert retriever.gate_threshold == 0.35  # instance default unchanged
+    assert retriever.retrieve("שאלה") == []  # next call falls back to defaults
+
+
+# --------------------------------------------------------------------------- #
 # Per-stage stats (last_stats) -- measures filtering/ranking impact
 # --------------------------------------------------------------------------- #
 
@@ -336,8 +405,8 @@ def test_smoke_anchor_chunk_in_top3_and_rerank_latency(repo_root, capsys):
         # Measure rerank latency separately: retrieve WITHOUT the gate first
         # by scoring the full fused candidate set (~20 pairs) directly.
         question = "תקופת התיישנות"
-        dense_hits = retriever._dense_search(question, None)
-        sparse_hits = retriever._sparse_search(question, None)
+        dense_hits = retriever.dense_search(question)
+        sparse_hits = retriever.sparse_search(question)
         from rag.retrieve.fusion import rrf as _rrf
 
         fused = _rrf(

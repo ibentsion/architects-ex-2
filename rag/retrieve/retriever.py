@@ -6,6 +6,11 @@ category filter, fetch 3x and post-filter) -> RRF fusion joined on chunk_id
 -> CrossEncoder rerank -> relevance gate. Returns ``RetrievedChunk``s with
 all per-stage scores populated; empty list on gate fail (the caller must
 skip generation and return the Hebrew fallback).
+
+Each stage is also public on its own — ``dense_search`` / ``sparse_search`` /
+``fuse`` / ``rerank_candidates`` — with per-call parameter overrides that
+fall back to the config-derived instance defaults, so an external harness
+(via the query CLI's stage subcommands) can drive any stage independently.
 """
 from __future__ import annotations
 
@@ -71,34 +76,55 @@ class Retriever:
         self.last_stats: dict[str, dict[str, int]] = {}
 
     # ------------------------------------------------------------------ #
+    # Public stages — per-call overrides fall back to instance defaults.
+    # ------------------------------------------------------------------ #
 
-    def _dense_search(
-        self, question: str, category: str | None
+    def dense_search(
+        self, question: str, *, top_k: int | None = None, category: str | None = None
     ) -> list[tuple[Chunk, float]]:
         vector = self.embedder.embed_query(question)
-        return self.dense.search(vector, top_k=self.dense_top_k, category=category)
+        top_k = self.dense_top_k if top_k is None else top_k
+        return self.dense.search(vector, top_k=top_k, category=category)
 
-    def _sparse_search(self, question: str, category: str | None) -> list[tuple[str, float]]:
+    def sparse_search(
+        self, question: str, *, top_k: int | None = None, category: str | None = None
+    ) -> list[tuple[str, float]]:
         """With a category filter, fetch 3x and post-filter by the chunk_id's
         category prefix (rag_plan.md §6 stage 2 — small corpus, cheap)."""
+        top_k = self.sparse_top_k if top_k is None else top_k
         query_tokens = self.normalizer.tokens(question)
-        fetch_k = self.sparse_top_k * 3 if category else self.sparse_top_k
+        fetch_k = top_k * 3 if category else top_k
         hits = self.sparse.search(query_tokens, top_k=fetch_k)
         if category is not None:
             hits = [(cid, score) for cid, score in hits if _category_of(cid) == category]
-        return hits[: self.sparse_top_k]
+        return hits[:top_k]
 
-    def retrieve(self, question: str, category: str | None = None) -> list[RetrievedChunk]:
+    def fuse(
+        self,
+        question: str,
+        *,
+        dense_top_k: int | None = None,
+        sparse_top_k: int | None = None,
+        rrf_k: int | None = None,
+        category: str | None = None,
+    ) -> list[RetrievedChunk]:
+        """Stages 2-3: dual search + RRF fusion, hydrated but NOT reranked.
+        Populates ``last_stats`` for dense/sparse/fused (``retrieve`` adds the
+        gated stage)."""
+        dense_top_k = self.dense_top_k if dense_top_k is None else dense_top_k
+        sparse_top_k = self.sparse_top_k if sparse_top_k is None else sparse_top_k
+        rrf_k = self.rrf_k if rrf_k is None else rrf_k
+
         # Stage 2 — dual search.
-        dense_hits = self._dense_search(question, category)
-        sparse_hits = self._sparse_search(question, category)
+        dense_hits = self.dense_search(question, top_k=dense_top_k, category=category)
+        sparse_hits = self.sparse_search(question, top_k=sparse_top_k, category=category)
         stats = {
             "dense": _stage_counts([chunk.chunk_id for chunk, _ in dense_hits]),
             "sparse": _stage_counts([chunk_id for chunk_id, _ in sparse_hits]),
         }
         if not dense_hits and not sparse_hits:
-            stats["fused"] = stats["gated"] = _stage_counts([])
-            self._log_stats(stats)
+            stats["fused"] = _stage_counts([])
+            self.last_stats = stats
             return []
         dense_scores = {chunk.chunk_id: score for chunk, score in dense_hits}
         sparse_scores = dict(sparse_hits)
@@ -110,9 +136,10 @@ class Retriever:
                 [chunk.chunk_id for chunk, _ in dense_hits],
                 [chunk_id for chunk_id, _ in sparse_hits],
             ],
-            k=self.rrf_k,
-        )[: max(self.dense_top_k, self.sparse_top_k)]
+            k=rrf_k,
+        )[: max(dense_top_k, sparse_top_k)]
         stats["fused"] = _stage_counts([chunk_id for chunk_id, _ in fused])
+        self.last_stats = stats
 
         # Hydrate sparse-only survivors from the dense payload store.
         missing = [cid for cid, _ in fused if cid not in chunks_by_id]
@@ -132,10 +159,49 @@ class Retriever:
                     rrf_score=rrf_score,
                 )
             )
+        return candidates
 
-        # Stage 4 — rerank + relevance gate (empty list = gate fail).
+    def rerank_candidates(
+        self,
+        question: str,
+        candidates: list[RetrievedChunk],
+        *,
+        gate_threshold: float | None = None,
+        top_n: int | None = None,
+    ) -> list[RetrievedChunk]:
+        """Stage 4 — CrossEncoder rerank + relevance gate over an arbitrary
+        candidate list (empty list = gate fail)."""
+        gate_threshold = self.gate_threshold if gate_threshold is None else gate_threshold
+        top_n = self.top_n if top_n is None else top_n
         scored = self.reranker.score(question, candidates)
-        gated = apply_gate(scored, self.gate_threshold, self.top_n)
+        return apply_gate(scored, gate_threshold, top_n)
+
+    def retrieve(
+        self,
+        question: str,
+        category: str | None = None,
+        *,
+        dense_top_k: int | None = None,
+        sparse_top_k: int | None = None,
+        rrf_k: int | None = None,
+        gate_threshold: float | None = None,
+        top_n: int | None = None,
+    ) -> list[RetrievedChunk]:
+        candidates = self.fuse(
+            question,
+            dense_top_k=dense_top_k,
+            sparse_top_k=sparse_top_k,
+            rrf_k=rrf_k,
+            category=category,
+        )
+        stats = self.last_stats
+        if not candidates:
+            stats["gated"] = _stage_counts([])
+            self._log_stats(stats)
+            return []
+        gated = self.rerank_candidates(
+            question, candidates, gate_threshold=gate_threshold, top_n=top_n
+        )
         stats["gated"] = _stage_counts([c.chunk.chunk_id for c in gated])
         self._log_stats(stats)
         return gated
