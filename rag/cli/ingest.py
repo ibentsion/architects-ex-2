@@ -39,10 +39,9 @@ from rag.chunking.common import iter_reading_order, load_docling
 from rag.embed.cache import EmbeddingCache, embed_doc, embedder_cache_key
 from rag.index.manifest import build_manifest, write_manifest
 from rag.normalize.cache import TokenCache, tokens_for_doc
-from rag.parsing import ParsedDoc, SourceFile, discover
+from rag.parsing import ParseError, ParsedDoc, SourceFile, discover, doc_source_for
 from rag.parsing.cache import CachedParser, ParseCache
 from rag.parsing.canary import CanaryError, run_canary
-from rag.parsing.docling_parser import ParseError
 from rag.parsing.txt_parser import TxtParser
 from rag.report import ReportBuilder, current_source, load_previous
 from rag.report import attach_collector, detach_collector
@@ -96,7 +95,7 @@ def _log_rss(tag: str) -> None:
 def _discover_sources(
     config: RagConfig, categories: list[str] | None
 ) -> list[SourceFile]:
-    sources = discover(config.corpus_dir)
+    sources = discover(config.corpus_dir, doc_source_for(config.parser.impl))
     if not categories:
         return sources
     available = {s.category for s in sources}
@@ -158,9 +157,9 @@ def _parse_batch(
         try:
             with current_source(source.rel_path, source.category):
                 doc = (
-                    pdf_parser.parse(source)
-                    if source.kind == "pdf"
-                    else txt_parser.parse(source)
+                    txt_parser.parse(source)
+                    if source.kind == "txt"
+                    else pdf_parser.parse(source)  # pdf (docling) or md (markdown)
                 )
         except ParseError as exc:
             logger.error("Parse FAILED (continuing): %s", exc)
@@ -265,11 +264,14 @@ def _run_ingestion(
     # ---- Stage 1: discover -------------------------------------------- #
     t0 = time.monotonic()
     sources = _discover_sources(config, categories)
-    pdfs = [s for s in sources if s.kind == "pdf"]
+    #: "documents" = the parser's rendering of the policy PDFs (Docling reads
+    #: .pdf, the markdown parser reads .md); scraped TXT pages are separate.
+    pdfs = [s for s in sources if s.kind != "txt"]
     txts = [s for s in sources if s.kind == "txt"]
     n_categories = len({s.category for s in sources})
+    doc_label = "MD" if config.parser.impl == "markdown" else "PDF"
     _stage(
-        f"[stage 1/7 discover] {len(sources)} files ({len(pdfs)} PDF, {len(txts)} TXT) "
+        f"[stage 1/7 discover] {len(sources)} files ({len(pdfs)} {doc_label}, {len(txts)} TXT) "
         f"across {n_categories} categories ({time.monotonic() - t0:.1f}s)"
     )
     if not sources:

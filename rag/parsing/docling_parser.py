@@ -21,15 +21,10 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from rag.parsing import ParsedDoc, SourceFile
+from rag.parsing import ParseError, ParsedDoc, SourceFile
 from rag.parsing.rtl_repair import repair_docling
 
 logger = logging.getLogger(__name__)
-
-
-class ParseError(Exception):
-    """A single file failed to parse (logged + recorded in the index manifest's
-    ``failed_files``; ingest continues — canary failure is the only hard stop)."""
 
 
 class DoclingParser:

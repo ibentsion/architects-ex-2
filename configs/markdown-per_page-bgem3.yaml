@@ -1,0 +1,11 @@
+extends: configs/final-per_page-bgem3-gptoss-low.yaml
+# Marker/DataLab markdown instead of Docling, everything else held constant
+# against configs/final-per_page-bgem3-gptoss-low.yaml (per_page chunker,
+# bge-m3 embedder, gpt-oss-120b low reasoning) so the only variable is the
+# parse. per_page is what makes the arms comparable at all: per_table keys off
+# Docling TableItems, which markdown has no equivalent for.
+index_dir: rag_index/markdown-perpage-bgem3
+parser:
+  impl: markdown
+  params: {}   # no canary knobs: the markdown is pre-parsed, and the RTL
+               # canary reads Docling's output specifically

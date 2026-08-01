@@ -50,9 +50,14 @@ class PageStore:
     """
 
     def __init__(self, corpus_dir: Path | str = "corpus",
-                 cache_dir: Path | str = "cache") -> None:
+                 cache_dir: Path | str = "cache",
+                 doc_source: str = "pdf") -> None:
         self.corpus_dir = Path(corpus_dir)
         self.cache_dir = Path(cache_dir)
+        #: Which parse the judge is shown. Must match the arm that produced the
+        #: answers: judging markdown-arm citations against Docling's text would
+        #: score a page the retriever never saw.
+        self.doc_source = doc_source
         self._sources: dict[str, object] | None = None  # rel_path -> SourceFile
         self._pages: dict[str, dict[int | None, str]] = {}  # rel_path -> {page: text}
         self._page_ids: dict[str, set] = {}  # rel_path -> page numbers in the PDF
@@ -64,7 +69,9 @@ class PageStore:
         if self._sources is None:
             from rag.parsing import discover
 
-            self._sources = {s.rel_path: s for s in discover(self.corpus_dir)}
+            self._sources = {
+                s.rel_path: s for s in discover(self.corpus_dir, self.doc_source)
+            }
         return self._sources
 
     def _match_file(self, cited: str) -> tuple[str | None, str | None]:
@@ -105,7 +112,13 @@ class PageStore:
             self._page_ids[rel_path] = set()
             return
 
-        docling = ParseCache(self.cache_dir).load(source.sha256)
+        if source.kind == "md":
+            # Markdown is cheap to parse and therefore never cached.
+            from rag.parsing.markdown_parser import MarkdownParser
+
+            docling = MarkdownParser().parse(source).docling
+        else:
+            docling = ParseCache(self.cache_dir).load(source.sha256)
         if docling is None:
             raise FileNotFoundError(
                 f"No parse-cache entry for {rel_path} (sha256 {source.sha256[:12]}). "

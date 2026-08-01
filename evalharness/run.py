@@ -43,6 +43,9 @@ def main(argv=None):
                     help="corpus directory, for resolving cited pages")
     ap.add_argument("--cache-dir", default="cache",
                     help="parse cache holding the corpus's Docling parses")
+    ap.add_argument("--doc-source", choices=("pdf", "markdown"), default="pdf",
+                    help="which parse the citation judge is shown; must match the "
+                         "parser the answers were generated with")
     ap.add_argument("--workers", type=int, default=8, help="parallel judge calls")
     ap.add_argument("--limit", type=int, default=None,
                     help="evaluate only the first N questions (smoke tests)")
@@ -63,7 +66,7 @@ def main(argv=None):
 
     # Resolve every cited {file, page} to its real corpus page before judging:
     # the citation judge reads the actual document, never a search result.
-    store = PageStore(args.corpus, args.cache_dir)
+    store = PageStore(args.corpus, args.cache_dir, args.doc_source)
     resolved_by_id = {q["id"]: citations.resolve_citations(
         answers_by_id[q["id"]].get("citations"), store) for q in questions}
     # An unanswerable question has no evidence to establish, so its citations
@@ -128,6 +131,7 @@ def main(argv=None):
         "answers_file": args.answers,
         "judges": args.judges,
         "prompt_variant": args.prompt,
+        "doc_source": args.doc_source,
         "est_cost_usd": n_calls * EST_COST_PER_CALL,
     }
 
