@@ -30,11 +30,23 @@ DIFFICULTY_RULES = {
         "the ground truth corrects it. Still a single source, no arithmetic."
     ),
     "hard": (
-        "HARD: the answer requires real work on top of retrieval — either "
-        "arithmetic over numbers on the page (a percentage of a sum, a "
-        "deductible, a pro-rata refund), or combining two separate clauses into "
-        "one conclusion. The ground-truth answer must show the computation or "
-        "the combination explicitly."
+        "HARD: the answer requires real work on top of retrieval. Two shapes, "
+        "both taken from the existing dataset:\n"
+        "  (a) ARITHMETIC — the CUSTOMER supplies a figure of their own in the "
+        "question (their sum insured, what they paid, how many days passed, "
+        "their monthly premium) and the page supplies the rate, percentage, "
+        "cap or formula that applies to it. The answer computes the result and "
+        "shows the working. You do NOT need a page that already contains a "
+        "worked example; you invent the customer's plausible figure and apply "
+        "the page's rule to it. E.g. the page says cover for garden plants is "
+        "limited to 2% of the sum insured, so the customer says their flat is "
+        "insured for 1,200,000 ₪ and asks the maximum payout — the answer is "
+        "2% x 1,200,000 = 24,000 ₪.\n"
+        "  (b) COMBINATION — two separate clauses on the page must be joined "
+        "to reach one conclusion (a rule plus the exception or condition that "
+        "governs it). Neither clause alone answers the question.\n"
+        "A question whose answer merely restates one number or one sentence "
+        "from the page is NOT hard, however specific that number is."
     ),
 }
 

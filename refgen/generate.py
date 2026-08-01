@@ -135,7 +135,11 @@ def build_item(kind: str, difficulty: str, category: str, sampler: Sampler,
                                          category_pages, verifiers, wanted)
             except Skipped as skip:
                 outcome.attempts.append(Attempt(kind, difficulty, model, "skip", str(skip)))
-                break  # the page is unusable — draw another
+                # Keep the page out of the pool: a model that called it
+                # unusable was not making a mistake about it, and releasing it
+                # only spends later items' page budget on the same dead end.
+                drawn = []
+                break
             except verify.Rejected as rejection:
                 logger.info("%s rejected at %s: %s", item_id, rejection.gate, rejection.reason)
                 outcome.attempts.append(Attempt(kind, difficulty, model, rejection.gate,

@@ -225,15 +225,16 @@ class Sampler:
         self.take(page)
         return page
 
-    def draw_pair(self, top_n: int = 5) -> tuple[Page, Page] | None:
-        """Two topically related pages from two different files.
+    #: Rank band the partner page is drawn from, by word overlap with the seed.
+    #: Not the top: the most-overlapping page in another file usually *covers
+    #: the same ground*, so one page answers the question by itself and the
+    #: leave-one-out gate rejects it. A little further down, pages share the
+    #: subject but carry different specifics — which is what a question needing
+    #: both pages is made of.
+    PAIR_BAND = (2, 12)
 
-        A multi-source question only works if the two pages are about
-        overlapping subject matter — a random pair usually has no question that
-        needs both. Pick a seed page, then its most word-overlapping page in
-        another file (sampled among the top few so the choice is not always the
-        single densest page).
-        """
+    def draw_pair(self) -> tuple[Page, Page] | None:
+        """Two topically related pages from two different files."""
         seed_page = self.draw()
         if seed_page is None:
             return None
@@ -241,7 +242,9 @@ class Sampler:
         if not others:
             return None
         ranked = sorted(others, key=lambda p: _overlap(seed_page, p), reverse=True)
-        partner = self._rng.choice(ranked[:top_n])
+        low, high = self.PAIR_BAND
+        candidates = ranked[low:high] or ranked[:high] or ranked
+        partner = self._rng.choice(candidates)
         self.take(partner)
         return seed_page, partner
 
