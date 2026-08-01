@@ -135,7 +135,17 @@ def _oracle_pages(pdf_path) -> dict[int, str]:
         pdf = pdfium.PdfDocument(str(pdf_path))
         try:
             for index in range(len(pdf)):
-                out[index + 1] = pdf[index].get_textpage().get_text_bounded()
+                page = pdf[index]
+                textpage = page.get_textpage()
+                try:
+                    out[index + 1] = textpage.get_text_bounded()
+                finally:
+                    # Close explicitly rather than leaving it to the weakref
+                    # finalizers: those run pdfium teardown on whichever thread
+                    # happens to trigger GC, which is how this segfaulted even
+                    # with the lock held around every call.
+                    textpage.close()
+                    page.close()
         except Exception:  # a PDF pdfium cannot read gives no opinion
             return {}
         finally:

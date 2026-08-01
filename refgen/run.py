@@ -37,12 +37,16 @@ def _examples_for(v1_items: list, difficulty: str, category: str, rng: random.Ra
     return rng.sample(pool, min(N_EXAMPLES, len(pool)))
 
 
-def build_category(category: str, index: int, store: PageStore, v1_items: list,
+def build_category(category: str, index: int, pages: list, v1_items: list,
                    v1_pages: set, existing: list, seed: int, progress,
                    checkpoint=None) -> tuple:
-    """Every item for one category. Returns (items, attempts, failures)."""
+    """Every item for one category. Returns (items, attempts, failures).
+
+    `pages` is prepared by the caller, in the main thread: building it touches
+    pdfium, which is not thread-safe even under a lock (its finalizers run on
+    whatever thread collects them).
+    """
     rng = random.Random(seed + index)
-    pages = build_inventory(category, store)
     sampler = Sampler(pages, seed=seed + index, excluded=set(v1_pages))
 
     slots = generate.category_plan()
@@ -104,6 +108,14 @@ def main(argv=None):
     store = PageStore(args.corpus, args.cache_dir)
     store._load_sources()  # warm the corpus walk once, before the threads start
 
+    # Inventories are built here, serially, because building one calls pdfium
+    # to check page word order and pdfium is not thread-safe.
+    print(f"Reading corpus pages for {len(args.categories)} categories...", file=sys.stderr)
+    inventories = {}
+    for category in args.categories:
+        inventories[category] = build_inventory(category, store)
+        print(f"  {category:26}{len(inventories[category]):5} usable pages", file=sys.stderr)
+
     print(f"Building {len(args.categories)} categories x "
           f"{schema.ITEMS_PER_CATEGORY} items "
           f"({len(args.categories) * schema.ITEMS_PER_CATEGORY} questions); "
@@ -123,8 +135,9 @@ def main(argv=None):
             fh.write(json.dumps(item.model_dump(), ensure_ascii=False) + "\n")
 
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        futures = [pool.submit(build_category, category, index, store, v1_items,
-                               v1_pages, v1_questions, args.seed, progress, checkpoint)
+        futures = [pool.submit(build_category, category, index, inventories[category],
+                               v1_items, v1_pages, v1_questions, args.seed, progress,
+                               checkpoint)
                    for index, category in enumerate(args.categories)]
         results = [f.result() for f in futures]
 
