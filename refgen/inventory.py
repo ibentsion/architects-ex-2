@@ -14,15 +14,20 @@ from __future__ import annotations
 import logging
 import random
 import re
-import threading
+import shutil
+import subprocess
 from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
 
-#: pdfium is not thread-safe. Categories are built in parallel, and calling it
-#: from several threads segfaults the whole process — no traceback, no output,
-#: just a dead run. Every use goes through this lock.
-_PDFIUM_LOCK = threading.Lock()
+#: Poppler's `pdftotext` is the page-order oracle. It runs as a subprocess, so
+#: it cannot be made to segfault by concurrent use the way the in-process
+#: pdfium binding could — and it is a *different* engine from the one
+#: `rag.parsing.rtl_repair` repairs with, so this filter cannot be fooled by a
+#: bug the repair and its own oracle share.
+PDFTOTEXT = "pdftotext"
+#: Poppler separates pages with a form feed.
+_PAGE_BREAK = "\f"
 
 #: Below this, a page is a cover sheet, a header, or a stub — nothing to ask about.
 MIN_PAGE_CHARS = 500
@@ -125,32 +130,27 @@ def order_agreement(text: str, oracle: str) -> float:
     return agreed / len(lines)
 
 
-def _oracle_pages(pdf_path) -> dict[int, str]:
-    """The PDF's own text layer, per 1-based page, via pypdfium2 (which
-    returns Hebrew in logical order)."""
-    import pypdfium2 as pdfium
+def oracle_available() -> bool:
+    return shutil.which(PDFTOTEXT) is not None
 
-    out: dict[int, str] = {}
-    with _PDFIUM_LOCK:
-        pdf = pdfium.PdfDocument(str(pdf_path))
-        try:
-            for index in range(len(pdf)):
-                page = pdf[index]
-                textpage = page.get_textpage()
-                try:
-                    out[index + 1] = textpage.get_text_bounded()
-                finally:
-                    # Close explicitly rather than leaving it to the weakref
-                    # finalizers: those run pdfium teardown on whichever thread
-                    # happens to trigger GC, which is how this segfaulted even
-                    # with the lock held around every call.
-                    textpage.close()
-                    page.close()
-        except Exception:  # a PDF pdfium cannot read gives no opinion
-            return {}
-        finally:
-            pdf.close()
-    return out
+
+def _oracle_pages(pdf_path) -> dict[int, str]:
+    """The PDF's own text layer, per 1-based page, via poppler's pdftotext,
+    which returns Hebrew in logical order.
+
+    One subprocess per document, split on the form feed — a document poppler
+    cannot read simply gives no opinion, and every page of it is kept.
+    """
+    try:
+        result = subprocess.run([PDFTOTEXT, str(pdf_path), "-"],
+                                capture_output=True, timeout=120)
+    except (OSError, subprocess.SubprocessError) as error:
+        logger.debug("pdftotext failed on %s (%s)", pdf_path, error)
+        return {}
+    if result.returncode != 0:
+        return {}
+    text = result.stdout.decode("utf-8", "replace")
+    return {index + 1: page for index, page in enumerate(text.split(_PAGE_BREAK))}
 
 
 def build_inventory(category: str, store, min_chars: int = MIN_PAGE_CHARS,
@@ -160,6 +160,12 @@ def build_inventory(category: str, store, min_chars: int = MIN_PAGE_CHARS,
     With `verify_order`, pages whose Hebrew word order disagrees with the PDF's
     own text layer are dropped — see `order_agreement`.
     """
+    if verify_order and not oracle_available():
+        raise RuntimeError(
+            f"{PDFTOTEXT} not found — it is the oracle that keeps scrambled "
+            "Hebrew pages out of the question pool. Install poppler-utils, or "
+            "pass verify_order=False to generate without that check."
+        )
     sources = store._load_sources()
     pages: list[Page] = []
 

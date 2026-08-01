@@ -39,30 +39,40 @@ def _examples_for(v1_items: list, difficulty: str, category: str, rng: random.Ra
 
 def build_category(category: str, index: int, pages: list, v1_items: list,
                    v1_pages: set, existing: list, seed: int, progress,
-                   checkpoint=None) -> tuple:
-    """Every item for one category. Returns (items, attempts, failures).
+                   checkpoint=None, have: list | None = None,
+                   id_from: int = 1) -> tuple:
+    """Every item one category still needs. Returns (items, attempts, failures).
 
     `pages` is prepared by the caller, in the main thread: building it touches
     pdfium, which is not thread-safe even under a lock (its finalizers run on
     whatever thread collects them).
-    """
-    rng = random.Random(seed + index)
-    sampler = Sampler(pages, seed=seed + index, excluded=set(v1_pages))
 
-    slots = generate.category_plan()
-    slots.append(("unanswerable", generate.unanswerable_difficulty(index)))
+    `have` is what a previous run already produced for this category; only the
+    shortfall is generated, and its pages and questions are held back so a fill
+    run cannot duplicate what it is topping up.
+    """
+    have = have or []
+    rng = random.Random(seed + index)
+    already_used = {page for item in have for page in item.pages()}
+    sampler = Sampler(pages, seed=seed + index,
+                      excluded=set(v1_pages) | already_used)
+
+    slots = generate.category_plan(have, generate.unanswerable_difficulty(index))
 
     items, attempts, failures = [], [], []
     cell_used: dict[str, set] = {}
+    for item in have:  # pages of existing items are spoken for
+        cell_used.setdefault(item.difficulty, set()).update(item.pages())
+
     for slot_index, (kind, difficulty) in enumerate(slots):
         model = generate.GENERATOR_MODELS[(index + slot_index) % len(generate.GENERATOR_MODELS)]
-        item_id = f"v2-{index * len(slots) + slot_index + 1:03d}-{category}-{difficulty}"
+        item_id = f"v2-{id_from + slot_index:03d}-{category}-{difficulty}"
         # Standard items are placed by the difficulty they earn, so aim at
         # whatever this category still has room for — with a preference for the
         # slot's own difficulty, to keep the mix spread across the corpus.
         wanted = None
         if kind == "standard":
-            filled = Counter(i.difficulty for i in items if i.kind == "standard")
+            filled = Counter(i.difficulty for i in have + items if i.kind == "standard")
             wanted = {d for d in schema.DIFFICULTIES
                       if filled[d] < schema.STANDARD_PER_CELL}
             if not wanted:
@@ -73,7 +83,7 @@ def build_category(category: str, index: int, pages: list, v1_items: list,
         outcome = generate.build_item(
             kind, difficulty, category, sampler, pages,
             _examples_for(v1_items, difficulty, category, rng), model, item_id,
-            used, existing + [i.question for i in items], wanted)
+            used, existing + [i.question for i in have + items], wanted)
         attempts += outcome.attempts
         if outcome.item is None:
             failures.append(f"{item_id} ({kind}/{difficulty}): {outcome.failure}")
@@ -91,6 +101,10 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--out", default="reference_questions_v2.json")
+    ap.add_argument("--fill", action="store_true",
+                    help="top up an existing --out file: generate only the slots "
+                         "it is short of, holding back the pages and questions "
+                         "it already uses, then merge")
     ap.add_argument("--v1", default="reference_questions.json",
                     help="held-out set: its pages and questions are excluded")
     ap.add_argument("--corpus", default="corpus")
@@ -105,6 +119,25 @@ def main(argv=None):
 
     v1_items = json.loads(Path(args.v1).read_text(encoding="utf-8"))
     v1_pages, v1_questions = schema.load_v1_exclusions(args.v1)
+
+    existing_items: list = []
+    if args.fill:
+        from .audit import load
+
+        existing_items = load(args.out)
+        short = {c: len(generate.category_plan(
+                    [i for i in existing_items if i.domain == c],
+                    generate.unanswerable_difficulty(n)))
+                 for n, c in enumerate(args.categories)}
+        print(f"Filling {Path(args.out).name}: {len(existing_items)} items present, "
+              f"{sum(short.values())} slots short "
+              f"({', '.join(f'{c}:{n}' for c, n in short.items() if n)})",
+              file=sys.stderr)
+    have_by_category: dict[str, list] = {}
+    for item in existing_items:
+        have_by_category.setdefault(item.domain, []).append(item)
+    # New ids continue past the highest already used, so a fill never collides.
+    next_id = 1 + max((int(i.id.split("-")[1]) for i in existing_items), default=0)
     store = PageStore(args.corpus, args.cache_dir)
     store._load_sources()  # warm the corpus walk once, before the threads start
 
@@ -137,11 +170,12 @@ def main(argv=None):
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         futures = [pool.submit(build_category, category, index, inventories[category],
                                v1_items, v1_pages, v1_questions, args.seed, progress,
-                               checkpoint)
+                               checkpoint, have_by_category.get(category),
+                               next_id + index * schema.ITEMS_PER_CATEGORY)
                    for index, category in enumerate(args.categories)]
         results = [f.result() for f in futures]
 
-    items = [item for r in results for item in r[0]]
+    items = existing_items + [item for r in results for item in r[0]]
     attempts = [a for r in results for a in r[1]]
     failures = [f for r in results for f in r[2]]
 

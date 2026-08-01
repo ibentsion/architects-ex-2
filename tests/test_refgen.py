@@ -7,6 +7,7 @@ reach the dataset. All LLM calls are mocked.
 """
 from __future__ import annotations
 
+import collections
 import json
 
 import pytest
@@ -161,6 +162,26 @@ def test_scrambled_pages_are_kept_out_of_the_inventory():
     assert order_agreement(scrambled, oracle) == 0.0
     # Nothing checkable is not evidence of a problem.
     assert order_agreement("שתי מילים", oracle) == 1.0
+
+
+def test_the_page_oracle_reads_a_real_pdf_per_page(anchor_pdf):
+    """poppler's pdftotext, one subprocess per document, split on form feeds."""
+    from refgen.inventory import _oracle_pages, oracle_available
+
+    if not oracle_available():
+        pytest.skip("pdftotext not installed")
+    pages = _oracle_pages(anchor_pdf)
+    assert pages and 1 in pages
+    assert "התיישנות" in pages[1], "the anchor PDF's page 1 states the limitation period"
+
+
+def test_a_missing_page_oracle_is_an_error_not_a_silently_skipped_check(monkeypatch):
+    """Dropping the check silently would let scrambled pages become questions."""
+    import refgen.inventory as inventory
+
+    monkeypatch.setattr(inventory.shutil, "which", lambda _: None)
+    with pytest.raises(RuntimeError, match="poppler-utils"):
+        inventory.build_inventory("dental", object())
 
 
 def test_bm25_finds_the_page_that_shares_the_query_terms():
@@ -411,9 +432,9 @@ def test_dataset_check_demands_every_category_and_count():
 def test_full_size_dataset_passes_every_structural_check():
     """The shape the real run must produce: 12 categories x 11 items."""
     items, n = [], 0
-    for category in sorted(schema.KNOWN_CATEGORIES):
-        for kind, difficulty in generate.category_plan() + [
-                ("unanswerable", generate.unanswerable_difficulty(n // 11))]:
+    for index, category in enumerate(sorted(schema.KNOWN_CATEGORIES)):
+        for kind, difficulty in generate.category_plan(
+                unanswerable_at=generate.unanswerable_difficulty(index)):
             n += 1
             sources = [{"any_of": [{"file": f"{category}/files/f{n}.pdf", "page": 1}]}]
             if kind == "multi_source":
@@ -431,6 +452,49 @@ def test_full_size_dataset_passes_every_structural_check():
     assert len(items) == 132
     assert schema.check_dataset(items) == []
     assert len(schema.coverage(items)) == 12
+
+
+def test_category_plan_asks_for_everything_when_nothing_exists():
+    slots = generate.category_plan()
+    assert len(slots) == schema.ITEMS_PER_CATEGORY
+    assert collections.Counter(k for k, _ in slots) == {
+        "standard": 9, "multi_source": 1, "unanswerable": 1}
+
+
+def test_category_plan_asks_only_for_the_shortfall():
+    """What --fill generates: a category with 3 easy, 1 medium and its
+    unanswerable item already done needs 2 medium, 3 hard and a multi-source."""
+    have = [RefQuestion(**item_dict(id=f"v2-{n:03d}-dental-{d}", difficulty=d,
+                                    kind=k, answerable=k != "unanswerable",
+                                    question=f"שאלה {n} בנושא ביטוח " + " ".join(
+                                        f"מילה{n}{w}" for w in range(6)),
+                                    ground_truth_sources=[] if k == "unanswerable" else
+                                    [{"any_of": [{"file": f"dental/files/f{n}.pdf", "page": 1}]}]))
+            for n, (k, d) in enumerate([("standard", "easy")] * 3
+                                       + [("standard", "medium")]
+                                       + [("unanswerable", "easy")], start=1)]
+    assert collections.Counter(generate.category_plan(have)) == {
+        ("standard", "medium"): 2, ("standard", "hard"): 3, ("multi_source", "hard"): 1}
+
+
+def test_a_full_category_needs_nothing_more():
+    def sources(kind, n):
+        if kind == "unanswerable":
+            return []
+        groups = [{"any_of": [{"file": f"dental/files/f{n}.pdf", "page": 1}]}]
+        if kind == "multi_source":
+            groups.append({"any_of": [{"file": f"dental/files/g{n}.pdf", "page": 1}]})
+        return groups
+
+    have = [RefQuestion(**item_dict(id=f"v2-{n:03d}-dental-{d}", difficulty=d, kind=k,
+                                    answerable=k != "unanswerable",
+                                    question=f"שאלה {n} בנושא ביטוח " + " ".join(
+                                        f"מילה{n}{w}" for w in range(6)),
+                                    ground_truth_sources=sources(k, n)))
+            for n, (k, d) in enumerate(
+                [("standard", d) for d in ("easy", "medium", "hard") for _ in range(3)]
+                + [("multi_source", "hard"), ("unanswerable", "easy")], start=1)]
+    assert generate.category_plan(have) == []
 
 
 def test_audit_reports_every_malformed_item_at_once(tmp_path):

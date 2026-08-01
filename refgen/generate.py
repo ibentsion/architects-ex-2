@@ -193,17 +193,26 @@ def build_item(kind: str, difficulty: str, category: str, sampler: Sampler,
     return outcome
 
 
-def category_plan() -> list[tuple[str, str]]:
-    """The (kind, difficulty) slots one category must fill.
+def category_plan(existing: list | None = None,
+                  unanswerable_at: str = "medium") -> list[tuple[str, str]]:
+    """The (kind, difficulty) slots one category still needs.
 
     Three standard questions at each difficulty, one multi-source (hard by
-    definition), one unanswerable (its difficulty is assigned per category by
-    the caller).
+    definition), one unanswerable. With `existing` — items already accepted for
+    this category, from a previous run — only the shortfall is returned, which
+    is what `--fill` generates.
     """
-    slots = [("standard", difficulty)
-             for difficulty in DIFFICULTIES
-             for _ in range(schema.STANDARD_PER_CELL)]
-    return slots + [("multi_source", "hard")]
+    existing = existing or []
+    slots = []
+    for difficulty in DIFFICULTIES:
+        have = sum(1 for item in existing
+                   if item.kind == "standard" and item.difficulty == difficulty)
+        slots += [("standard", difficulty)] * max(0, schema.STANDARD_PER_CELL - have)
+    if not any(item.kind == "multi_source" for item in existing):
+        slots.append(("multi_source", "hard"))
+    if not any(item.kind == "unanswerable" for item in existing):
+        slots.append(("unanswerable", unanswerable_at))
+    return slots
 
 
 def unanswerable_difficulty(category_index: int) -> str:
