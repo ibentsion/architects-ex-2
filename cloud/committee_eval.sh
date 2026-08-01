@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# SUPERSEDED — kept as the record of the 2026-07-27 run. Do not re-run as-is:
+# GLM-5.1 is too slow to keep in a judging loop, and the index this scored has
+# since been rebuilt (Hebrew table cells were word-order reversed). The current
+# comparison lives in cloud/postrepair_eval.sh.
+#
 # Judge-committee eval (2026-07-27): per_table + bge-m3 index, two generation
 # arms, both scored by a 3-model committee (median scores / majority verdict):
 #   openai/gpt-oss-120b            western member (also a contestant — the

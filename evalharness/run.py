@@ -7,7 +7,11 @@ judgments.jsonl + metrics.json + report.md into the output directory.
         --out eval_results/baseline
 
 Committee mode: pass --judges with several models, e.g.
-    --judges deepseek-ai/DeepSeek-V4-Pro Qwen/Qwen3-235B-A22B zai-org/GLM-4.5
+    --judges openai/gpt-oss-120b Qwen/Qwen3-235B-A22B-Instruct-2507 \
+        deepseek-ai/DeepSeek-V4-Pro
+Use an odd number so the median/majority aggregation has a real middle. Avoid
+the GLM family here — it spends its whole token budget thinking and is far too
+slow to keep in a judging loop.
 """
 import argparse
 import datetime
