@@ -7,6 +7,8 @@ Stage-3 FastAPI wiring is a trivial adapter. ``Answer`` maps 1:1 onto
 """
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -55,6 +57,36 @@ class RetrievedChunk(BaseModel):
     rerank_score: float | None = Field(None, description="CrossEncoder sigmoid relevance (also the gate signal)")
 
 
+class SubQuestion(BaseModel):
+    """One independently-answerable part of a user query (rag/classify.py)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    question: str = Field(..., description="Self-contained sub-question, answerable on its own")
+    categories: list[str] = Field(
+        default_factory=list,
+        description="Corpus categories this sub-question maps to (validated; empty = no filter)",
+    )
+
+
+class Classification(BaseModel):
+    """LLM query classification: single- vs multi-category + decomposition.
+
+    ``mode`` and ``categories`` are DERIVED from the sub-questions (ordered
+    union of their categories; multi iff the union has >1) — never taken
+    verbatim from the LLM.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    mode: Literal["single", "multi"]
+    categories: list[str] = Field(
+        default_factory=list, description="Ordered union of sub-question categories"
+    )
+    sub_questions: list[SubQuestion]
+    cost_estimate: float = Field(0.0, description="Estimated $ cost of the classification LLM call")
+
+
 class Citation(BaseModel):
     """Mirrors contract.py's Citation — do not diverge."""
 
@@ -98,3 +130,9 @@ class Answer(BaseModel):
     n_retries: int = Field(0, description="Number of corrective-nudge LLM retries used for this answer")
     retrieval_ms: float | None = Field(None, description="Wall time spent in Retriever.retrieve() (dense+sparse+rerank+gate)")
     generation_ms: float | None = Field(None, description="Wall time spent in Generator.generate() (0.0 on gate-fail, no LLM call)")
+    classification: Classification | None = Field(
+        None, description="Query classification (populated only on --route answers)"
+    )
+    classification_ms: float | None = Field(
+        None, description="Wall time of the routing classification LLM call (--route only)"
+    )
