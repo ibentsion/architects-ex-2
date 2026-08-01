@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
-# Post-BiDi-repair eval (2026-08-01): re-run of the per_table + bge-m3 /
-# gpt-oss-120b-low arm from cloud/committee_eval.sh, against indexes rebuilt
-# from the repaired parse cache (rag/parsing/rtl_repair.py).
+# Post-BiDi-repair eval (2026-08-01): does repairing Docling's reversed Hebrew
+# table cells (rag/parsing/rtl_repair.py) move the scores?
 #
-# Same questions, same judges, same generation config as
-# eval_results/committee-pertable-bgem3-gptosslow-20260727T195127Z, so the
-# delta isolates one variable: Hebrew table cells that used to be word-order
-# reversed (99.4% of multi-word cells -> 5.3%).
+# Two arms, SAME questions and SAME judges, differing only in the index the
+# answers came from:
+#   before/  2026-07-27 answers, generated against the reversed index (reused)
+#   after/   fresh answers from the indexes rebuilt off the repaired cache
 #
-# Baseline to compare against (2026-07-27, reversed index):
-#   correctness 5.65  completeness 5.44  hallucination 0.17  refusal 0.27
-#   verdicts 24 correct / 5 partial / 6 incorrect / 13 refusal
-#   citation recall 0.33  precision 0.26
+# Both arms are judged here rather than comparing against the published
+# 2026-07-27 numbers, because the committee changed: GLM-5.1 is dropped (too
+# slow) and DeepSeek-V4-Pro takes its place — it was DOWN on the Token Factory
+# at committee time and is back up. Re-judging the old answers with the new
+# committee keeps the delta attributable to retrieval alone.
+#
+# gpt-oss-120b judges an arm it also generated; as before, the median across
+# three judges is what mitigates the self-judging bias.
 #
 # Run on the node from the repo root:
 #   cloud/submit_job.sh run 'bash cloud/postrepair_eval.sh'
@@ -19,19 +22,25 @@ set -euo pipefail
 
 TS=$(date -u +%Y%m%dT%H%M%SZ)
 ARTIFACTS_REPO="${ARTIFACTS_REPO:-ibentsion/apex-ex2-artifacts}"
-JUDGES=(openai/gpt-oss-120b Qwen/Qwen3-235B-A22B-Instruct-2507 zai-org/GLM-5.1)
+JUDGES=(openai/gpt-oss-120b Qwen/Qwen3-235B-A22B-Instruct-2507 deepseek-ai/DeepSeek-V4-Pro)
 RUN="postrepair-pertable-bgem3-gptosslow-$TS"
 
-ANS="rag_answers_$RUN.jsonl"
+# Arm 1 — answers off the reversed index (2026-07-27), re-judged unchanged.
+ANS_BEFORE=$(python -c "from huggingface_hub import hf_hub_download; print(hf_hub_download('$ARTIFACTS_REPO', 'results/committee-20260727T195127Z/rag_answers_cloud_pertable-bgem3-gptosslow_20260727T195127Z.jsonl', repo_type='dataset'))")
+
+# Arm 2 — fresh answers off the repaired index.
+ANS_AFTER="rag_answers_$RUN.jsonl"
 python -m rag.cli.query --config configs/final-per_table-bgem3-gptoss-low.yaml \
-    --questions reference_questions.json --out "$ANS"
+    --questions reference_questions.json --out "$ANS_AFTER"
 
 fail=0
-python -m evalharness.run --questions reference_questions.json --answers "$ANS" \
-    --out "eval_results/$RUN" --judges "${JUDGES[@]}" || fail=1
+python -m evalharness.run --questions reference_questions.json --answers "$ANS_BEFORE" \
+    --out "eval_results/$RUN/before-reversed-index" --judges "${JUDGES[@]}" || fail=1
+python -m evalharness.run --questions reference_questions.json --answers "$ANS_AFTER" \
+    --out "eval_results/$RUN/after-repaired-index" --judges "${JUDGES[@]}" || fail=1
 
 # Ship results home even if a judge failed on some questions.
 hf upload "$ARTIFACTS_REPO" "eval_results/$RUN" "results/$RUN" --repo-type dataset
-hf upload "$ARTIFACTS_REPO" "$ANS" "results/$RUN/$ANS" --repo-type dataset
+hf upload "$ARTIFACTS_REPO" "$ANS_AFTER" "results/$RUN/$ANS_AFTER" --repo-type dataset
 echo "RESULTS_PREFIX=results/$RUN"
 exit $fail
