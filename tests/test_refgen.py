@@ -201,9 +201,19 @@ def test_multi_source_item_needs_both_pages(llm):
 def test_multi_source_rejected_when_one_page_answers_alone(llm):
     llm["support"] = {1: "fully", 2: "fully"}
     llm["difficulty"] = "hard"
-    outcome = build(kind="multi_source", difficulty="hard")
+    outcome = build(kind="multi_source", difficulty="hard", pages=make_pages(20))
     assert outcome.item is None
     assert {a.gate for a in outcome.attempts} == {"needs_both"}
+
+
+def test_multi_source_spends_its_budget_on_pairs_not_on_retries(llm):
+    """Whether a question can need both pages is decided by the pair, so a
+    rejected pair is usually unusable however well the reason is explained."""
+    llm["support"] = {1: "fully", 2: "fully"}
+    llm["difficulty"] = "hard"
+    outcome = build(kind="multi_source", difficulty="hard", pages=make_pages(30))
+    assert len(outcome.attempts) == generate.MAX_PAIRS * (generate.MAX_RETRIES_MULTI + 1)
+    assert generate.MAX_PAIRS > generate.MAX_PAGES
 
 
 def test_difficulty_mismatch_is_rejected_when_no_cell_is_open(llm):

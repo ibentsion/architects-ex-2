@@ -39,6 +39,12 @@ GENERATOR_MODELS = (
 MAX_RETRIES = 2
 #: Pages tried before giving up on an item.
 MAX_PAGES = 3
+#: Multi-source is pair-limited, not prompt-limited: whether a question can
+#: need both pages is decided by the pair, so a rejected pair is usually
+#: unusable however well the reason is explained. Spend the budget on more
+#: pairs and less arguing — 1 of 3 categories succeeded at 3 pairs x 3 tries.
+MAX_PAIRS = 8
+MAX_RETRIES_MULTI = 1
 #: Pages shown to an unanswerable-question writer as category context.
 UNANSWERABLE_CONTEXT_PAGES = 8
 #: Generation prompts carry whole corpus pages, and the writers are reasoning
@@ -104,8 +110,10 @@ def build_item(kind: str, difficulty: str, category: str, sampler: Sampler,
     """
     verifiers = [m for m in GENERATOR_MODELS if m != model]
     outcome = Outcome()
+    draws = MAX_PAIRS if kind == "multi_source" else MAX_PAGES
+    retries = MAX_RETRIES_MULTI if kind == "multi_source" else MAX_RETRIES
 
-    for _page_attempt in range(MAX_PAGES):
+    for _page_attempt in range(draws):
         if kind == "unanswerable":
             pages, drawn = category_pages[:UNANSWERABLE_CONTEXT_PAGES], []
         elif kind == "multi_source":
@@ -123,7 +131,7 @@ def build_item(kind: str, difficulty: str, category: str, sampler: Sampler,
             pages = drawn = [page]
 
         reason = None
-        for _retry in range(MAX_RETRIES + 1):
+        for _retry in range(retries + 1):
             candidate = None
             try:
                 candidate = _generate_candidate(kind, difficulty, pages, examples,
@@ -181,7 +189,7 @@ def build_item(kind: str, difficulty: str, category: str, sampler: Sampler,
 
         sampler.release(*drawn)  # this page did not work out; try a different one
 
-    outcome.failure = f"exhausted {MAX_PAGES} pages"
+    outcome.failure = f"exhausted {draws} {'pairs' if kind == 'multi_source' else 'pages'}"
     return outcome
 
 
