@@ -216,6 +216,12 @@ def _run_batch(engine: QueryEngine, questions_path: Path, out_path: Path, catego
                 record["tokens"] = tokens
             if answer.classification is not None:
                 record["classification"] = answer.classification.model_dump(mode="json")
+            # Agent-engine diagnostics for failure-mode analysis (absent/None
+            # under the rag engine, which sets no category without --category).
+            record["category"] = answer.category
+            record["confidence"] = answer.confidence
+            if answer.trace is not None:
+                record["trace"] = answer.trace
             out.write(json.dumps(record, ensure_ascii=False) + "\n")
             gated_n = (answer.retrieval_stats or {}).get("gated", {}).get("n_chunks", 0)
             flags = []

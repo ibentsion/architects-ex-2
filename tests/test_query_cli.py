@@ -111,6 +111,37 @@ def test_legacy_invocation_still_dispatches_to_answer_flow(config_path, capsys):
     assert "Provide a question" in capsys.readouterr().err
 
 
+def test_batch_records_include_agent_diagnostics(monkeypatch, config_path, tmp_path, capsys):
+    from rag.types import Answer
+
+    class FakeEngine:
+        def _answer(self, question, category=None):
+            answer = Answer(
+                text="תשובה",
+                citations=[],
+                category="apartment",
+                confidence=0.8,
+                latency_ms=1.0,
+                trace=[{"step": "classify", "ms": 5}],
+            )
+            return answer, {"prompt": 3, "completion": 2}
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(query_cli, "load_config", lambda path: {"path": path})
+    monkeypatch.setattr(query_cli, "AgentEngine", lambda config: FakeEngine())
+    questions = tmp_path / "q.json"
+    questions.write_text(json.dumps([{"id": "q1", "question": "ש"}], ensure_ascii=False))
+    out = tmp_path / "a.jsonl"
+    argv = ["--config", config_path, "--engine", "agent", "--questions", str(questions), "--out", str(out)]
+    assert query_cli.main(argv) == query_cli.EXIT_OK
+    record = json.loads(out.read_text().strip())
+    assert record["category"] == "apartment"
+    assert record["confidence"] == 0.8
+    assert record["trace"] == [{"step": "classify", "ms": 5}]
+
+
 def test_engine_flag_selects_agent_engine(monkeypatch, config_path, capsys):
     from rag.types import Answer
 
