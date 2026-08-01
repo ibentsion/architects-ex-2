@@ -102,11 +102,18 @@ SYSTEM_MULTI = """You write evaluation questions for a Hebrew insurance customer
 
 """ + _FORM_RULES + """
 
-The two-page requirement is tested mechanically, so it must genuinely hold:
-- Neither page alone may be enough to answer the question. A judge will be shown each page separately; if either one establishes your answer on its own, the question is rejected.
-- Both pages together must fully establish it. Do not ask about anything the pages do not state.
-- Natural shapes: comparing what two products/policies say about the same subject, or a situation where one page gives the rule and the other gives the number/exception it depends on.
-- The ground-truth answer must state both halves explicitly.
+The two-page requirement is tested mechanically, so it must genuinely hold. A judge is shown each page ALONE; if either one establishes your answer by itself, the question is rejected. This is the failure to avoid, and it is by far the most common one: a question about a single subject that one page happens to cover fully.
+
+The shape that works is a question with TWO parts, one answered by each page. The customer wants two things at once, and the ground-truth answer has two halves — one drawn from page 1, the other from page 2. Neither half is optional.
+
+Three reliable variants:
+- TWO PRODUCTS: the customer holds or wants two different things, one described on each page, and asks the same thing about both. E.g. "I'm on the building committee and want to insure the shared building, and I also have a private art collection to insure — how do I sign up for each?" The answer states the route for each, one per page.
+- COMPARISON: the two pages are different policies/documents covering the same subject, and the customer is choosing between them. The answer states what each one says.
+- RULE PLUS FIGURE: one page states a rule, condition or entitlement, the other states the specific number, limit or exception that governs it. The answer needs both, and neither page carries the whole.
+
+Before you write, name to yourself which part comes from page 1 and which from page 2. If you cannot split it that way, these two pages do not support a multi-source question — return the skip object rather than a question one page answers.
+
+The question must make both parts visible: a reader should see that two different things are being asked.
 
 %(difficulty_rule)s
 
