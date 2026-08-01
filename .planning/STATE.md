@@ -3,8 +3,8 @@
 Exercise 2 — Harel Insurance customer support agent (APEX). Standalone quick-task
 tracking (no ROADMAP.md — work proceeds as ad-hoc quick tasks).
 
-Last activity: 2026-08-01 - Completed quick task 260801-002: Marker/DataLab markdown parser + parser comparison (markdown is the better parse, Docling the better pipeline; staying on Docling+BiDi repair)
-Previous: 2026-08-01 - Completed quick task 260801-001: retrieval stages exposed as parameterized query-CLI tools (dense/sparse/fuse/rerank/retrieve) + LLM query classification (classify subcommand, --route answer flow)
+Last activity: 2026-08-01 - Completed quick task 260801-003: agentic harness (--engine agent) — hybrid fast-path with concurrent sub-question retrieval, native tool-calling loop (retrieve + AST calculator), gpt-oss orchestration + DeepSeek synthesis; --route removed
+Previous: 2026-08-01 - Completed quick task 260801-002: Marker/DataLab markdown parser + parser comparison (markdown is the better parse, Docling the better pipeline; staying on Docling+BiDi repair)
 
 ### Quick Tasks Completed
 
@@ -17,3 +17,4 @@ Previous: 2026-08-01 - Completed quick task 260801-001: retrieval stages exposed
 | 260801-001 | Retrieval stages as parameterized query-CLI tools (dense/sparse/fuse/rerank/retrieve, no generation) + LLM query classification into categories/sub-questions (classify subcommand + --route pooled answering); 26 new tests, live-verified | 2026-08-01 | a3f6bb2 | [260801-001-retrieval-tools-classify](./quick/260801-001-retrieval-tools-classify/) |
 | 260731-002 | Reference dataset v2: `refgen` package (spec-as-code, sampler, gated generation, audit CLI) + harness support for unanswerable questions; produced 108 verified questions over all 12 categories, 3 generator models, v1 held out | 2026-08-01 | (this push) | [260731-002-refset-v2](./quick/260731-002-refset-v2/) |
 | 260801-002 | Marker/DataLab markdown as an alternative parser (`markdown` impl, synthetic DoclingDocument from `{N}---` page markers, evalharness `--doc-source`) + full parser comparison; markdown wins on parse quality (clause ordering 40.5% vs 32.6%), Docling wins end-to-end (correctness 5.69 vs 5.02) — recommendation: stay on Docling+repair, keep markdown for per-file routing | 2026-08-01 | (this push) | [260801-002-markdown-corpus-comparison](./quick/260801-002-markdown-corpus-comparison/) |
+| 260801-003 | Agentic harness: --engine agent on the query CLI — classify + concurrent sub-question retrieval + native tool-calling loop (retrieve/calculate, AST calculator, capped hops, degrade-on-failure) + DeepSeek synthesis; harness config block (per-role models); --route replaced; partial-answer citation fix; 39 new tests, live-verified 3 query shapes | 2026-08-01 | e49f59d | [260801-003-agentic-harness](./quick/260801-003-agentic-harness/) |
