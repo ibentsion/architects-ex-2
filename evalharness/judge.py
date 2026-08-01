@@ -11,6 +11,7 @@ substantial disagreement is flagged per question so the report can surface it.
 import json
 import re
 import statistics
+import time
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 
@@ -77,19 +78,23 @@ def _normalize_citation(raw: dict, n_citations: int) -> dict:
     }
 
 
-def _call_judge(messages: list, model: str, normalize, max_retries: int = 2) -> dict:
+def _call_judge(messages: list, model: str, normalize, max_retries: int = 2,
+                max_tokens: int = 4096) -> dict:
     """Call one judge model until it returns JSON that `normalize` accepts.
 
     Returns the normalized judgment tagged with `judge_model`, or
     {"error": ...} if the model never produced a valid reply.
+
+    `max_tokens` defaults to 4096 because reasoning-model judges (Nemotron,
+    GLM) spend most of the budget thinking and return content=None when it runs
+    out; long prompts need more (see refgen's generation calls).
     """
     last_err = None
-    reply = ""
+    original = messages
     for attempt in range(max_retries + 1):
+        reply = ""
         try:
-            # 4096 tokens: reasoning-model judges (e.g. Nemotron) spend most of
-            # the budget thinking and return content=None when it runs out.
-            reply = chat(messages, model=model, max_tokens=4096,
+            reply = chat(messages, model=model, max_tokens=max_tokens,
                          temperature=0.0, quiet=True)
             if not reply:
                 reply = ""
@@ -99,13 +104,22 @@ def _call_judge(messages: list, model: str, normalize, max_retries: int = 2) -> 
             return judgment
         except Exception as err:  # bad JSON, schema violation, or API error
             last_err = err
-            if attempt < max_retries:
-                messages = messages + [
+            if attempt >= max_retries:
+                break
+            if reply:
+                # Show the model its malformed reply so it can correct it.
+                messages = original + [
                     {"role": "assistant", "content": reply},
                     {"role": "user", "content":
                         f"Your previous reply was invalid ({err}). "
                         "Reply again with ONLY the JSON object, exactly per the schema."},
                 ]
+            else:
+                # Empty reply or transport error: there is nothing to correct,
+                # and appending the exchange would only make the next prompt
+                # longer — which is what exhausted the budget in the first place.
+                messages = original
+                time.sleep(2 ** attempt)
     return {"judge_model": model, "error": f"{type(last_err).__name__}: {last_err}"}
 
 

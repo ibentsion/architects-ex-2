@@ -31,6 +31,10 @@ MAX_RETRIES = 2
 MAX_PAGES = 3
 #: Pages shown to an unanswerable-question writer as category context.
 UNANSWERABLE_CONTEXT_PAGES = 8
+#: Generation prompts carry whole corpus pages, and the writers are reasoning
+#: models — at the judges' 4096 budget GLM-5.1 spent it all thinking and
+#: returned nothing on two-page multi-source prompts.
+GENERATION_MAX_TOKENS = 12288
 
 
 @dataclass
@@ -64,7 +68,8 @@ def _generate_candidate(kind: str, difficulty: str, pages: list, examples: list,
     messages = prompts.build_generation_messages(kind, difficulty, pages, examples, category)
     if reason:
         messages = messages + [prompts.retry_message(reason)]
-    result = _call_judge(messages, model, prompts.parse_generation)
+    result = _call_judge(messages, model, prompts.parse_generation,
+                         max_tokens=GENERATION_MAX_TOKENS)
     if "error" in result:
         raise verify.Rejected("generation", result["error"])
     if "skip" in result:
