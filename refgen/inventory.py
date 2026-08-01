@@ -14,9 +14,15 @@ from __future__ import annotations
 import logging
 import random
 import re
+import threading
 from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
+
+#: pdfium is not thread-safe. Categories are built in parallel, and calling it
+#: from several threads segfaults the whole process — no traceback, no output,
+#: just a dead run. Every use goes through this lock.
+_PDFIUM_LOCK = threading.Lock()
 
 #: Below this, a page is a cover sheet, a header, or a stub — nothing to ask about.
 MIN_PAGE_CHARS = 500
@@ -125,14 +131,15 @@ def _oracle_pages(pdf_path) -> dict[int, str]:
     import pypdfium2 as pdfium
 
     out: dict[int, str] = {}
-    pdf = pdfium.PdfDocument(str(pdf_path))
-    try:
-        for index in range(len(pdf)):
-            out[index + 1] = pdf[index].get_textpage().get_text_bounded()
-    except Exception:  # a PDF pdfium cannot read gives no opinion
-        return {}
-    finally:
-        pdf.close()
+    with _PDFIUM_LOCK:
+        pdf = pdfium.PdfDocument(str(pdf_path))
+        try:
+            for index in range(len(pdf)):
+                out[index + 1] = pdf[index].get_textpage().get_text_bounded()
+        except Exception:  # a PDF pdfium cannot read gives no opinion
+            return {}
+        finally:
+            pdf.close()
     return out
 
 
