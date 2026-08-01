@@ -143,8 +143,24 @@ def test_inventory_reads_pages_through_the_page_store(tmp_path):
         def _extract(self, rel_path):  # already populated
             pass
 
-    pages = build_inventory("apartment", FakeStore())
+    pages = build_inventory("apartment", FakeStore(), verify_order=False)
     assert [p.page for p in pages] == [1], "the 'short' page is below the threshold"
+
+
+def test_scrambled_pages_are_kept_out_of_the_inventory():
+    """Docling leaves some Hebrew in visual word order. A question written from
+    a scrambled page gets a scrambled ground truth, and the derivability judge
+    reads that same page and agrees — so the only defence is to never write
+    from those pages."""
+    from refgen.inventory import order_agreement
+
+    oracle = "הננו להביא לתשומת לבך כי תקופת ההתיישנות היא שלוש שנים"
+    good = "הננו להביא לתשומת לבך כי תקופת\nההתיישנות היא שלוש שנים"
+    scrambled = "שנים שלוש היא ההתיישנות תקופת כי לבך לתשומת להביא הננו"
+    assert order_agreement(good, oracle) == 1.0
+    assert order_agreement(scrambled, oracle) == 0.0
+    # Nothing checkable is not evidence of a problem.
+    assert order_agreement("שתי מילים", oracle) == 1.0
 
 
 def test_bm25_finds_the_page_that_shares_the_query_terms():

@@ -11,9 +11,12 @@ category, and never offers a page the held-out v1 set quizzes on.
 """
 from __future__ import annotations
 
+import logging
 import random
 import re
 from dataclasses import dataclass, field
+
+logger = logging.getLogger(__name__)
 
 #: Below this, a page is a cover sheet, a header, or a stub — nothing to ask about.
 MIN_PAGE_CHARS = 500
@@ -22,6 +25,11 @@ MIN_PAGE_CHARS = 500
 #: currency/percent marker or a multi-digit number.
 _QUANTITY = re.compile(r"[₪%]|ש\"ח|אחוז|\d{2,}")
 _WORD = re.compile(r"[֐-׿\w]{3,}")
+#: Hebrew words, for checking a page's word order against the PDF oracle.
+_HEBREW_WORD = re.compile(r"[֐-׿]{2,}")
+#: A page must have at least this fraction of its Hebrew lines in the same word
+#: order as pypdfium2 reports, or it is not fit to write a question from.
+MIN_ORDER_AGREEMENT = 0.7
 
 
 @dataclass(frozen=True)
@@ -41,8 +49,50 @@ class Page:
         return bool(_QUANTITY.search(self.text))
 
 
-def build_inventory(category: str, store, min_chars: int = MIN_PAGE_CHARS) -> list[Page]:
-    """Every substantive page of one category, in stable corpus order."""
+def order_agreement(text: str, oracle: str) -> float:
+    """Fraction of a page's multi-word Hebrew lines whose word order matches
+    the PDF's own text layer.
+
+    Docling emits some Hebrew in visual rather than logical order.
+    `rag.parsing.rtl_repair` fixes the great majority of it, but what survives
+    is invisible to the acceptance gates: a question written from a scrambled
+    page gets a scrambled ground truth, and the derivability judge — reading
+    that same scrambled page — agrees with it. The only defence is to not
+    write questions from those pages at all.
+    """
+    oracle_words = " ".join(_HEBREW_WORD.findall(oracle))
+    lines = [_HEBREW_WORD.findall(line) for line in text.split("\n")]
+    lines = [words for words in lines if len(words) >= 4]
+    if not lines or not oracle_words:
+        return 1.0  # nothing checkable — not evidence of a problem
+    agreed = sum(1 for words in lines if " ".join(words) in oracle_words)
+    return agreed / len(lines)
+
+
+def _oracle_pages(pdf_path) -> dict[int, str]:
+    """The PDF's own text layer, per 1-based page, via pypdfium2 (which
+    returns Hebrew in logical order)."""
+    import pypdfium2 as pdfium
+
+    out: dict[int, str] = {}
+    pdf = pdfium.PdfDocument(str(pdf_path))
+    try:
+        for index in range(len(pdf)):
+            out[index + 1] = pdf[index].get_textpage().get_text_bounded()
+    except Exception:  # a PDF pdfium cannot read gives no opinion
+        return {}
+    finally:
+        pdf.close()
+    return out
+
+
+def build_inventory(category: str, store, min_chars: int = MIN_PAGE_CHARS,
+                    verify_order: bool = True) -> list[Page]:
+    """Every substantive page of one category, in stable corpus order.
+
+    With `verify_order`, pages whose Hebrew word order disagrees with the PDF's
+    own text layer are dropped — see `order_agreement`.
+    """
     sources = store._load_sources()
     pages: list[Page] = []
     for rel_path, source in sorted(sources.items()):
@@ -55,9 +105,17 @@ def build_inventory(category: str, store, min_chars: int = MIN_PAGE_CHARS) -> li
             continue
         if rel_path not in store._pages:
             store._extract(rel_path)
-        for page_no, text in sorted(store._pages[rel_path].items()):
-            if text and len(text) >= min_chars:
-                pages.append(Page(rel_path, page_no, text))
+        candidates = [(page_no, text) for page_no, text in sorted(store._pages[rel_path].items())
+                      if text and len(text) >= min_chars]
+        if not candidates:
+            continue
+        oracle = _oracle_pages(source.abs_path) if verify_order else {}
+        for page_no, text in candidates:
+            if verify_order and page_no in oracle:
+                if order_agreement(text, oracle[page_no]) < MIN_ORDER_AGREEMENT:
+                    logger.debug("Skipping scrambled page: %s p%s", rel_path, page_no)
+                    continue
+            pages.append(Page(rel_path, page_no, text))
     return pages
 
 
