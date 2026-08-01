@@ -8,10 +8,13 @@
 # Uses the venv's hf CLI and your cached HF token. Re-uploading a subset is
 # fine — each dir is its own tarball. On the node, delete the dir before the
 # next job to force a re-download (setup skips dirs that already exist).
+#
+# Also runnable *on* the node to push artifacts rebuilt there (the node's venv
+# is on PATH, not at ./venv):  HF=hf cloud/upload_artifacts.sh rag_index
 set -euo pipefail
 
 ARTIFACTS_REPO="${ARTIFACTS_REPO:-ibentsion/apex-ex2-artifacts}"
-HF=venv/bin/hf
+HF="${HF:-venv/bin/hf}"
 if [ $# -gt 0 ]; then DIRS=("$@"); else DIRS=(corpus cache rag_index); fi
 
 WORK=$(mktemp -d)
