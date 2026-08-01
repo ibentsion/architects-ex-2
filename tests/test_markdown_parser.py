@@ -15,6 +15,8 @@ from rag.parsing import ParseError, SourceFile, discover, doc_source_for
 from rag.parsing.markdown_parser import (
     MarkdownParser,
     clean_markdown,
+    parse_table,
+    split_blocks,
     split_pages,
     to_docling_dict,
 )
@@ -101,9 +103,19 @@ def test_dollar_escapes_are_removed() -> None:
     assert clean_markdown(r"עלות יומית \$0.20") == "עלות יומית $0.20"
 
 
-def test_table_pipes_survive_cleaning() -> None:
-    out = clean_markdown("| עלות יומית | קבוצת גיל |\n|---|---|\n| $0.20 | כל הגילאים |")
-    assert out.count("|") >= 8
+def test_markdown_links_are_unwrapped() -> None:
+    """A mailto link left intact puts the same address in the chunk twice."""
+    out = clean_markdown("send it to [services@harel-ins.co.il](mailto:services@harel-ins.co.il) today")
+    assert out.count("services@harel-ins.co.il") == 1
+    assert "mailto:" not in out
+
+
+def test_image_alt_text_repeated_as_a_caption_is_dropped() -> None:
+    """Marker writes the image, then repeats its alt text as a bare line —
+    a description of a logo, not document content."""
+    out = clean_markdown("![HAREL logo](x.jpg)\n\nHAREL logo\n\nסכום הביטוח")
+    assert "HAREL logo" not in out
+    assert "סכום הביטוח" in out
 
 
 # --------------------------------------------------------------------------- #
@@ -118,11 +130,44 @@ def test_every_text_item_carries_page_provenance() -> None:
         assert item["prov"][0]["page_no"] >= 1
 
 
-def test_a_table_stays_one_block() -> None:
+def test_a_pipe_table_becomes_a_real_table_item() -> None:
+    """per_table keys off TableItems — leaving tables as pipe text inside a
+    text block would make the markdown arm impossible to compare against the
+    production per_table config, and would embed raw pipe syntax."""
     doc = to_docling_dict(PAGED)
-    tables = [t for t in doc["texts"] if t["text"].startswith("|")]
-    assert len(tables) == 1
-    assert "כל הגילאים" in tables[0]["text"]
+    assert len(doc["tables"]) == 1
+    cells = doc["tables"][0]["data"]["table_cells"]
+    assert {c["text"] for c in cells} >= {"עלות יומית", "קבוצת גיל", "$0.20", "כל הגילאים"}
+    assert not any("|" in t["text"] for t in doc["texts"])
+
+
+def test_table_header_row_is_marked() -> None:
+    header = [c for c in to_docling_dict(PAGED)["tables"][0]["data"]["table_cells"]
+              if c["column_header"]]
+    assert {c["text"] for c in header} == {"עלות יומית", "קבוצת גיל"}
+
+
+def test_empty_rows_and_columns_are_dropped() -> None:
+    """Marker renders ruled form boxes as mostly-empty grids; carrying them
+    through bloats every chunk that contains a form."""
+    data = parse_table([
+        "| | | |",
+        "|---|---|---|",
+        "| שם | | 12 |",
+        "| | | |",
+    ])
+    assert data is not None
+    assert data["num_rows"] == 1 and data["num_cols"] == 2
+    assert [c["text"] for c in data["table_cells"]] == ["שם", "12"]
+
+
+def test_a_table_with_no_content_is_dropped() -> None:
+    assert parse_table(["| | |", "|---|---|", "| | |"]) is None
+
+
+def test_prose_and_tables_keep_document_order() -> None:
+    kinds = [k for k, _ in split_blocks("טקסט לפני\n\n| א | ב |\n|---|---|\n| 1 | 2 |\n\nטקסט אחרי")]
+    assert kinds == ["text", "table", "text"]
 
 
 def test_pages_map_lists_every_page() -> None:

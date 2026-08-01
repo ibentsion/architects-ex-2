@@ -1,0 +1,17 @@
+extends: configs/embedder-bge-m3.yaml
+# Apples-to-apples against rag_index/bge-m3 (the production arm): identical
+# per_table chunker, bge-m3 embedder and stanza normalizer — the ONLY
+# difference is that the documents come from Marker/DataLab markdown instead
+# of Docling. Possible because the markdown parser lifts pipe tables into real
+# DoclingDocument tables[], so per_table's TableItem atomicity applies here too.
+index_dir: rag_index/markdown-pertable-bgem3
+parser:
+  impl: markdown
+  params: {}   # no canary knobs: the markdown is pre-parsed, and the RTL
+               # canary reads Docling's output specifically
+generation:
+  model: openai/gpt-oss-120b
+  max_tokens: 4096
+  extra_params:
+    reasoning_effort: low
+    allowed_openai_params: [reasoning_effort]
