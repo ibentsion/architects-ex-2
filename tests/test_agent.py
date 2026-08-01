@@ -91,8 +91,9 @@ class FakeGenerator:
     def __init__(self):
         self.calls = []
 
-    def generate(self, question, retrieved):
+    def generate(self, question, retrieved, system_addendum=None):
         self.calls.append((question, retrieved))
+        self.addenda = getattr(self, "addenda", []) + [system_addendum]
         return GenerationResult(
             text="תשובה",
             citations=[],
@@ -175,6 +176,7 @@ def test_fast_path_no_loop_pools_and_generates_once():
     ]
     assert len(engine.generator.calls) == 1
     assert engine.generator.calls[0][0] == "שאלה מקורית"  # no calc block appended
+    assert engine.generator.addenda == [None]  # no calculation -> untouched prompt
     assert answer.cost_estimate == pytest.approx(0.01 + 0.002)
     assert answer.retrieval_stats == {"gated": {"n_chunks": 4, "n_documents": 4}}
     assert tokens == {"prompt": 10, "completion": 5}
@@ -207,6 +209,7 @@ def test_calculation_loop_executes_tool_and_appends_results(monkeypatch):
     # Tool computed the number (not the LLM); result appended to synthesis question.
     synth_question = engine.generator.calls[0][0]
     assert "351" in synth_question and "תוצאות חישוב" in synth_question
+    assert engine.generator.addenda == [engine_mod.CALCULATION_ADDENDUM]
     # Tool-result message fed back to the orchestrator on the second turn.
     second_turn_messages = calls[1][0]
     assert second_turn_messages[-1]["role"] == "tool"

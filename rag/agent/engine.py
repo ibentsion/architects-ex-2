@@ -85,6 +85,11 @@ TOOLS: list[dict[str, Any]] = [
     },
 ]
 
+#: System-prompt addendum for synthesis when calculator results exist — the
+#: base grounded_cite rules forbid numbers that aren't in the sources, so the
+#: computed values must be explicitly authorized.
+CALCULATION_ADDENDUM = """כלל נוסף: בהודעת המשתמש מופיע בלוק "תוצאות חישוב" — חישובים אריתמטיים שבוצעו על-ידי מחשבון המערכת על נתונים מהשאלה ומקטעי המקור. כאשר חלק מהשאלה דורש חישוב על נתונים שהלקוח עצמו סיפק, תוצאת המחשבון היא התשובה לאותו חלק — השתמש בה כפי שהיא גם אם הסכום אינו מופיע בקטעי המקור, ואל תסרב לענות על חלק זה. אין לציין מקור עבור תוצאת חישוב בבלוק המקורות, ואין לחשב אותה מחדש בעצמך."""
+
 ORCHESTRATOR_SYSTEM = """You orchestrate evidence gathering for a Hebrew insurance-support answer \
 (Harel Insurance corpus). Evidence passages for the customer's question are provided; you have two tools:
 - retrieve(query, category?): fetch more passages when a needed fact is missing.
@@ -220,14 +225,14 @@ class AgentEngine:
             return answer, None
 
         synth_question = question
+        addendum = None
         if calc_results:
             lines = "\n".join(f"- {expr} = {value:g}" for expr, value in calc_results)
-            synth_question = (
-                f"{question}\n\nתוצאות חישוב (חושבו במחשבון — השתמש בהן כפי שהן):\n{lines}"
-            )
+            synth_question = f"{question}\n\nתוצאות חישוב:\n{lines}"
+            addendum = CALCULATION_ADDENDUM
 
         t2 = time.monotonic()
-        result = self.generator.generate(synth_question, retrieved)
+        result = self.generator.generate(synth_question, retrieved, system_addendum=addendum)
         generation_ms = (time.monotonic() - t2) * 1000
         trace.append({"step": "synthesize", "ms": round(generation_ms), "model": self.generator.model})
         for key in total_tokens:

@@ -10,7 +10,15 @@ from typing import Any
 from tf_client import chat as tf_chat
 
 from rag.generate.citations import parse_sources_block, validate_citations
-from rag.generate.prompts import CORRECTIVE_NUDGE, FALLBACK_TEXT, PROMPT_REGISTRY
+from rag.generate.prompts import CORRECTIVE_NUDGE, FALLBACK_TEXT, PROMPT_REGISTRY, SOURCES_HEADER
+
+
+def _is_pure_refusal(text: str) -> bool:
+    """A legitimate refusal contains the fallback sentence and (per prompt
+    rule 4) NO sources block. A multi-part answer may refuse one part while
+    answering and citing another — that is NOT a refusal, and its validated
+    citations must be kept."""
+    return FALLBACK_TEXT in text and SOURCES_HEADER not in text
 from rag.types import Citation, RetrievedChunk
 
 logger = logging.getLogger(__name__)
@@ -154,8 +162,15 @@ class Generator:
         return text, usage, cost, finish_reason
 
     def generate(
-        self, question: str, retrieved: list[RetrievedChunk]
+        self,
+        question: str,
+        retrieved: list[RetrievedChunk],
+        system_addendum: str | None = None,
     ) -> GenerationResult:
+        """``system_addendum`` appends extra rules to the system prompt — used
+        by the agent engine to authorize calculator results, which the base
+        rules would otherwise force the model to refuse as un-sourced
+        numbers."""
         if not retrieved:
             return GenerationResult(
                 text=FALLBACK_TEXT,
@@ -166,6 +181,8 @@ class Generator:
             )
 
         system_prompt = PROMPT_REGISTRY[self.prompt_name]()
+        if system_addendum:
+            system_prompt = f"{system_prompt}\n\n{system_addendum}"
         context = assemble_context(retrieved)
         user_message = f"קטעי מקור:\n\n{context}\n\nשאלה: {question}"
         messages: list[dict[str, str]] = [
@@ -179,7 +196,7 @@ class Generator:
         max_tokens_hit = finish_reason == "length"
         n_retries = 0
 
-        if FALLBACK_TEXT in text:
+        if _is_pure_refusal(text):
             # The model itself declared it can't answer -- a legitimate
             # refusal, not a citation-validation failure. No retry, no
             # fabricated top-3 citations attached.
@@ -204,7 +221,7 @@ class Generator:
             max_tokens_hit = max_tokens_hit or finish_reason == "length"
             total_tokens = {k: total_tokens[k] + usage[k] for k in total_tokens}
             total_cost += cost
-            if FALLBACK_TEXT in text:
+            if _is_pure_refusal(text):
                 return GenerationResult(
                     text=text,
                     citations=[],

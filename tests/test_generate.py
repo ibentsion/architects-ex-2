@@ -233,6 +233,40 @@ def test_generate_happy_path_valid_citation(monkeypatch):
     assert result.cost_estimate == pytest.approx(0.001)
 
 
+def test_generate_partial_refusal_with_sources_keeps_citations(monkeypatch):
+    # Multi-part answers may refuse one part (fallback sentence present) while
+    # citing sources for another — validated citations must be kept.
+    retrieved = [make_retrieved(file=ANCHOR_FILE, page=1)]
+    reply = (
+        f"תקופת ההתיישנות היא שלוש שנים.\n\nלגבי הסכום: {FALLBACK_TEXT}\n\n"
+        f"{_sources_block(ANCHOR_FILE, 1)}"
+    )
+    monkeypatch.setattr(
+        "rag.generate.generator.tf_chat",
+        lambda messages, **kw: (reply, {"prompt": 50, "completion": 20}, 0.001),
+    )
+    result = make_generator().generate("שאלה", retrieved)
+    assert result.citations == [Citation(file=ANCHOR_FILE, page=1)]
+    assert result.n_retries == 0
+
+
+def test_generate_system_addendum_appended_to_system_prompt(monkeypatch):
+    retrieved = [make_retrieved(file=ANCHOR_FILE, page=1)]
+    reply = f"תשובה.\n\n{_sources_block(ANCHOR_FILE, 1)}"
+    seen_messages = []
+    monkeypatch.setattr(
+        "rag.generate.generator.tf_chat",
+        lambda messages, **kw: seen_messages.append(messages)
+        or (reply, {"prompt": 50, "completion": 20}, 0.001),
+    )
+    generator = make_generator()
+    generator.generate("שאלה", retrieved, system_addendum="כלל נוסף: מותר להשתמש בתוצאות חישוב.")
+    assert seen_messages[0][0]["role"] == "system"
+    assert seen_messages[0][0]["content"].endswith("כלל נוסף: מותר להשתמש בתוצאות חישוב.")
+    generator.generate("שאלה", retrieved)  # without addendum — untouched prompt
+    assert "כלל נוסף" not in seen_messages[1][0]["content"]
+
+
 def test_generate_model_refusal_no_retry_no_fallback_citations(monkeypatch):
     retrieved = [make_retrieved(file=ANCHOR_FILE, page=1)]
     calls = []
