@@ -3409,5 +3409,430 @@
         "unanswerable": "not_at_all over BM25 top-20"
       }
     }
+  },
+  {
+    "id": "v2-144-business-hard",
+    "domain": "business",
+    "difficulty": "hard",
+    "kind": "standard",
+    "answerable": true,
+    "question": "העסק שלי שכר עובד ללא דיווח למס הכנסה ולא לבריאות, ובמהלך העבודה הוא נפגע. אני רוצה להגיש תביעה לביטוח, אבל אני יודע שעשיתי טעות. אם הביטוח ישלם לי פיצוי, האם אצטרך להחזיר לו את הכסף, גם אם זה פחות ממה שהייתי צריך לשלם לו לפי חוק?",
+    "ground_truth_answer": "כן, תצטרך להחזיר את הסכום שמשלם הביטוח, אך הביטוח יכסה רק את הסכום שמעל הפיצוי שהיה מתקבל לפי חוק הביטוח הלאומי. כלומר, הביטוח ישלם רק את החלק שמעל הסכום שהיה מחויב לו לפי חוק, ולא יכסה את כל הפיצוי.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "business/files/תנאי-פוליסת-ביטוח-מכלול-לעסק-מהדורת-מרץ-2023-באנגלית.pdf",
+            "page": 68
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "nvidia/Nemotron-3-Ultra-550b-a55b"
+      ],
+      "attempts": 6,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard"
+      }
+    }
+  },
+  {
+    "id": "v2-145-business-hard",
+    "domain": "business",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "יש לי גם פוליסת 'מכלול למשרד' וגם 'מכלול לעסק', ובשתיהן יש פרק חבות מעבידים. אני רוצה להרחיב את הכיסוי בשתיהן: במשרד להוסיף חברה קשורה כמבוטחת נוספת, ובעסק לכסות עובדים של קבלן משנה. מה התנאים בכל פוליסה?",
+    "ground_truth_answer": "ב'מכלול למשרד' ההרחבה למבוטחים נוספים דורשת ציון מפורש בלוח הזמנים והתחייבות כתובה מראש לכלול אותם בחבות המעבידים, כשהם נחשבים מעביד או נושאים באחריות שילוחית. ב'מכלול לעסק' ההרחבה לקבלני משנה ועובדי כוח אדם דורשת ציון מפורש בלוח הזמנים, תחול רק אם אתה נחשב מעבידם, וכפופה לחריגים כגון ביטוח אחר קיים או תביעות ביטוח לאומי.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "business/files/תנאי-פוליסת-ביטוח-מכלול-למשרד-מהדורת-ינואר-2024-באנגלית.pdf",
+            "page": 64
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "business/files/תנאי-פוליסת-ביטוח-מכלול-לעסק-מהדורת-מרץ-2023-באנגלית.pdf",
+            "page": 71
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 2,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v2-155-car-hard",
+    "domain": "car",
+    "difficulty": "hard",
+    "kind": "standard",
+    "answerable": true,
+    "question": "הרכב שלי ניזוק בתאונה ואני צריך לבחור שמאי חוץ. אם במחוז שלי מבוטחים אצלכם 10,000 רכבים בביטוח רכוש, מה המספר המינימלי של שמאי חוץ שהראל חייבת להעמיד ברשימה לאותו מחוז?",
+    "ground_truth_answer": "הכלל הוא לפחות שמאי חוץ אחד לכל 2,000 כלי רכב מבוטחים, ובכל מקרה לא פחות מ-7 שמאים למחוז. עבור 10,000 כלי רכב: 10,000 ÷ 2,000 = 5, אך מכיוון שהמינימום הקבוע הוא 7, הראל חייבת להעמיד לפחות 7 שמאי חוץ ברשימת המחוז.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "car/files/מהדורת-יוני-2023-upgrade-פוליסת-הראל.pdf",
+            "page": 63
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 3,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard"
+      }
+    }
+  },
+  {
+    "id": "v2-166-dental-hard",
+    "domain": "dental",
+    "difficulty": "hard",
+    "kind": "standard",
+    "answerable": true,
+    "question": "אני צריך לעשות טיפול שורש בגלל עששת. האם הביטוח מכסה גם את הטיפול השורש עצמו וגם צילום רנטגן לפני ואחרי הטיפול?",
+    "ground_truth_answer": "כן, טיפול שורש בגלל עששת (קוד 51) מכוסה, ונדרש צילום רנטגן לפני ואחרי הטיפול (מסומן ב-X בעמודה 'X-Ray After Before' לצד קוד D3310000).",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "dental/files/טופס-כיסוי-הוצאות-רפואת-שיניים-באנגלית-dental-claim-form.pdf",
+            "page": 2
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "google/gemma-3-27b-it",
+      "verifier_models": [
+        "Qwen/Qwen3-235B-A22B-Instruct-2507",
+        "nvidia/Nemotron-3-Ultra-550b-a55b"
+      ],
+      "attempts": 2,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard"
+      }
+    }
+  },
+  {
+    "id": "v2-177-diseases-disabilities-medium",
+    "domain": "diseases-disabilities",
+    "difficulty": "medium",
+    "kind": "standard",
+    "answerable": true,
+    "question": "קיבלתי תשלום על מחלת סרטן קלה, ועכשיו אובחנתי עם מחלה אחרת לגמרי לא קשורה – האם אני עדיין זכאי לקבל תשלום גם על המקרה החדש?",
+    "ground_truth_answer": "כן, המבוטח זכאי לתגמולי ביטוח למקרה ביטוח נוסף, בקבוצה אחרת, גם אם כבר קיבל תשלום על מקרה קודם, בתנאי שאין קשר סיבתי בין המקרה החדש למקרה הקודם ואין מדובר באותה מחלה.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "diseases-disabilities/files/תנאי-פוליסת-ביטוח-מחלות-קשות-מענקית-זהב-1.pdf",
+            "page": 16
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "nvidia/Nemotron-3-Ultra-550b-a55b"
+      ],
+      "attempts": 1,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "medium"
+      }
+    }
+  },
+  {
+    "id": "v2-178-diseases-disabilities-hard",
+    "domain": "diseases-disabilities",
+    "difficulty": "hard",
+    "kind": "standard",
+    "answerable": true,
+    "question": "הגדרתי בהרשאת הוראת הקבע תקרת חיוב של 400 ש״ח. החודש חויבתי ב-550 ש״ח ועברו כבר 5 ימי עסקים מאז מועד החיוב — האם אני עדיין יכול לדרוש מהבנק לבטל את החיוב הזה?",
+    "ground_truth_answer": "כן. אומנם ביטול חיוב רגיל דורש הודעה בכתב לבנק לא יאוחר מ-3 ימי עסקים לאחר מועד החיוב, אך סעיף נפרד קובע שרשאים לדרוש ביטול אם החיוב אינו תואם את הסכומים שנקבעו בהרשאה — בלי מגבלת זמן.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "diseases-disabilities/files/062025-הצעה-לביטוח-מענקית-סרטן.pdf",
+            "page": 5
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 3,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard"
+      }
+    }
+  },
+  {
+    "id": "v2-179-diseases-disabilities-hard",
+    "domain": "diseases-disabilities",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "חלילה, גילו לי סרטן לפני שבוע. אני מבין שאני זכאי לפיצוי, אבל אני גם יודע שאם לא אגיש תביעה בזמן, אני מאבד את הזכות. כמה זמן יש לי להגיש תביעה, ומה גובה הפיצוי שאני יכול לקבל?",
+    "ground_truth_answer": "יש לך חמש שנים מיום גילוי המחלה להגיש תביעה לפיצוי. גובה הפיצוי הוא עשרות אלפי שקלים, והוא ניתן בעת גילוי המחלה.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "diseases-disabilities/pages/cancer-compensation.txt",
+            "page": null
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "diseases-disabilities/files/תנאי-פוליסת-ביטוח-מחלות-קשות-מענקית-זהב-1.pdf",
+            "page": 8
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "google/gemma-3-27b-it",
+      "verifier_models": [
+        "Qwen/Qwen3-235B-A22B-Instruct-2507",
+        "nvidia/Nemotron-3-Ultra-550b-a55b"
+      ],
+      "attempts": 14,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v2-188-health-hard",
+    "domain": "health",
+    "difficulty": "hard",
+    "kind": "standard",
+    "answerable": true,
+    "question": "שילמתי 1,200 ₪ עבור שנה שלמה של כתב השירות, ואני רוצה לבטל אותו היום כשנשארו לי עוד 4 חודשים עד סוף התקופה. כמה כסף אקבל בחזרה?",
+    "ground_truth_answer": "תקבל 400 ₪. הביטול מזכה בהחזר החלק היחסי של הפרמיה עבור התקופה שנותרה, ו-4 חודשים מתוך 12 הם שליש מ-1,200 ₪.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "health/files/כתב-שירות-רפואה-אישית-onlineplus.pdf",
+            "page": 6
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 2,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard"
+      }
+    }
+  },
+  {
+    "id": "v2-211-long-term-care-hard",
+    "domain": "long-term-care",
+    "difficulty": "hard",
+    "kind": "standard",
+    "answerable": true,
+    "question": "אני מטפל באמא שלי 14 שעות ביממה והגשתי תצהיר מטפל להראל. אם מצבה ישתפר ואצטרך לעזור לה רק 8 שעות ביום, אני חייב להודיע להם בכתב? ומה בדיוק בתצהיר מחייב אותי לעדכן?",
+    "ground_truth_answer": "כן. בתצהיר אתה מצהיר שאתה מטפל בה \"ברוב שעות היממה (מעל 12 שעות ביממה)\" (סעיף 1), ובסעיף 3 אתה מתחייב לעדכן בכתב את הראל על כל שינוי בעובדות המוצהרות בתצהיר. ירידה מ־14 ל־8 שעות היא שינוי בעובדה המוצהרת (פחות מ־12 שעות), ולכן מחייבת הודעה בכתב להראל.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "long-term-care/files/טופס-הגשת-תביעה-ביטוח-סיעודי.pdf",
+            "page": 9
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 2,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard"
+      }
+    }
+  },
+  {
+    "id": "v2-213-long-term-care-medium",
+    "domain": "long-term-care",
+    "difficulty": "medium",
+    "kind": "unanswerable",
+    "answerable": false,
+    "question": "אני בן 72 וגר בבית עם בנותיי. בגלל שבנתיים אני צריך עזרה עם רחצה ולבישת בגדים, האם אני זכאי לקבל את גמלת הסיעוד גם אם אחת הבנות שלי עוזרת לי ללא תשלום?",
+    "ground_truth_answer": "המסמכים הזמינים לא מציינים אם זכאות לגמלת סיעוד תלויה בתשלום עבור שירותי הסיעוד או האם שירותים unpaid ניתנים על ידי בני משפחה משפיעים על הזכאות. יש לפנות למחלקת התביעות של הראל לברור את הנושא.",
+    "ground_truth_sources": [],
+    "provenance": {
+      "generator_model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "nvidia/Nemotron-3-Ultra-550b-a55b"
+      ],
+      "attempts": 1,
+      "gates": {
+        "form": "pass",
+        "topicality": "pass",
+        "unanswerable": "not_at_all over BM25 top-20"
+      }
+    }
+  },
+  {
+    "id": "v2-221-loss-of-working-ability-hard",
+    "domain": "loss-of-working-ability",
+    "difficulty": "hard",
+    "kind": "standard",
+    "answerable": true,
+    "question": "הסוכן אמר לי שהוספת כיסוי הנכויות החדש היא לגמרי לבחירתי ולא תפגע בפוליסה הקיימת, אבל באותו משפט אמר שאם יהיו החרגות בכיסוי החדש אז שאר הכיסויים שביקשתי לא יופקו עד שאאשר בכתב. איך זה מסתדר ביחד?",
+    "ground_truth_answer": "אין סתירה: סעיף 3 קובע שהוספת כיסוי נוסף, הרחבה או כתב שירות נתונה לבחירתך ואינה פוגעת ביתר תנאי הפוליסה. סעיף 9 קובע שאם לא ניתן לצרף אותך לכיסוי מסוים או נקבעו לו תנאי חיתום (החרגות), יתר הכיסויים המבוקשים בהצעה לא יופקו עד לקבלת אישורך בכתב. הזכות לוותר על הכיסוי החדש עומדת לך (סעיף 3), אך אם בחרת בו ויש החרגות, שאר הכיסויים בהצעה ממתינים לאישורך (סעיף 9).",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "loss-of-working-ability/files/טופס-הצטרפות-לביטוח-חיים-7-שאלות-בהצהרת-הבריאות.pdf",
+            "page": 6
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 2,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard"
+      }
+    }
+  },
+  {
+    "id": "v2-222-loss-of-working-ability-hard",
+    "domain": "loss-of-working-ability",
+    "difficulty": "hard",
+    "kind": "standard",
+    "answerable": true,
+    "question": "אני עובד כשליח על אופניים חשמליים, ואני מבוטח אצלכם. אם אהיה מעורב בתאונה תוך כדי עבודה, האם הביטוח יכסה אותי? אני בן 28.",
+    "ground_truth_answer": "לא, לא יהיה כיסוי במקרה שהנהיגה בכלי התחבורה הינה מתוקף עיסוקו של המבוטח. גם אם גילך מעל 21, חריג זה שולל את הכיסוי במקרה של תאונה בעת עבודה כשליח.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "loss-of-working-ability/files/טופס-הצטרפות-לביטוח-חיים-17-שאלות-בהצהרת-הבריאות.pdf",
+            "page": 3
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "google/gemma-3-27b-it",
+      "verifier_models": [
+        "Qwen/Qwen3-235B-A22B-Instruct-2507",
+        "nvidia/Nemotron-3-Ultra-550b-a55b"
+      ],
+      "attempts": 2,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard"
+      }
+    }
+  },
+  {
+    "id": "v2-254-travel-medium",
+    "domain": "travel",
+    "difficulty": "medium",
+    "kind": "standard",
+    "answerable": true,
+    "question": "קרה מצב שאיבדתי קשר עם בעלי כשהוא בטיול בחו״ל. תוך כמה זמן הראל מתחילים לחפש אותו באמת? יש תקופת המתנה לפני שמפעילים חיפוש?",
+    "ground_truth_answer": "אם לא נמצא המבוטח תוך 14 ימי עסקים מיום ניתוק הקשר, הראל פותחים בקמפיין חיפוש רשמי. הם רשאים להקדים ולהתחיל בחיפושים קודם לכן לפי שיקול דעתם הבלעדי.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-ערבית-first-class.pdf",
+            "page": 16
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 2,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "medium"
+      }
+    }
   }
 ]
