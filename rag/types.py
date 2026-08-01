@@ -7,7 +7,7 @@ Stage-3 FastAPI wiring is a trivial adapter. ``Answer`` maps 1:1 onto
 """
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -138,8 +138,13 @@ class Answer(BaseModel):
     retrieval_ms: float | None = Field(None, description="Wall time spent in Retriever.retrieve() (dense+sparse+rerank+gate)")
     generation_ms: float | None = Field(None, description="Wall time spent in Generator.generate() (0.0 on gate-fail, no LLM call)")
     classification: Classification | None = Field(
-        None, description="Query classification (populated only on --route answers)"
+        None, description="Query classification (populated by the agent engine)"
     )
     classification_ms: float | None = Field(
-        None, description="Wall time of the routing classification LLM call (--route only)"
+        None, description="Wall time of the routing classification LLM call (agent engine only)"
+    )
+    trace: list[dict[str, Any]] | None = Field(
+        None,
+        description="Agent-engine step records (classify/retrieve/orchestrator/calculate/"
+        "synthesize with args, summaries, ms) — eval and debugging",
     )

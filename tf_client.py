@@ -20,7 +20,8 @@ BASE_URL = os.environ.get("NEBIUS_BASE_URL", "https://api.tokenfactory.nebius.co
 EST_PRICE = (0.5, 2.0)
 
 
-def chat(messages, model, max_tokens=1024, temperature=0.2, quiet=False, return_usage=False, **kw):
+def chat(messages, model, max_tokens=1024, temperature=0.2, quiet=False, return_usage=False,
+         return_message=False, **kw):
     """OpenAI-compatible chat completion via litellm; prints a per-call cost estimate.
 
     return_usage=True additionally returns
@@ -29,6 +30,11 @@ def chat(messages, model, max_tokens=1024, temperature=0.2, quiet=False, return_
     rag/generate's Answer.cost_estimate) or to detect max_tokens truncation
     (finish_reason == "length"). Default (False) is unchanged for existing
     callers (evalharness/judge.py, etc.).
+
+    return_message=True returns (message, usage_dict, cost) with the FULL
+    litellm message object instead of just its content — needed by callers
+    that use native tool calling (message.tool_calls; pass tools=[...] via
+    **kw). Takes precedence over return_usage.
     """
     key = os.environ.get("NEBIUS_API_KEY") or sys.exit("NEBIUS_API_KEY not set")
     # openai/ prefix: TF model ids contain "/" which litellm would misread as
@@ -43,6 +49,12 @@ def chat(messages, model, max_tokens=1024, temperature=0.2, quiet=False, return_
               f"~${cost:.4f}", file=sys.stderr)
     choice = resp.choices[0]
     content = choice.message.content
+    if return_message:
+        return choice.message, {
+            "prompt": u.prompt_tokens,
+            "completion": u.completion_tokens,
+            "finish_reason": choice.finish_reason,
+        }, cost
     if return_usage:
         return content, {
             "prompt": u.prompt_tokens,

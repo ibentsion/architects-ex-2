@@ -40,7 +40,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from rag.classify import QueryClassifier
+from rag.classify import build_classifier
 from rag.config import ConfigError, RagConfig, load_config
 from rag.generate.generator import Generator
 from rag.generate.prompts import FALLBACK_TEXT, SOURCES_HEADER
@@ -59,14 +59,6 @@ def _confidence(retrieved: list[RetrievedChunk]) -> float:
     the CrossEncoder's forced activation, rag/retrieve/rerank.py)."""
     scores = [r.rerank_score for r in retrieved if r.rerank_score is not None]
     return max(scores) if scores else 0.0
-
-
-def build_classifier(config: RagConfig, model: str | None = None) -> QueryClassifier:
-    """Classifier runs on the fast orchestrator model (harness block);
-    its extra_params (reasoning knobs) apply only when the model is unchanged."""
-    chosen = model or config.harness.orchestrator_model
-    extra = config.harness.orchestrator_extra_params if chosen == config.harness.orchestrator_model else {}
-    return QueryClassifier(chosen, extra_params=extra)
 
 
 class QueryEngine:

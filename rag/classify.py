@@ -81,6 +81,14 @@ def _fallback(question: str, cost: float) -> Classification:
     )
 
 
+def build_classifier(config: Any, model: str | None = None) -> "QueryClassifier":
+    """Classifier runs on the fast orchestrator model (harness config block);
+    its extra_params (reasoning knobs) apply only when the model is unchanged."""
+    chosen = model or config.harness.orchestrator_model
+    extra = config.harness.orchestrator_extra_params if chosen == config.harness.orchestrator_model else {}
+    return QueryClassifier(chosen, extra_params=extra)
+
+
 class QueryClassifier:
     """One-shot tf_client classifier; see module docstring for the contract."""
 

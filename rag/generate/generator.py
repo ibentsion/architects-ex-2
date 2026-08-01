@@ -71,6 +71,20 @@ def _zero_tokens() -> dict[str, int]:
     return {"prompt": 0, "completion": 0}
 
 
+def build_generator(config: Any) -> "Generator":
+    """Construct a Generator from a validated RagConfig's generation block
+    (shared by the query CLI's QueryEngine and the agent engine)."""
+    generation = config.generation
+    return Generator(
+        model=generation.model,
+        prompt=generation.prompt,
+        max_tokens=generation.max_tokens,
+        temperature=generation.temperature,
+        retry_on_citation_failure=generation.retry_on_citation_failure,
+        extra_params=generation.extra_params,
+    )
+
+
 class Generator:
     """``generate(question, retrieved)`` — context assembly, tf_client.chat
     call, citation validation with one corrective retry

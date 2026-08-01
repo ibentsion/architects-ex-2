@@ -15,6 +15,7 @@ fall back to the config-derived instance defaults, so an external harness
 from __future__ import annotations
 
 import logging
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -73,7 +74,14 @@ class Retriever:
         self.top_n = top_n
         #: Per-stage {n_chunks, n_documents} from the most recent retrieve()
         #: call -- read by the query CLI to log/attach filtering-impact stats.
+        #: SERIAL-use convenience only; concurrent callers must use
+        #: retrieve_with_stats(), which shares no mutable state.
         self.last_stats: dict[str, dict[str, int]] = {}
+        #: stanza pipelines are not thread-safe -- serialize the sparse stage
+        #: (normalizer.tokens + bm25 search) under concurrent retrieval.
+        #: Dense (qdrant-local reads) and CrossEncoder inference are safe for
+        #: concurrent read-only use.
+        self._sparse_lock = threading.Lock()
 
     # ------------------------------------------------------------------ #
     # Public stages — per-call overrides fall back to instance defaults.
@@ -92,9 +100,10 @@ class Retriever:
         """With a category filter, fetch 3x and post-filter by the chunk_id's
         category prefix (rag_plan.md §6 stage 2 — small corpus, cheap)."""
         top_k = self.sparse_top_k if top_k is None else top_k
-        query_tokens = self.normalizer.tokens(question)
         fetch_k = top_k * 3 if category else top_k
-        hits = self.sparse.search(query_tokens, top_k=fetch_k)
+        with self._sparse_lock:
+            query_tokens = self.normalizer.tokens(question)
+            hits = self.sparse.search(query_tokens, top_k=fetch_k)
         if category is not None:
             hits = [(cid, score) for cid, score in hits if _category_of(cid) == category]
         return hits[:top_k]
@@ -111,6 +120,27 @@ class Retriever:
         """Stages 2-3: dual search + RRF fusion, hydrated but NOT reranked.
         Populates ``last_stats`` for dense/sparse/fused (``retrieve`` adds the
         gated stage)."""
+        candidates, stats = self._fuse_with_stats(
+            question,
+            dense_top_k=dense_top_k,
+            sparse_top_k=sparse_top_k,
+            rrf_k=rrf_k,
+            category=category,
+        )
+        self.last_stats = stats
+        return candidates
+
+    def _fuse_with_stats(
+        self,
+        question: str,
+        *,
+        dense_top_k: int | None = None,
+        sparse_top_k: int | None = None,
+        rrf_k: int | None = None,
+        category: str | None = None,
+    ) -> tuple[list[RetrievedChunk], dict[str, dict[str, int]]]:
+        """Pure fuse core: returns (candidates, stats) and mutates no shared
+        state, so concurrent per-sub-question retrievals stay correct."""
         dense_top_k = self.dense_top_k if dense_top_k is None else dense_top_k
         sparse_top_k = self.sparse_top_k if sparse_top_k is None else sparse_top_k
         rrf_k = self.rrf_k if rrf_k is None else rrf_k
@@ -124,8 +154,7 @@ class Retriever:
         }
         if not dense_hits and not sparse_hits:
             stats["fused"] = _stage_counts([])
-            self.last_stats = stats
-            return []
+            return [], stats
         dense_scores = {chunk.chunk_id: score for chunk, score in dense_hits}
         sparse_scores = dict(sparse_hits)
         chunks_by_id: dict[str, Chunk] = {c.chunk_id: c for c, _ in dense_hits}
@@ -139,7 +168,6 @@ class Retriever:
             k=rrf_k,
         )[: max(dense_top_k, sparse_top_k)]
         stats["fused"] = _stage_counts([chunk_id for chunk_id, _ in fused])
-        self.last_stats = stats
 
         # Hydrate sparse-only survivors from the dense payload store.
         missing = [cid for cid, _ in fused if cid not in chunks_by_id]
@@ -159,7 +187,7 @@ class Retriever:
                     rrf_score=rrf_score,
                 )
             )
-        return candidates
+        return candidates, stats
 
     def rerank_candidates(
         self,
@@ -187,27 +215,51 @@ class Retriever:
         gate_threshold: float | None = None,
         top_n: int | None = None,
     ) -> list[RetrievedChunk]:
-        candidates = self.fuse(
+        gated, stats = self.retrieve_with_stats(
+            question,
+            category=category,
+            dense_top_k=dense_top_k,
+            sparse_top_k=sparse_top_k,
+            rrf_k=rrf_k,
+            gate_threshold=gate_threshold,
+            top_n=top_n,
+        )
+        self.last_stats = stats
+        return gated
+
+    def retrieve_with_stats(
+        self,
+        question: str,
+        category: str | None = None,
+        *,
+        dense_top_k: int | None = None,
+        sparse_top_k: int | None = None,
+        rrf_k: int | None = None,
+        gate_threshold: float | None = None,
+        top_n: int | None = None,
+    ) -> tuple[list[RetrievedChunk], dict[str, dict[str, int]]]:
+        """Full-pipeline core returning (gated, stats) without touching
+        ``last_stats`` — safe for concurrent per-sub-question retrieval
+        (rag/agent). The sparse stage is internally lock-serialized."""
+        candidates, stats = self._fuse_with_stats(
             question,
             dense_top_k=dense_top_k,
             sparse_top_k=sparse_top_k,
             rrf_k=rrf_k,
             category=category,
         )
-        stats = self.last_stats
         if not candidates:
             stats["gated"] = _stage_counts([])
             self._log_stats(stats)
-            return []
+            return [], stats
         gated = self.rerank_candidates(
             question, candidates, gate_threshold=gate_threshold, top_n=top_n
         )
         stats["gated"] = _stage_counts([c.chunk.chunk_id for c in gated])
         self._log_stats(stats)
-        return gated
+        return gated, stats
 
     def _log_stats(self, stats: dict[str, dict[str, int]]) -> None:
-        self.last_stats = stats
         logger.info(
             "retrieval stage counts: dense=%s sparse=%s fused=%s gated=%s",
             stats["dense"],
