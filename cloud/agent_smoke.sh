@@ -5,11 +5,14 @@
 # DeepSeek synthesis against the real bge-m3 index.
 set -euo pipefail
 
+OUT=$(mktemp)
 python -m rag.cli.query --config configs/embedder-bge-m3.yaml --engine agent --json \
     "אם הנזק לתכולת הדירה הוערך ב-10,000 שקל וההשתתפות העצמית היא 1,500 שקל, איזה סכום אקבל בפועל? ומה תקופת ההתיישנות להגשת תביעה?" \
-    | python - <<'EOF'
+    > "$OUT"
+
+python - "$OUT" <<'EOF'
 import json, sys
-d = json.load(sys.stdin)
+d = json.load(open(sys.argv[1]))
 steps = [t["step"] for t in d.get("trace") or []]
 print("ANSWER:", d["text"][:300].replace("\n", " "))
 print("STEPS:", steps)
