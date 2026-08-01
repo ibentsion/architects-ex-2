@@ -109,3 +109,25 @@ def test_legacy_invocation_still_dispatches_to_answer_flow(config_path, capsys):
     # (before any config/index loading).
     assert query_cli.main(["--config", config_path]) == query_cli.EXIT_CONFIG_ERROR
     assert "Provide a question" in capsys.readouterr().err
+
+
+def test_engine_flag_selects_agent_engine(monkeypatch, config_path, capsys):
+    from rag.types import Answer
+
+    constructed = []
+
+    class FakeAgentEngine:
+        def __init__(self, config):
+            constructed.append(config)
+
+        def answer(self, question, category=None):
+            return Answer(text=f"agent:{question}", citations=[])
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(query_cli, "load_config", lambda path: {"path": path})
+    monkeypatch.setattr(query_cli, "AgentEngine", FakeAgentEngine)
+    assert query_cli.main(["--config", config_path, "--engine", "agent", "שאלה"]) == query_cli.EXIT_OK
+    assert constructed  # AgentEngine (not QueryEngine) was built
+    assert "agent:שאלה" in capsys.readouterr().out

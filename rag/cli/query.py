@@ -7,9 +7,13 @@
         --questions reference_questions.json --out answers.jsonl
 
 Flags: --config (required), --category, --interactive/-i, --show-chunks,
---json, --questions/--out (batch mode), --route (classify the query into
-categories/sub-questions, retrieve per sub-question, answer once over the
-pooled context; mutually exclusive with --category).
+--json, --questions/--out (batch mode), --engine {rag,agent}. ``rag`` (the
+default) is the classic single-pass pipeline; ``agent`` answers via the
+agentic harness (rag/agent: classify -> concurrent per-sub-question
+retrieval -> tool-calling loop for calculation/dependent queries -> one
+synthesized answer; mutually exclusive with --category — the agent predicts
+its own filters). All modes (single/interactive/batch) work with either
+engine.
 
 Retrieval-stage tools (no generation) — for wiring an external harness:
 
@@ -40,9 +44,10 @@ import time
 from pathlib import Path
 from typing import Any
 
+from rag.agent.engine import AgentEngine
 from rag.classify import build_classifier
 from rag.config import ConfigError, RagConfig, load_config
-from rag.generate.generator import Generator
+from rag.generate.generator import build_generator
 from rag.generate.prompts import FALLBACK_TEXT, SOURCES_HEADER
 from rag.index.manifest import ManifestError, ManifestMismatchError
 from rag.retrieve.retriever import Retriever, load_retriever
@@ -65,27 +70,16 @@ class QueryEngine:
     """Stage 0 load & validate (manifest compatibility, lazy/warm component
     loads), then stateless ``answer(question, category=None)`` per query
     (rag_plan.md §6). Each query is independent -- no conversation memory.
+    For classification-driven agentic answering use rag/agent's AgentEngine
+    (same contract, ``--engine agent``)."""
 
-    ``route=True`` answers via classification instead of a caller-supplied
-    category: classify -> retrieve per sub-question -> one pooled generation
-    (see ``_answer_routed``)."""
-
-    def __init__(self, config: RagConfig, *, route: bool = False) -> None:
+    def __init__(self, config: RagConfig) -> None:
         self.config = config
-        self.route = route
-        self.classifier: QueryClassifier | None = build_classifier(config) if route else None
         # §6 stage 0: verify_manifest (inside load_retriever) raises a clear
         # "re-ingest with this config" error on embedder/chunker/normalizer
         # mismatch. Model loads themselves are lazy (warm after 1st query).
         self.retriever: Retriever = load_retriever(config)
-        self.generator = Generator(
-            model=config.generation.model,
-            prompt=config.generation.prompt,
-            max_tokens=config.generation.max_tokens,
-            temperature=config.generation.temperature,
-            retry_on_citation_failure=config.generation.retry_on_citation_failure,
-            extra_params=config.generation.extra_params,
-        )
+        self.generator = build_generator(config)
 
     def answer(self, question: str, category: str | None = None) -> Answer:
         return self._answer(question, category)[0]
@@ -96,8 +90,6 @@ class QueryEngine:
         """Returns (Answer, tokens) -- tokens is None on the gate-fail path
         (no LLM call) and exposed only for the evalharness-compatible batch
         writer; ``answer()`` is the public single-value API."""
-        if self.route:
-            return self._answer_routed(question)
         t0 = time.monotonic()
         retrieved = self.retriever.retrieve(question, category=category)
         retrieval_ms = (time.monotonic() - t0) * 1000
@@ -135,78 +127,6 @@ class QueryEngine:
             generation_ms=generation_ms,
             max_tokens_hit=result.max_tokens_hit,
             n_retries=result.n_retries,
-        )
-        return answer, result.tokens
-
-    def _answer_routed(self, question: str) -> tuple[Answer, dict[str, int] | None]:
-        """--route flow: classify -> retrieve per sub-question (category
-        filter only when a sub-question maps to exactly ONE category) ->
-        pool/dedupe the gated chunks by chunk_id (keep max rerank score) ->
-        ONE generation call with the ORIGINAL question over the pooled
-        context. ``retrieval_stats`` is the element-wise sum over the
-        sub-question retrievals (documents may double-count across them)."""
-        assert self.classifier is not None
-        t0 = time.monotonic()
-        classification = self.classifier.classify(question)
-        classification_ms = (time.monotonic() - t0) * 1000
-
-        t1 = time.monotonic()
-        pooled: dict[str, RetrievedChunk] = {}
-        stats_sum: dict[str, dict[str, int]] = {}
-        for sub in classification.sub_questions:
-            category = sub.categories[0] if len(sub.categories) == 1 else None
-            for r in self.retriever.retrieve(sub.question, category=category):
-                prev = pooled.get(r.chunk.chunk_id)
-                if prev is None or (r.rerank_score or 0.0) > (prev.rerank_score or 0.0):
-                    pooled[r.chunk.chunk_id] = r
-            for stage, counts in (self.retriever.last_stats or {}).items():
-                acc = stats_sum.setdefault(stage, {"n_chunks": 0, "n_documents": 0})
-                for key, value in counts.items():
-                    acc[key] += value
-        retrieved = sorted(
-            pooled.values(), key=lambda r: (-(r.rerank_score or 0.0), r.chunk.chunk_id)
-        )
-        retrieval_ms = (time.monotonic() - t1) * 1000
-
-        routed_category = (
-            classification.categories[0] if len(classification.categories) == 1 else None
-        )
-        if not retrieved:
-            answer = Answer(
-                text=FALLBACK_TEXT,
-                citations=[],
-                category=routed_category,
-                confidence=0.0,
-                latency_ms=classification_ms + retrieval_ms,
-                cost_estimate=classification.cost_estimate,
-                retrieved=[],
-                retrieval_stats=stats_sum or None,
-                retrieval_ms=retrieval_ms,
-                generation_ms=0.0,
-                classification=classification,
-                classification_ms=classification_ms,
-            )
-            return answer, None
-
-        t2 = time.monotonic()
-        result = self.generator.generate(question, retrieved)
-        generation_ms = (time.monotonic() - t2) * 1000
-        answer = Answer(
-            text=result.text,
-            citations=result.citations,
-            category=routed_category,
-            confidence=_confidence(retrieved),
-            latency_ms=classification_ms + retrieval_ms + generation_ms,
-            cost_estimate=result.cost_estimate + classification.cost_estimate,
-            citation_fallback=result.citation_fallback,
-            retrieved=retrieved,
-            retrieval_stats=stats_sum or None,
-            retrieval_ms=retrieval_ms,
-            generation_ms=generation_ms,
-            max_tokens_hit=result.max_tokens_hit,
-            n_retries=result.n_retries,
-            classification=classification,
-            classification_ms=classification_ms,
         )
         return answer, result.tokens
 
@@ -481,9 +401,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--config", required=True, help="YAML config path (must match the ingested index)")
     parser.add_argument("--category", help="restrict retrieval to one category")
     parser.add_argument(
-        "--route",
-        action="store_true",
-        help="classify the query (categories + sub-questions) and answer over pooled per-sub-question retrieval",
+        "--engine",
+        choices=("rag", "agent"),
+        default="rag",
+        help="'rag' = classic single-pass pipeline; 'agent' = agentic harness "
+        "(classify, concurrent sub-question retrieval, tool loop for calculations/multi-hop)",
     )
     parser.add_argument("--interactive", "-i", action="store_true", help="REPL mode")
     parser.add_argument("--show-chunks", action="store_true", help="print retrieved chunks + rerank scores")
@@ -505,13 +427,13 @@ def main(argv: list[str] | None = None) -> int:
     if not args.interactive and not args.questions and not args.question:
         print("Provide a question, --interactive/-i, or --questions/--out for batch mode", file=sys.stderr)
         return EXIT_CONFIG_ERROR
-    if args.route and args.category:
-        print("--route and --category are mutually exclusive (routing predicts the categories)", file=sys.stderr)
+    if args.engine == "agent" and args.category:
+        print("--engine agent and --category are mutually exclusive (the agent predicts its own filters)", file=sys.stderr)
         return EXIT_CONFIG_ERROR
 
     try:
         config = load_config(args.config)
-        engine = QueryEngine(config, route=args.route)
+        engine = AgentEngine(config) if args.engine == "agent" else QueryEngine(config)
     except (ConfigError, ManifestError, ManifestMismatchError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return EXIT_CONFIG_ERROR
