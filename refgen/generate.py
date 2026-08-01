@@ -82,6 +82,10 @@ def _generate_candidate(kind: str, difficulty: str, pages: list, examples: list,
         raise verify.Rejected("generation", result["error"])
     if "skip" in result:
         raise Skipped(result["skip"])
+    if kind != "unanswerable" and prompts.is_non_answer(result["ground_truth_answer"]):
+        # A disguised skip: the model was handed a page too thin to support a
+        # question and wrote "the page does not state X" rather than declining.
+        raise Skipped(f"non-answer ground truth: {result['ground_truth_answer'][:80]}")
     return result
 
 

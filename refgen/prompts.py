@@ -49,6 +49,8 @@ The ground-truth answer must be:
 - Carrying the exact number, limit, condition or exception the page states — not a vague paraphrase.
 - Supported entirely by the page(s) shown. Never add knowledge from outside them."""
 
+_NO_INVENTED_GAP = """The ground-truth answer must ANSWER the question from the page. Never write an answer that says the page does not state something ("הדף אינו מציין", "לא מצוין", "אין מידע על כך") — an answer like that is not a question, it is a page you should have skipped. If the page cannot support a good question, return the skip object instead."""
+
 _OUTPUT = """Return ONLY a JSON object (no markdown fences, no prose):
 {
   "question": "<the customer's question, in Hebrew>",
@@ -79,6 +81,8 @@ SYSTEM_STANDARD = """You write evaluation questions for a Hebrew insurance custo
 
 %(difficulty_rule)s
 
+""" + _NO_INVENTED_GAP + """
+
 """ + _OUTPUT
 
 
@@ -93,6 +97,8 @@ The two-page requirement is tested mechanically, so it must genuinely hold:
 - The ground-truth answer must state both halves explicitly.
 
 %(difficulty_rule)s
+
+""" + _NO_INVENTED_GAP + """
 
 """ + _OUTPUT
 
@@ -245,6 +251,26 @@ def parse_generation(raw: dict) -> dict:
         raise ValueError(f"ground_truth_answer too short: {answer!r}")
     return {"question": question, "ground_truth_answer": answer,
             "rationale": str(raw.get("rationale", "")).strip()}
+
+
+#: Ways a model says "the page doesn't cover this". Valid for an unanswerable
+#: item, and a disguised skip for every other kind.
+_NON_ANSWER_MARKERS = (
+    "אינו מציין", "אינה מציינת", "אינו מפרט", "לא מצוין", "לא מצויין",
+    "אין מידע", "לא מופיע", "אינו כולל מידע", "לא נמסר מידע", "הדף אינו",
+    "המסמך אינו", "does not state", "does not specify", "no information",
+)
+
+
+def is_non_answer(text: str) -> bool:
+    """Does this 'ground truth' decline to answer rather than answer?
+
+    The generators reach for this when handed a page too thin to support a
+    question — they write "the page does not state the co-payment" instead of
+    skipping. It is not a ground truth, and the derivability judge rightly
+    rules `not_at_all` on it, so catching it here saves the gate calls.
+    """
+    return any(marker in text for marker in _NON_ANSWER_MARKERS)
 
 
 def parse_verdict(raw: dict) -> dict:

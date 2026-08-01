@@ -49,6 +49,56 @@ class Page:
         return bool(_QUANTITY.search(self.text))
 
 
+#: Token n-gram used to detect text repeated across a category's scraped pages.
+_BOILERPLATE_NGRAM = 6
+#: A surviving run shorter than this is a fragment, not a sentence.
+_MIN_RUN_TOKENS = 8
+
+
+def strip_boilerplate(texts: list[str], min_pages: int = 3,
+                      ratio: float = 0.3) -> list[str]:
+    """Remove the navigation and footer chrome shared by scraped `.txt` pages.
+
+    The corpus's web pages carry the site's menus and footer on every page —
+    the median dental page is 80% boilerplate. Left in, it passes the length
+    filter on chrome alone, and the generator is asked to write a question
+    about a navigation menu. Any token covered by an n-gram that recurs across
+    the category's pages is dropped, and only runs long enough to be a sentence
+    are kept.
+
+    Needs several pages to have any signal; with fewer, the texts pass through.
+    """
+    if len(texts) < min_pages:
+        return list(texts)
+    tokenized = [text.split() for text in texts]
+    frequency: dict[str, int] = {}
+    for words in tokenized:
+        for gram in {" ".join(words[i:i + _BOILERPLATE_NGRAM])
+                     for i in range(max(0, len(words) - _BOILERPLATE_NGRAM + 1))}:
+            frequency[gram] = frequency.get(gram, 0) + 1
+    threshold = max(min_pages, len(texts) * ratio)
+
+    cleaned = []
+    for words in tokenized:
+        keep = [True] * len(words)
+        for i in range(max(0, len(words) - _BOILERPLATE_NGRAM + 1)):
+            if frequency.get(" ".join(words[i:i + _BOILERPLATE_NGRAM]), 0) >= threshold:
+                for j in range(i, min(i + _BOILERPLATE_NGRAM, len(words))):
+                    keep[j] = False
+        runs, current = [], []
+        for word, keeping in zip(words, keep):
+            if keeping:
+                current.append(word)
+            else:
+                if len(current) >= _MIN_RUN_TOKENS:
+                    runs.append(" ".join(current))
+                current = []
+        if len(current) >= _MIN_RUN_TOKENS:
+            runs.append(" ".join(current))
+        cleaned.append("\n\n".join(runs))
+    return cleaned
+
+
 def order_agreement(text: str, oracle: str) -> float:
     """Fraction of a page's multi-word Hebrew lines whose word order matches
     the PDF's own text layer.
@@ -95,13 +145,18 @@ def build_inventory(category: str, store, min_chars: int = MIN_PAGE_CHARS,
     """
     sources = store._load_sources()
     pages: list[Page] = []
+
+    # Scraped pages first: their shared chrome can only be found by comparing
+    # them to each other, and the length filter applies to what survives.
+    txt_paths = [rel for rel, s in sorted(sources.items())
+                 if s.category == category and s.kind == "txt"]
+    txt_texts = [store.resolve(rel, None)[0] or "" for rel in txt_paths]
+    for rel_path, text in zip(txt_paths, strip_boilerplate(txt_texts)):
+        if len(text) >= min_chars:
+            pages.append(Page(rel_path, None, text))
+
     for rel_path, source in sorted(sources.items()):
-        if source.category != category:
-            continue
-        if source.kind == "txt":
-            text, _ = store.resolve(rel_path, None)
-            if text and len(text) >= min_chars:
-                pages.append(Page(rel_path, None, text))
+        if source.category != category or source.kind == "txt":
             continue
         if rel_path not in store._pages:
             store._extract(rel_path)

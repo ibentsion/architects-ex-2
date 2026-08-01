@@ -291,6 +291,29 @@ def test_rejection_reason_is_fed_back_to_the_generator(llm):
     assert "voice" in retries[0]["last"], "the reason must be the gate's own"
 
 
+def test_a_non_answer_ground_truth_is_treated_as_a_skip(llm):
+    """Handed a thin page, generators write "the page does not state X" rather
+    than declining. That is not a ground truth — and arguing with it wastes
+    three gate calls to be told what we already know."""
+    llm["generation"] = {"question": QUESTION,
+                         "ground_truth_answer": "הדף אינו מציין את גובה ההשתתפות העצמית.",
+                         "rationale": "r"}
+    outcome = build()
+    assert outcome.item is None
+    assert [a.gate for a in outcome.attempts] == ["skip"] * generate.MAX_PAGES
+    assert not any("citation_support" in c["system"] for c in llm["calls"]), \
+        "a disguised skip must not reach the derivability judge"
+
+
+def test_an_unanswerable_item_may_say_the_corpus_lacks_it(llm):
+    """The same wording is the whole point for an unanswerable item."""
+    llm["support"] = {n: "not_at_all" for n in range(1, 30)}
+    llm["generation"] = {"question": QUESTION,
+                         "ground_truth_answer": "המסמכים אינם מציינים מידע זה; יש לפנות לסוכן.",
+                         "rationale": "r"}
+    assert build(kind="unanswerable", difficulty="easy").item is not None
+
+
 def test_a_skipped_page_is_not_argued_with(llm):
     """A model that declines a page should get a different page, not two more
     attempts at the same one."""
