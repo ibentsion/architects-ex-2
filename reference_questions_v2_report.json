@@ -1,0 +1,2743 @@
+{
+  "generated_at": "2026-08-01T08:25:02.788903+00:00",
+  "seed": 20260731,
+  "n_items": 108,
+  "by_kind": {
+    "standard": 91,
+    "unanswerable": 11,
+    "multi_source": 6
+  },
+  "by_generator": {
+    "google/gemma-3-27b-it": 34,
+    "Qwen/Qwen3-235B-A22B-Instruct-2507": 33,
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 41
+  },
+  "by_difficulty": {
+    "easy": 40,
+    "medium": 34,
+    "hard": 34
+  },
+  "rejections_by_gate": {
+    "skip": 73,
+    "difficulty": 114,
+    "needs_both": 66,
+    "derivable": 49,
+    "form": 16,
+    "unanswerable": 2,
+    "generation": 4
+  },
+  "rejections": [
+    {
+      "kind": "standard",
+      "difficulty": "easy",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page contains administrative and privacy-related information about data processing and access to a personal account, but does not include any specific coverage terms, conditions, or benefits that ",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks whether a described earthquake damage scenario triggers the additional coverage, and the answer directly restates the single policy condition (damage ≥70% per engineer) without arithmetic or combining clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "קרה רעש גדול בבית אחרי רעידת אדמה, ועכשיו יש סדקים גדולים בקיר החיצוני. קראתי לאינженיר והוא אמר שהנזק הוא מעל 70% מהערך של הדירה. אני מוגבל בפוליסת דירה רגילה, אבל יש לי גם כיסוי תוספת על רעידה. האם אני זכאי לפיצוי גם מהכיסוי הנוסף?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single coverage condition from the source page without computation or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "התרסקות א파트mnt שלי נגרמה בגלל רעש, והsurveyor קבע שנזק של 75% מהערך. אני שולח את הדוח לביטוח – הם ישלמו לפי הסכום הנוסף שרשום בתעודת הביטוח?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single threshold condition (70% minimum damage) from the source page without any arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "קרה רעש גדול בבניין שלי בגלל רעידת אדמה, והאינженיאר כתב שהנזק הוא ב-65% מהדירה. האם אני זכאי לפיצוי לפי הפוליסה על הנזק הזה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly states a single available option (reduced deductible at higher rate) from the source page without requiring arithmetic or combining clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "קניתי דירה חדשה ורוצה להצטרף לביטוח רעידת אדמה, אבל שמעתי שיש השתתפות עצמית די גבוהה. אפשר לשלם קצת יותר פרמיה ולצמצם את ההשתתפות העצמית?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer is a direct restatement of a single fact from the page, with no arithmetic or combination of clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "הגשתי תביעה על נזק בדירה והחלק של התיקון גג לא שנוי במחלוקת — תוך כמה זמן חייבים לשלם לי את הסכום הזה בנפרד משאר התביעה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single coverage rule from the page — valuables in a bank safe are reimbursed at market value on the loss date — and the customer’s stated figure (10,000 ₪) is already that market value, so no arithmetic or clause combination is required.), and this category still needs hard questions — aim there instead",
+      "question": "יש לי אוסף בולים ישראליים שרכשתי לפני כמה שנים, והערך שלהם היום הוא 10,000 ש\"ח. אם הבנק ייפרץ וגנבו לי את הבולים האלה שהיו בכספת, כמה כסף אני יכול לקבל מחברת הביטוח?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates the policy's coverage rule (market value on day of loss) without any calculation or clause combination.), and this category still needs hard questions — aim there instead",
+      "question": "יש לי אוסף בולים ישראליים שרכשתי לפני כמה שנים, והערך שלהם היום הוא 15,000 ש\"ח. אם הבנק ייפרץ וגנבו לי את הבולים האלה שהיו בכספת, כמה כסף אני יכול לקבל מחברת הביטוח?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer simply restates the policy's market-value rule using the customer's figure as an illustration, with no calculation or clause combination.), and this category still needs hard questions — aim there instead",
+      "question": "יש לי אוסף בולים ישראליים שרכשתי לפני כמה שנים, והיום הם שווים בערך 10,000 ש\"ח. אם יקרה משהו לאוסף הזה, כמה כסף אני יכול לקבל מחברת הביטוח?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The question asks about a specific procedure (restoring sum insured after a claim) and corrects a misconception about 'additional fees'; the answer explains the fee basis (the 80,000 paid) per policy rates, requiring location of the relevant clause among others in a single source.), and this category still needs hard questions — aim there instead",
+      "question": "קרה לי נזק בדירה מהפרקים א' ו-ב' של הפוליסה, וה compañía שילמה לי 80,000 שקל. אני רוצה לשחזר את סכום הביטוח למקורי, אבל שמעתי שיש עמלות נוספות. כמה אני צריך לשלם בערך כדי לשחזר את הסכום ששילמו לי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single policy rule about restoration premium calculation without arithmetic or clause combination.), and this category still needs hard questions — aim there instead",
+      "question": "קרה לי נזק בדירה מפיחית ברזל, והחברה שילמה לי 80,000 ₪ לפיצוי. אני רוצה לשחזר את סכום הביטוח ל-1,200,000 ₪ כמו שהיה לפני הטענה. כמה אני צריך לשלם כדי לשחזר את הסכום, והאם יחשבו את כל הסכום או רק את הסכום ששילמו לי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The answer corrects a misconception about the restoration fee basis using a single clause from the page, with no arithmetic or clause combination.), and this category still needs hard questions — aim there instead",
+      "question": "קרה לי נזק בדירה מהפרות צינור, והחברה שילמה לי 80,000 ₪ לפיצוי. הסכום הביטוחי הכולל של הדירה שלי הוא 1.6 מיליון ₪. אני רוצה לשחזר את הסכום הביטוחי למקורי – כמה אני צריך לשלם בערך עבור העמלה על השחזור?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The page is a marketing landing page listing product features and benefits (discounts, coverage highlights, product names) but contains no policy clauses with specific numbers, formulas, conditions, o",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (apartment/files/חוברת-כללים.pdf p12) answers the question on its own — the question must need both pages",
+      "question": "קרה נזק בדירה שלי לפני שבוע, ואני רוצה להגיש תביעה. אני מתכוון להזמין שמאי מטעמי כדי לקבל הערכת נזק עצמאית, ואני גם רוצה לדעת תוך כמה זמן מחברת הביטוח מצפים לקבל החלטה סופית על התביעה שלי, בהנחה שאספק את כל המסמכים הדרושים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (apartment/files/חוברת-כללים.pdf p12) answers the question on its own — the question must need both pages",
+      "question": "הייתה לי נזילה בדירה, ואני רוצה להגיש תביעה. אני יודע שאני יכול להזמין שמאי, אבל מה קורה אם אני רוצה להשתמש בשירות של אדריכל או קבלן כדי לתקן את הנזק, ומה הזמן המקסימלי שלוקח לחברה להחליט אם היא מאשרת את התביעה שלי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/תנאי-פוליסת-ביטוח-דירה-אדירה-זהב-מהדורה-חדשה-בתוקף-החל-מ-2-12-2019.pdf p18) answers the question on its own — the question must need both pages",
+      "question": "יש לי דירה עם שטיחים יקרים, ואני גם צריך להחליף מנעול בדלת אחרי פריצה. אם השטיחים שווים 8,000 ש\"ח, וסכום ביטוח התכולה שלי הוא 500,000 ש\"ח, כמה כסף אקבל על השטיחים, וכמה יכסו לי על המנעול?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/תנאי-פוליסת-ביטוח-דירה-אדירה-זהב-מהדורה-חדשה-בתוקף-החל-מ-2-12-2019.pdf p18) answers the question on its own — the question must need both pages",
+      "question": "יש לי אוסף בולים יקר, חלקם בולים ישראליים וחלקם בולים מחו\"ל. אם הכספת בבנק תיפרץ לי, ויהיו נזקים לאוסף – מה הסכום המקסימלי שאקבל עבור הבולים הישראליים, ומה הסכום המקסימלי שאקבל עבור הבולים הזרים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/adira-silver-2025-apartment-plus-contents-אדירה-כסף-פברואר-25-באנגלית.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "יש לי דירה עם מרפסת פתוחה, ובחורף האחרון חלחלה לי מים דרך הקיר וגרמה נזק לרצפה בחדר האמבטיה. אני גם מתקין דוד שמש חדש בדירה – האם הביטוח מכסה את הנזק מהמים, ובאיזה סכום מקסימלי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "יש לי נזילה מהשירותים, ואני רוצה לתקן את האיטום. בפוליסה שלי כתוב שיש כיסוי לנזילות, אבל יש לי גם דוד שמש על הגג – אם הוא יתקלקל בגלל הנזילה, האם הביטוח יכסה את התיקון של הדוד, ומה המקסימום שהביטוח ישלם לי על כל הנזקים האלה ביחד?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "skip",
+      "reason": "non-answer ground truth: בפוליסת 'אדירה זהב', הביטוח יכסה את הסכום שמעל הפיצוי ממס רכוש, אך לא פחות מ-1% ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/חוברת-הכללים-לגבי-פוליסות-שנרכשו-לאחר-ה-030917.pdf p23) answers the question on its own — the question must need both pages",
+      "question": "קרה נזק מים בדירה שלי לפני שבוע, ואני רוצה לתקן את זה. אם אני מזמין שרברב בעצמי, וגם יש לי נזק לגוף של שכן שלי בגלל המים – איך אני מתחיל את התהליך עם הראל, ומה אני צריך להגיש כדי להתחיל את הטיפול בשני הנזקים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/חוברת-הכללים-לגבי-פוליסות-שנרכשו-לאחר-ה-030917.pdf p23) answers the question on its own — the question must need both pages",
+      "question": "היה לי נזק מים בדירה לפני שבוע, ואני צריך לתקן את זה. אני מעדיף לבחור שרברב בעצמי, אבל אני גם רוצה לדעת איך מדווחים על הנזק לחברה - מה עושים בשני המקרים, ומה מספר הטלפון שאני צריך להתקשר אליו?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (apartment/pages/third-party-damage.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "יש לי דירה שאני משכיר, ואני רוצה לבטח אותה מפני נזקים שעלולים להיגרם לדיירים או לרכוש שלהם. אם דייר נפצע בדירה שלי בגלל משהו לא תקין, או אם רכוש שלו ניזוק, כמה כסף אני יכול לקבל מהביטוח, ואיך אני מגיש תביעה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (apartment/pages/third-party-damage.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "יש לי עמדת טעינה לרכב בחניה שלי, ואני רוצה לעשות ביטוח דירה. האם הביטוח יכסה נזק שנגרם לעמדת הטעינה, ומה קורה אם יש לי כבר ביטוח נפרד לעמדת הטעינה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (apartment/files/חוברת-הכללים-לגבי-פוליסות-שנרכשו-לאחר-ה-030917.pdf p31) answers the question on its own — the question must need both pages",
+      "question": "קרה לי נזק בדירה לפני שבוע, ואני רוצה להגיש תביעה. אני גם רוצה לדעת, אם אני צריך להזמין שמאי בעצמי או שהחברה שולחת שמאי, ומה אני צריך להכין מראש כדי שהטיפול בתביעה יהיה מהיר?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "הייתה לי פריצה לדירה לפני שבוע, וגרם נזק לדלת. אני רוצה לדעת מה אני צריך להגיש לחברת הביטוח כדי לקבל פיצוי, וגם, אם אני רוצה לקבל הצעת מחיר לתיקון הדלת מחנות שאינה בהסדר עם הראל - האם זה בסדר?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "שמעתי שיש לי לדווח על נזק בדירה, אבל אני קצת מבולבל. אם אני רוצה גם לדווח על הנזק לחברת הביטוח וגם לבדוק אם אני יכול לתבוע את הצד שגרם לנזק, איך אני עושה את זה, ומה אני צריך להגיד לסוכן או למוקד הטלפוני?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (apartment/files/פירוט-הליך-בירור-ויישוב-התביעה-בנזק-רכוש-או-גוף-צד-ג-מדירה-המבוטחת-בהראל.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "הייתה לי נזילה בדירה לפני שבוע, ואני רוצה לדעת לאן לפנות קודם כל – לסוכן הביטוח שלי או ישירות למוקד הראל? ואם אני רק רוצה ליידע אתכם על הנזילה, אבל מתכוון לתבוע את השכן שגרם לה, מה אני צריך להגיד?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates the policy's definition of pure financial damage and its coverage status from a single source page without arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "קרה מקרה רפואי שלטעות שלי גרם נזק פיננסי למטופל – למשל הפסד בעסקים בגלל שגיאה שגרמה לדחיית טיפול. האם הפוליסה מכסה את הסוג הזה של נזק?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates the policy's definition of pure financial damage from a single source page without arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני רופא פרטי, ובמהלך טיפול התרחשה טעות רפואית שגרמה למטופל שלי נזק פיננסי טהור, כמו הפסד בעבודה בגלל יום עבודה שהחמיץ. האם הפוליסה שלי מכסה את הסוג הזה של נזק?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page contains definitions of terms but does not include any numerical limits, conditions, or rules that can be used to create a hard arithmetic or combination question. It lacks the necessary data",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single policy rule about survey exemption for new equipment up to age one year and value 50,000 NIS, confirming the customer's generator qualifies without any arithmetic or clause combination.), and this category still needs hard questions — aim there instead",
+      "question": "קניתי גנרטור חדש למשק, עלה לי 48,000 ש\"ח, ורוצה לבטח אותו. הגיל של הגנרטור הוא חצי שנה. האם אני חייב לעשות סקר כדי לקבל כיסוי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page does not provide sufficient combinatory or arithmetic complexity to form a hard question that requires either multi-clause reasoning or calculation based on a customer-provided value. Most ru",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer restates a single clause about sprinkler system water damage coverage and its condition, with no arithmetic or clause combination needed.), and this category still needs hard questions — aim there instead",
+      "question": "התקנתי מערכת זילוף אוטומטית בבית העסק, וברצוני להבין מתי אני מוגבל בפיצוי במקרה של נזק ממים. נניח שנגרם נזק ממים בגלל שסתום במערכת הזילוף התפורר, אבל לא ידעתי על בעיה כזו לפני התקרית. האם אני מוגן?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page does not contain sufficient numerical data, rates, or interdependent clauses that require arithmetic or logical combination to derive a non-trivial answer. All exclusions and conditions are s",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The answer requires locating a specific exception (Erev Yom Kippur) within a longer passage about guarding requirements, correcting the customer's assumption that 24/7 guarding always suffices.), and this category still needs hard questions — aim there instead",
+      "question": "יש לי מוסך ואני שומר בו על כלי רכב. אם אני משאיר כלי רכב בחצר מגודרת בגדר בטון בגובה 2.5 מטר, ושומר שומר במשך 24 שעות ביממה, אבל זה קורה בערב יום כיפור, האם הביטוח עדיין מכסה גניבה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The question targets a specific exception within a longer guarding condition, and the customer's scenario reflects a common misconception that the ground truth corrects by combining the rule and its exception.), and this category still needs hard questions — aim there instead",
+      "question": "יש לי מוסך ואני שומר עליו 24 שעות ביממה עם שומר, אבל בערב יום כיפור השומר לא יכול להיות פה. אם יגנבו לי רכב מהמוסך ביום כיפור, הביטוח יכסה את הנזק?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The customer presents a specific scenario with a common misconception (a guard in the yard is sufficient), and the ground truth corrects it by citing the precise policy conditions for theft coverage from a single source page.), and this category still needs hard questions — aim there instead",
+      "question": "יש לי מוסך ואני שומר בו על רכבים של לקוחות. אם אני משאיר רכב עם המפתחות שלו במוסך בלילה, כשהמוסך סגור ואין בו עובדים, אבל יש שומר בחצר, האם הביטוח מכסה גניבה של הרכב?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single coverage condition from the source page (renovation damage covered if work duration ≤1 week and performed legally) and simply confirms the customer's 4-day duration meets the stated time threshold, with no arithmetic computation or combination of separate clauses required.), and this category still needs hard questions — aim there instead",
+      "question": "אני עובד על שיפוץ קטן בעסק שלי, החלפת ריצוף בחנות. העבודה תימשך בערך 4 ימים. אם במהלך השיפוץ יקרה נזק לרכוש שלי, הביטוח מכסה את זה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The answer states a specific conditional coverage limit (work must not exceed one week and must be lawful) that is embedded within a longer policy passage, requiring the reader to locate the correct clause among several.), and this category still needs hard questions — aim there instead",
+      "question": "יש לי עסק קטן, ואני מתכנן לעשות שיפוץ קטן בחצר שלו - להחליף כמה רצפים. השיפוץ הזה יעלה לי בערך 8,000 ש\"ח. אם במהלך השיפוץ ייגרם נזק לרכוש של צד שלישי, האם הביטוח שלי מכסה את הנזק הזה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (business/files/תנאי-פוליסת-ביטוח-מכלול-למשרד-מהדורת-ינואר-2024-באנגלית.pdf p68) answers the question on its own — the question must need both pages",
+      "question": "קרה לי אירוע ביטוחי שגרם לנזק גבוה מאוד, והסכום שנדרש לפיצוי עלה על את גבול האחריות של הפוליסה שלי. אני יודע שהביטוח יכול להפחית לי חלק מהחיוב מהזכויות שלי, אבל גם יש לי חובות שטרם שילמתי. האם הביטוח יכול להוריד לי מהזכויות גם את התשלומים שטרם חלו, ובנוסף – מה אני צריך לעשות מייד אחרי שידעתי על האירוע כדי לאבד כמה שפחות?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages cover unrelated aspects of business insurance: page 1 is a proposal form asking about claims history and current coverage details, while page 2 contains policy conditions regarding claim",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני מנהל עסק עם שותף, וקבענו אותי כמבוטח ראשי בפוליסה. לפני חודש שלחנו לחברת הביטוח הודעה בכתב על תביעה שמתגבשת נגדנו, אבל לא ענו. האם הם חייבים להכיר בהודעה שלי כמי ששלחה, גם אם לא הגענו דרך המייל הרשמי, ותוך כמה זמן הם חייבים להגיב?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not provide complementary or distinct information that can be combined into a single hard question requiring both. Both pages independently restate similar clauses about a 'main insur",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (business/files/פוליסה-לביטוח-אחריות-מקצועית-מבית-שירביט-מהדורת-מרץ-2021.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "קרה לי מקרה מקצועי לפני שבוע, ואני רוצה לדעת אם אני יכול להסכים לפיצוי ללקוח בלי לשאול אתכם קודם, וגם אם אני מוציא הוצאות כדי להקטין את הנזק – האם תשלמו לי על זה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (business/files/פוליסה-לביטוח-אחריות-מקצועית-מבית-שירביט-מהדורת-מרץ-2021.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "קרה מקרה של טעות מקצועית במשרד שלי לפני שבוע, וקיבלתי הודעה על תביעה עתידה. אני רוצה לדעת אם אני יכול להודות בשגיאה בפני הלקוח, וגם אם אני יכול להתחיל לנהל משא ומתן על פיצוי — מה מותר לי לעשות בלי הסכמת חברת הביטוח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages are different insurance proposal forms (one for safe deposit box property insurance, the other for contractor business insurance), but both contain nearly identical boilerplate sections ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages come from unrelated insurance products — one is a proposal form for professional indemnity insurance for investment managers, and the other is a marine insurance policy for yachts. There",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "קרה תקלה אצל לקוח שהסיטור שלי עשה לו נזק, והם כבר הגישו תביעה. אני רוצה להבין אם אני צריך לשלם משהו משלמי, וכמה ירד לי מהסכום המוגבל של הביטוח אחרי התביעה הזאת?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (business/files/פוליסה-לביטוח-חבות-בעלי-מוסכים-הראל-מהדורת-ינואר-2023.pdf p24) answers the question on its own — the question must need both pages",
+      "question": "אני עוסק בעסק של מוסך, והרבה פעמים מגיעים אליי לקוחות עם רכבים של גורמים שלישיים. אם מישהו יגיש תביעה עבורי לנזק לרכב של צד שלישי, איך יתנהלו התביעות, והאם אני אצטרך לשלם חלק מהפיצוי מהכיס שלי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (business/files/פוליסה_לביטוח_ימי_ליאכטות_וסירות_מבית_שירביט_-_מהדורת_יולי_2016.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "קרה לי נזק בעסק מההצתת ספינה שגרמה לזיהום ימי ונזקים לציוד, והספינה שטה מחוץ למים הטריטוריאליים של ישראל. האם אני מוגבל מהפחתה לפי הפוליסה, גם בגלל הזיהום וגם בגלל המקום?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (business/files/פוליסה_לביטוח_ימי_ליאכטות_וסירות_מבית_שירביט_-_מהדורת_יולי_2016.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "אני מנהל עסק שמשמש כמתקנת סירות, והגעתי להסכם עם בעלים של יאכטה שירצה להכניס אותה למים רק אם אתחייב לבטח את הנזקים שיתרחשו מהשימוש בזינוקים במהלך הפעילות. אני גם רוצה לוודא שברגע שיש נזק מהשבתות עובדים במפעל שלי - זה גם מוגן. האם שתי ההתניות האלה מוגנות לפי הפוליסות שלכם?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (business/files/תנאי-פוליסת-ביטוח-מכלול-לעסק-מהדורת-מרץ-2023-באנגלית.pdf p16) answers the question on its own — the question must need both pages",
+      "question": "אני מנהל מחקר קליני במעבדה פרטית, והגעתי לשלב שצריך להרחיב את התשתיות - מוסיפים ציוד חדש ומשדרגים את הלבה. הסכום המובטח בתבנית הביטוח שלי הוא 2,000,000 ש\"ח. כמה כסף יקבלו במקרה של נזק במהלך הבנייה, גם אם לא דיווחתי על הרחבה, ותוך כמה זמן חייבים לדווח על הוספת הציוד?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages cover unrelated topics: one is an application form for clinical trials liability insurance, and the other is a general property insurance clause for business policies. There is no overla",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The provided page is only a table of contents listing section titles and page numbers. It contains no substantive policy details, limits, conditions, exceptions, or procedures that a customer would as",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The page is a generic landing/navigation page for 'Third-party claim status' with only menus, marketing banners, and browser notices. It contains no substantive policy details, procedures, limits, con",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks about a single privacy condition and the answer directly restates the page's stated procedure and consequence without arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "תשמע, אני קצת חושש לגבי הפרטיות שלי. אם אני לא רוצה שהראל תעביר את הנתונים שלי לרשות שוק ההון, מה יקרה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single policy rule from the source page about adding coverage to an existing policy without affecting other conditions, requiring no arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני רוצה להוסיף ביטוח מקיף לרכב שלי שיש עליו כבר ביטוח חובה. אפשר לעשות את זה בלי שישפיע על התנאים של הביטוח הקיים?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single condition from the source page without any calculation or combination of clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני רוצה לעשות ביטוח לרכב שלי, אבל אני קצת חושש לגבי הפרטיות שלי. אם אני לא רוצה שהראל תעביר את הפרטים שלי לרשות שוק ההון, מה יקרה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single cancellation rule from the page without arithmetic or combining clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "תראה, עשיתי ביטוח לרכב שלי, אבל אני חושב שאני רוצה לבטל אותו. אם אני מבטל אחרי שבוע, כמה כסף יחזירו לי בערך?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "ביטוח הרכב שלי בתוקף כבר שבועיים, אבל אני רוצה לבטל אותו. כמה כסף יוחזר לי בערך?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "ביטוח הרכב שלי בתוקף כבר שבוע, אבל אני רוצה לבטל אותו. כמה אחוזים מדמי הביטוח השנתיים יוחזרו לי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks about a single coverage condition (coordination with other insurance) and the answer directly restates the policy's excess-coverage rule without arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "קרה נזק בעמדת הטעינה שלי, וכבר קבלתי פיצוי מביטוח הרכב. האם אני יכול לקבל עוד פיצוי מביטוח עמדת הטעינה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "form",
+      "reason": "The ANSWER points at the source material as if the customer could see it: \"לפי סעיף 5.4\".",
+      "question": "האופנוע שלי נגנב לפני חודשיים ועדיין לא נמצא. סכום הביטוח שלו הוא 50,000 ש\"ח, ההשתתפות העצמית הרשומה ברשימה היא 2,000 ש\"ח, ושווי הנזק (ערך האופנוע) מוערך ב-40,000 ש\"ח. כמה אקבל מהביטוח?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks about a single coverage scope (vehicle and property damage) which is directly stated in the policy without requiring arithmetic or clause combination.), and this category still needs hard questions — aim there instead",
+      "question": "יש לי אופנוע, ואני רוצה לעשות ביטוח צד ג'. אם אני גורם לתאונה ופוגע ברכב אחר, האם הביטוח מכסה גם את הנזק לרכב שלו וגם את הנזק לרכוש אחר, כמו גדר או תמרור?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks about a single coverage fact (third-party insurance scope) directly answered by restating the page's definition. No arithmetic or clause combination needed.), and this category still needs hard questions — aim there instead",
+      "question": "יש לי אופנוע, ואני רוצה לעשות ביטוח צד ג'. אם אני גורם לתאונה ופוגע ברכב אחר, האם הביטוח מכסה גם את הנזק לרכב שלי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks about a single coverage fact (third-party insurance covers only third-party damage) which is directly stated on the page, and the answer simply restates that fact without arithmetic or clause combination.), and this category still needs hard questions — aim there instead",
+      "question": "יש לי אופנוע, ואני רוצה לעשות ביטוח צד ג'. אם אני גורם לתאונה ופוגע ברכב אחר, האם הביטוח מכסה גם את הנזק לאופנוע שלי, או רק לרכב השני?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page provided is a web page interface for checking the status of a car theft claim and does not contain any substantive policy information, coverage terms, limits, conditions, or formulas that cou",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page contains administrative and consent-related information about data usage, insurance database integration, and marketing preferences, but does not include any coverage terms, policy conditions",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page provides procedural information about claim handling, appraiser selection, and garage choice, but does not contain quantitative rules, percentages, caps, or combined conditions that would all",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (car/files/תנאי-פוליסת-ביטוח-חובה-לרכב-מהדורת-ספטמבר-2021.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "אבא שלי נפטר לפני חודש ואני ירשתי את הרכב. לפני שבועיים הפעלתי ביטוח חובה חדש בחברה אחרת. בפוליסת החובה הסטנדרטית שלו הפרמיה הייתה 2,400 ש״ח ל־365 יום, ובמועד הפטירה נותרו 100 ימים עד סוף התקופה — כמה החזר פרמיה אקבל? ובפוליסת החובה של שירביט, אם ארעה תאונה היום, מה אני צריך להודיע ולעשות מול המבטח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (car/files/תנאי-פוליסת-ביטוח-חובה-לרכב-מהדורת-ספטמבר-2021.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "אני מוכר את האוטו בשבוע הבא ורוצה לבטל את ביטוח החובה. במקרה גם הייתה לי תאונה קטנה אתמול — מה בדיוק אני צריך לעשות בשביל הביטול (כי הרכב כבר לא אצלי) ומה אני חייב להודיע ולמסור לחברת הביטוח על התאונה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "easy",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני רוצה לדעת אם אני יכולה להגיש תוכנית טיפולים מראש לביטוח השיניים שלי לפני שאני מתחילה טיפול?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "easy",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The page is a generic website navigation/template page with menus, login links, marketing banners, and footer links. It contains no specific dental insurance policy details, coverage limits, exclusion",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני צריך לעשות טיפול שורש בגלל עששת. האם הביטוח מכסה צילום רנטגן לפני ואחרי הטיפול?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single coverage fact from the source page without arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני צריך לעשות טיפול שורש בגלל עששת. האם הביטוח שלי מכסה צילום רנטגן לפני ואחרי הטיפול?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני צריך לעשות טיפול שורש בגלל עששת. האם הביטוח שלי מכסה גם את הטיפול השורש עצמו וגם את הכתר שאצטרך אחר כך?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single coverage fact from a table on the page without arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני צריך לעשות טיפול שורש בגלל עששת. האם הביטוח שלי מכסה גם צילום רנטגן לפני ואחרי הטיפול?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני צריך לעשות טיפול שורש בגלל עששת. האם הביטוח מכסה גם את הטיפול השורש עצמו וגם את הכתר שאני צריך לעשות אחריו?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks about a single coverage detail explicitly stated in the source page with no calculation or clause combination needed.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני צריך לעשות טיפול שורש בגלל עששת. האם הביטוח שלי מכסה צילום רנטגן לפני ואחרי הטיפול?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks about a single coverage detail explicitly listed in a table on the page, and the answer directly restates that fact without any calculation or combination of clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני צריך לעשות טיפול שורש בגלל עששת. האם הביטוח מכסה גם צילום רנטגן לפני ואחרי הטיפול?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני צריך לעשות טיפול שורש בגלל עששת. האם הביטוח מכסה גם את הטיפול עצמו וגם את צילום הרנטגן שצריך לעשות לפני ואחרי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single coverage fact from the source page without arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני צריך לעשות טיפול שורש בגלל עששת. האם הביטוח שלי מכסה צילום רנטגן לפני ואחרי הטיפול?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "עשיתי רנטגן לפני עשרים יום, עכשיו השיננית רוצה שאעשה עוד אחד בשביל לטפל בשן. האם הביטוח יכסה את הרנטגן השני?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page is a dental claim form code table listing procedures, codes, and X-ray requirements, but it does not contain clear coverage rules, limits, or conditions that would allow formulating a medium-",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page provided is a website navigation or error page (noting that Internet Explorer is no longer supported) and does not contain any substantive content about dental insurance coverage, benefits, l",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page is about the acquisition of an insurance company's operations and lists transferred policies, but does not contain specific dental coverage terms, limits, or conditions needed to form a mediu",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly states which form to use and where to send it, as explicitly written on the page, with no need for interpretation, combination, or arithmetic.), and this category still needs hard/medium questions — aim there instead",
+      "question": "עשיתי יישור שיניים אצל רופא פרטי שלא בהסדר ואני רוצה להגיש תביעה להחזר. איזה טופס בדיוק אני צריך למלא ולאן שולחים אותו?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer is a single fact stated outright on the page: the exact form name and submission methods for orthodontic treatment reimbursement.), and this category still needs hard/medium questions — aim there instead",
+      "question": "הלכתי לרופא שיניים פרטי (לא בהסדר) לטיפול אורתודונטי (יישור שיניים) ושילמתי מכיסי. איזה טופס בדיוק אני צריך למלא כדי לקבל החזר?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single fact from the page about not needing to submit a claim when using an in-network dentist.), and this category still needs hard/medium questions — aim there instead",
+      "question": "הלכתי לרופא שיניים שבהסדר שלכם ושילמתי לו רק את ההשתתפות העצמית. האם אני עדיין צריך להגיש לכם טופס תביעה כדי לקבל החזר?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer is a single fact stated outright on the page: the name of the form needed for orthodontic treatment claim.), and this category still needs hard/medium questions — aim there instead",
+      "question": "עשיתי טיפול אורתודונטי אצל רופא פרטי ואני רוצה להגיש תביעה להחזר. איזה טופס בדיוק אני צריך להוריד?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer is a single fact stated outright on the page: the requirement to fill out a form before submitting a claim, with no arithmetic or combination of clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "הלכתי לרופא שיניים פרטי שלא בהסדר שלכם ועשיתי טיפול שורש. האם אני יכול פשוט לשלוח לכם את החשבונית במייל ולקבל החזר, או שאני חייב למלא איזה טופס קודם?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer is a single fact stated outright on the page: the exact form the customer needs to fill out.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני צריך טיפול אורתודונטי (יישור שיניים) אצל רופא פרטי שלא בהסדר. איזה טופס בדיוק אני צריך להוריד ולמלא לפני שאני שולח לכם תביעה להחזר?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer is a single fact stated outright on the page: the email address for submitting a dental insurance claim.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני צריך להגיש תביעה על טיפול שיניים שעשיתי אצל רופא פרטי. לאיזה מייל אני שולח את הטופס?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly states a single fact from the page—the exact form needed—without requiring interpretation, combination, or arithmetic.), and this category still needs hard/medium questions — aim there instead",
+      "question": "התחלתי טיפול אורתודונטי אצל רופא פרטי שלא בהסדר. איזה טופס בדיוק אני צריך למלא כדי להגיש תביעה להחזר?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly states a single fact from the page—the exact form needed—without requiring any interpretation, combination, or correction of misconceptions.), and this category still needs hard/medium questions — aim there instead",
+      "question": "בחרתי לעשות טיפול שורש אצל רופא שיניים פרטי שלא בהסדר עם החברה. איזה טופס בדיוק אני צריך להוריד ולמלא כדי להגיש תביעה להחזר?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "form",
+      "reason": "The question refers to 'המסמך' (the document) as if the customer can see it, which violates the rule against referencing source material directly.",
+      "question": "אני צריך לעשות טיפול שיניים יקר, ואני רוצה לשלוח את התביעה בפקס. לא מצאתי מספר פקס באתר, אבל ראיתי במסמך מספר אחד. זה נכון שאני יכול לשלוח את התביעה לפקס 03-7348102?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני צריך לעשות טיפול שיניים מורכב, ואני רוצה לדעת אם אני יכול לשלוח את כל המסמכים שקשורים לתביעה שלי ב SMS. זה אפשרי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני צריך לעשות טיפול שיניים מורכב, ואני רוצה לדעת אם אני יכול לשלוח את התביעה גם בSMS וגם בפקס. אם כן, מה המספרים שלהם?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer is a single, explicitly stated fax number on the page with no calculation or clause combination required.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני צריך לעשות טיפול שיניים יקר, ואני רוצה לשלוח את התביעה בפקס. לא זוכר את המספר, אבל אני יודע שזה מתחיל ב-03. מה המספר המדויק?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer simply restates the manual claims procedure for out-of-network dentists from a single page without arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני צריך לעשות טיפול שיניים מורכב, ואני רוצה לדעת אם כדאי לי ללכת לרופא בהסדר או שאני יכול לבחור כל רופא שאני רוצה. אם אני בוחר רופא לא בהסדר, איך אני מקבל החזר?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks for a single factual address stated directly on the page, requiring no arithmetic or combination of clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני צריך לעשות טיפול שיניים יקר, ואני רוצה להגיש תביעה ידנית. אם אני שולח את הטופס בדואר, לאיזה כתובת בדיוק אני צריך לשלוח אותו, כולל מספר ת.ד.?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks for confirmation of a single fax number explicitly stated on the page, requiring no inference or calculation.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני צריך לעשות טיפול שיניים יקר, ואני רוצה לשלוח את התביעה בפקס. לא מצאתי מספר פקס באתר, אבל מצאתי מספר אחד בדף הזה. זה נכון שאני יכול לשלוח את התביעה לפקס 03-7348102?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates the claim submission methods (email, SMS, fax, mail) from the page without requiring arithmetic or combining multiple clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני צריך לעשות טיפול שיניים מורכב, ואני רוצה ללכת לרופא שאני סומך עליו, אבל הוא לא בהסדר. אם אני בוחר ללכת לרופא פרטי, איך אני מגיש את התביעה להחזר?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks for a single form name, which is directly stated on the page without requiring arithmetic or combining clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני צריך לעשות טיפול שיניים יקר, ואני רוצה להגיש תביעה כדי לקבל החזר. אם אני בוחר ללכת לרופא שיניים פרטי ולא לרופא בהסדר, איזה טופס אני צריך להוריד ולמלא?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "ביקשתי טיפול שיניים אצל רופא פרטי שלא בהסדר, ושלמתי 1,200 ש\"ח. כמה אקבל החזר מהבריאות?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The provided page does not contain specific numerical data, coverage limits, formulas, or conditional rules necessary to construct a hard question requiring arithmetic or combination of clauses. It on",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "עשיתי שן פלטינה לפני שנתיים, והשנה נEEDED לבצע שדרוג בגלל קaries שפרצה שוב באותו שן. הרופאה אמרה שצריך לעשות שדרוג של התותבת. האם זה מכסה לפי הביטוח?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page is a dental claim form listing procedure codes, names, and required X-rays, but does not contain coverage rules, reimbursement amounts, frequency limits, or eligibility criteria needed to for",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page provided is a general navigation or informational page about dental insurance, but it does not contain specific policy details, numerical limits, coverage percentages, or conditions that woul",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The page describes only the procedural steps for filing a dental insurance claim (network vs. private dentist, forms to download, submission channels). It contains no monetary limits, percentages, cap",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates information from a single source: procedure code, reason code, and requirement for X-rays before and after, all explicitly stated on the page.), and this category still needs hard/medium questions — aim there instead",
+      "question": "עשיתי טיפול שורש בגלל עששת עמוקה שהגיעה עד המוך. הרופא צילם צילומי רנטגן לפני הטיפול וגם אחריו. איזה קוד פרוצדורה וקוד סיבה אני צריך למלא בטופס התביעה, והאם באמת נדרשים גם צילום לפני וגם צילום אחרי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The page is a pure procedure-code reference table for filling out a dental claim form. It lists procedure names, codes, reason codes, and X-ray requirements (before/after), but contains no monetary am",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The page is a corporate notification about the transfer of Shirbit's insurance portfolio to Harel on 1 December 2021, stating that existing policies were transferred under the same terms without chang",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני בן 63, לא מעשן, והצטרפתי לביטוח הזה לפני שנתיים. עוד כמה שנים ישתנה לי הסכום שאני משלם, ומי יקבע אותו?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly states that a policy extension covers speech therapy, requiring only a single fact from the source page.), and this category still needs hard/medium questions — aim there instead",
+      "question": "הבן שלי מתקשה בדיבור, ואני שוקל לקחת אותו לקלינאית תקשורת. האם הביטוח הבריאות הפרטי שלי יכול לעזור לי עם העלויות של הטיפול?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks about coverage for a specific treatment and the answer directly restates the page's statement that private health insurance can help finance occupational therapy, requiring no arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "הבן שלי מתקשה בלימודים ורופא המליץ על ריפוי בעיסוק. האם הביטוח הבריאות שלי מכסה טיפולים כאלה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks about a single coverage (speech therapist) and the answer directly states that a policy extension can assist, which is a single fact from the source page.), and this category still needs hard/medium questions — aim there instead",
+      "question": "הבן שלי מתקשה בדיבור, ואני שוקל לקחת אותו לקלינאית תקשורת. האם הביטוח הבריאות הפרטי שלי יכול לעזור לי עם העלויות של הטיפול?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single, explicitly stated opt-out procedure from the page with no calculation or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני מנסה להבין אם אני יכול להעביר את הנתונים שלי לאתר של רשות שוק ההון. אם אני לא רוצה שהראל יעבירו את הפרטים שלי לשם, מה אני צריך לעשות?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks for a single procedure stated directly on the page, and the answer restates it without arithmetic or combining clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני מגיש בקשה לביטוח סרטן, ואני לא רוצה שהראל יעבירו את הפרטים שלי לאתר האינטרנט המאובטח של רשות שוק ההון. מה אני צריך לעשות?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single opt-out procedure from the source page without requiring arithmetic or combining clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני מנסה להבין אם הראל תעביר את הפרטים שלי לאתר האינטרנט המאובטח של רשות שוק ההון. אם אני לא רוצה שהם יעבירו את המידע, מה אני צריך לעשות?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer restates a single refund rule from the page — refunds go to the payment method used unless the company decides to send them to the primary insured — with no arithmetic or clause combination required.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני משלם על הפוליסה של אמא שלי, ואני רוצה להוסיף את הילד שלה לפוליסה. אם אני אשלם על כולם באותו כרטיס אשראי, האם החזר כספי אם יהיה, יגיע אלי או לאמא שלי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single condition from the page about signing to use the same payment method for an additional child, with no arithmetic or clause combination needed.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני רוצה להוסיף את הילד שלי לפוליסת ביטוח הסרטן שלי. אם אני משלם את הפוליסה בכרטיס אשראי, האם אני צריך למלא טופס חדש כדי שהתשלום עבור הילד החדש ירד באותו כרטיס?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "form",
+      "reason": "The question is not in the customer's first-person voice and reads like an exam question about a document.",
+      "question": "אני משלם על הפוליסה של אמא שלי, ואני רוצה להוסיף גם את האח שלי. אם אני לא ממלא את כל הפרטים שלי בתור המשלם, זה בסדר?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page is promotional content about critical illness insurance for children and related therapies, but it does not contain specific policy terms, numerical limits, formulas, or conditions required t",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני בן 63, לא מעשן, והצטרפתי לביטוח הזה לפני שנתיים. אני מתכנן להישאר בו גם אחרי גיל 65. אם סכום הביטוח שלי הוא 150,000 ש\"ח, מה תהיה הפרמיה החודשית שלי מרגע שאגיע לגיל 65?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני בן 52, לא מעשן, והצטרפתי לביטוח הזה לפני שנתיים. אני רוצה לדעת כמה אני אשלם בחודש הבא, כי שמעתי שהפרמיה משתנה כל חמש שנים. סכום הביטוח שלי הוא 150,000 ש\"ח."
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "אני בן 63, לא מעשן, והצטרפתי לביטוח הזה לפני שנתיים. סכום הביטוח שלי הוא 50,000 ש\"ח. מה תהיה הפרמיה החודשית שלי בשנה הבאה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page provides administrative instructions for adding insured individuals to an existing policy and payment details, but does not contain information about coverage, benefits, eligibility, or claim",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "form",
+      "reason": "The answer points at the source material ('לפי הטבלה') as if the customer could see it.",
+      "question": "אני בת 68, מעשנת, הצטרפתי לביטוח עכשיו בגיל 68. סכום הביטוח שלי 150,000 ₪. כמה אשלם כל חודש?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single policy clause about continuation of coverage and unchanged premium after a first claim, requiring no arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני בת 62, ואובחנתי בסרטן השד לפני שנתיים. לפני חודש אובחנתי גם במחלת לב. יש לי ביטוח 'מענקית זהב'. האם הביטוח ימשיך לכסות אותי למקרה של מחלה קשה נוספת, ואם כן, האם הפרמיה תשתנה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני עשיתי ניתוח מעקפים לפני שנה, וקיבלתי כסף מהביטוח. עכשיו גילו לי סרטן, ואני רוצה לדעת אם הביטוח עדיין יכסה אותי, ואם כן, האם הסכום שאקבל יהיה אותו סכום כמו בפוליסה המקורית שלי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not provide complementary information that requires both to answer a single, non-trivial question. Page 1 is a general informational webpage about critical illness insurance with no s",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary or distinct information required to form a hard multi-source question. Page 1 is a general informational text about financial planning for growing families, ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (diseases-disabilities/files/תנאי-פוליסת-ביטוח-מחלות-קשות-מענקית-זהב-1.pdf p18) answers the question on its own — the question must need both pages",
+      "question": "קרה לי צינתור כלילי טיפולי לפני חודש, ואני רוצה להבין אם אני זכאי לפיצוי נוסף מהביטוח שלי על סרטן, וכמה יקבלו לי. בנוסף, אם בעתיד אחל בסרטן שוב אחרי 5 שנים, האם אני אקבל עוד פיצוי על המקרה השני?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (diseases-disabilities/files/תנאי-פוליסת-ביטוח-מחלות-קשות-מענקית-זהב-1.pdf p18) answers the question on its own — the question must need both pages",
+      "question": "קרה לי צינתור כלילי טיפולי לפני חודש, ואני רוצה לדעת אם אני זכאי לפיצוי, וכמה יקבלו. בנוסף, אני זוכר ששמעתי שאם יהיה לי מקרה שני של סרטן בעוד 5 שנים אני אקבל עוד פיצוי — האם זה נכון?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "קרה לי משהו ואני רוצה להבין מה קורה עכשיו — אבחנו אותי בסרטן לפני חודש, ואני מחובר כבר שנתיים לביטוח מחלות קשות של הראל. אני זוכר שקראתי על פיצוי גם במקרה שני, אבל לא בטוח מה התנאים. אם חלילה יהיה לי עוד מקרה של סרטן בעוד 4 שנים, האם אקבל שוב את הפיצוי, והאם זה תלוי בסכום שהתקבל בפעם הראשונה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not provide sufficient combined information to form a hard question requiring both pages where the answer is fully supported by the content. Page 1 is promotional and lacks specific p",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not support a hard multi-source question. Page 1 is a consent and declaration form for insurance enrollment, containing procedural and informational statements (e.g., data sharing, ag",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (diseases-disabilities/files/תנאי-פוליסת-ביטוח-מחלות-קשות-מענקית-זהב-1.pdf p10) answers the question on its own — the question must need both pages",
+      "question": "ילד שלי בן 20 נפגע לפני חודש מאוטם בשריר הלב, ולפי הדוחות הרפואיים היה עלייה בטרופונין ל-2.5 ng/ml וגם היו לו כאבי חזה אופייניים. לפני חצי שנה הוא נרשם לתוכנית 'מענקית זהב' של הראל. האם יקבל מענק, ובנוסף — הוא עבר גם ניתוח CABG בגלל החסימה, אז האם גם על זה יש כיסוי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages provided do not contain complementary information that requires both to answer a single, non-redundant hard question. Page 1 is a declaration and agent certification form with no policy ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (diseases-disabilities/files/062025-הצעה-לביטוח-מענקית-סרטן.pdf p3) answers the question on its own — the question must need both pages",
+      "question": "אני רוצה להצטרף לביטוח מונעית סרטן דרך הצעה חדשה, אבל יש לי כבר פוליסה קיימת של מונעית סרטן עם כיסוי של 100,000 ש\"ח. אני רוצה לדעת אם אני יכול להשאיר את הפוליסה הישנה עם 50,000 ש\"ח כיסוי, ולרכוש את הכיסוי החדש גם הוא ב-50,000 ש\"ח – האם זה מותר, והאם ייגבו לי דמי ביטוח גם על הכיסוי החדש?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not provide complementary information that requires both to answer a single, non-redundant hard question. Page 1 deals with policy replacement options (keep, reduce, or cancel an exis",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני מתכנן להצטרף לתוכנית הביטוח על מחלות קשות, אבל הייתה לי אבחנה רפואית של מחלת לב לפני חצי שנה. אני בן 62 — האם יקבלו אותי לביטוח בכלל, וכמה זמן יכסו אותי במקרה שיחזרו להאשים את המחלה הישנה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not support a hard question requiring both sources, as one covers payment methods and authorization (Page 1) while the other covers exclusions and claim conditions for critical illnes",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "easy",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page provides general information about hyperbaric oxygen chambers and their medical use but does not specify coverage, conditions, limits, or eligibility for reimbursement under the health insura",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "easy",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני בן 48, יש לי לחץ דם של 170/110 ו- BMI של 36 – האם אני זכאי להחזר על בדיקת CT קרדיאלי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The page is a promotional article about organ transplants abroad and the general value of private health insurance, but contains no specific policy terms, coverage limits, percentages, formulas, or cl",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The page contains only a static premium table broken down by age group and coverage component. There are no rules, conditions, percentages, caps, or formulas that a customer could apply to their own s",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "form",
+      "reason": "The answer is vague and does not specify the maximum compensation amount or list the required documents, which the question explicitly asks for.",
+      "question": "אני מבוטח בהראל כבר כמה שנים, ואני אזרח ותיק. לפני חודש וחצי הגשתי תביעה לפיצוי על אובדן כושר עבודה. מה הפיצוי המקסימלי שמגיע לי, ואילו מסמכים אני צריך להביא כדי שהתביעה תטופל?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני מבוטח בהראל כבר כמה שנים, ויש לי ביטוח מפני מחלות ואשפוז. אם אני צריך לעבור ניתוח, כמה זמן לוקח להראל לענות לי עם אישור או סירוב, ואילו מסמכים אני צריך להביא כדי שהם יוכלו לבדוק את זה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer is a single explicitly stated time limit (14 business days) found directly in the source text with no calculation or clause combination needed.), and this category still needs hard questions — aim there instead",
+      "question": "אני מבוטח בהראל כבר כמה שנים, ואני אזרח ותיק. הגשתי תביעה לפי ביטוח מחלות ואשפוז, אבל אני לא בטוח כמה זמן יש להראל לענות לי. מה הזמן המקסימלי שיכול לעבור עד שאקבל הודעה בכתב עם רשימת המסמכים שהם קיבלו ומה הם צריכים ממני?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The answer requires locating a specific condition (two-year smoking cessation) and procedure (submitting an affidavit for premium review) within a longer policy passage, not just restating a single explicit fact.), and this category still needs hard questions — aim there instead",
+      "question": "אני מעשן כבר 15 שנה, אבל עכשיו הפסקתי לגמרי. אם אני אצליח להישאר בלי סיגריות שנתיים שלמות, האם הביטוח שלי יוכל להשתנות? ומה אני צריך לעשות כדי לבדוק את זה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The answer requires locating a specific condition (2+ years smoke-free) and procedure (submit affidavit) within a longer passage, not a single outright fact.), and this category still needs hard questions — aim there instead",
+      "question": "אני מבוטח אצלכם כבר כמה שנים, ואני מעשן לשעבר. הפסקתי לעשן לפני שלוש שנים. האם אני יכול לקבל הנחה בדמי הביטוח שלי, ואם כן, מה אני צריך לעשות כדי לקבל אותה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The question asks for a specific payout amount given a 100,000 NIS surgery cost, but the ground-truth answer only explains the supplementary-insurance principle (difference up to policy ceiling) without computing a final figure; the reader must locate the relevant supplementary-coverage clause in the page.), and this category still needs hard questions — aim there instead",
+      "question": "אני בן 65, ואני רוצה לעשות ביטוח בריאות חדש. אני מבוטח בקופת חולים כללית מושלם. אם אני עושה ניתוח, כמה הביטוח ישלם לי, בהנחה שהניתוח עולה 100,000 ש״ח?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer restates a single coverage fact from the page without arithmetic or combining clauses.), and this category still needs hard questions — aim there instead",
+      "question": "אני מבוטח במסגרת 'כללית מושלם'. אני צריך להתייעץ עם רופא מומחה לפני ניתוח. האם הביטוח מכסה את ההתייעצות הזו, ואם כן, האם יש הבדל אם ההתייעצות היא לפני או אחרי הניתוח?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני מבוטח במסגרת 'כללית מושלם'. אני צריך להתייעץ עם רופא מומחה לפני ניתוח. האם הביטוח מכסה את ההתייעצות הזו, ואם כן, האם יש הבדל אם הרופא המומחה הוא בבית חולים ציבורי או פרטי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks for a single coverage fact and definition directly stated on the page, requiring no arithmetic or clause combination.), and this category still needs hard questions — aim there instead",
+      "question": "אני מבוטח במסגרת 'כללית מושלם'. אני צריך להתייעץ עם רופא מומחה לפני ניתוח. האם הביטוח מכסה את ההתייעצות הזו, ומה נחשב להתייעצות לצורך הכיסוי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (health/files/כתב-שירות-שירותי-רפואה-משלימה-אלטרנטיבית.pdf p3) answers the question on its own — the question must need both pages",
+      "question": "עשיתי תאונה לפני 100 יום ואושפזתי, הרופא נתן לי הפניה לעיסוי רפואי. בכתב השירות לרפואה משלימה — אני כבר אחרי תקופת האכשרה? ותוך כמה זמן מהתאונה אני חייב להתחיל את העיסויים? ובכתב השירות של רופא מלווה אישי — שילמתי 400 ₪ השתתפות עצמית, כמה יעלה לי להאריך בעוד 90 יום אם צריך?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (health/files/כתב-שירות-שירותי-רפואה-משלימה-אלטרנטיבית.pdf p3) answers the question on its own — the question must need both pages",
+      "question": "עברתי תאונת דרכים ואושפזתי לפני חודשיים. הרופא הפנה אותי לעיסוי רפואי לשיקום, ואני גם רוצה רופא מלווה אישי שינהל את הטיפול המתמשך. כמה טיפולי עיסוי מגיעים לי בשנה, וכמה זמן נמשך שירות הרופא המלווה והאם יש עלות נוספת להארכה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (health/files/תנאי-פוליסה-לניתוחים-upgrade.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "יש לי גם את פוליסת הניתוחים upgrade וגם את הפוליסה מהשקל הראשון. השנה היו לי 3 התייעצויות עם רופא שאין לו הסדר עם החברה, כל אחת עלתה 2,000 ₪. כמו כן עברתי טיפול מחליף ניתוח שעלה 50,000 ₪, והניתוח המוחלף עולה 40,000 ₪ לפי אתר החברה. השב\"ן שלי לא מכסה את הטיפול המחליף בגלל פיגור בתשלומים. כמה תשלם כל פוליסה בסך הכל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (health/files/תנאי-פוליסה-לניתוחים-upgrade.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "יש לי שב\"ן ואני מתלבט בין שתי פוליסות ניתוחים - את פוליסת ה-upgrade ואת זו ש'מהשקל הראשון'. בפוליסת ה-upgrade, אם אעשה ניתוח שממומן על ידי השב\"ן אבל המנתח לא נמצא בהסדר של חברת הביטוח, האם יחזירו לי את ההשתתפות העצמית ששילמתי לשב\"ן? ובפוליסה 'מהשקל הראשון', מה הסכום המקסימלי שאקבל החזר על התייעצות עם רופא שאין לו הסדר ניתוח או הסדר התייעצות?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (health/files/תנאי-פוליסת-upgrade-אקסטרה-ניתוחים-וטיפולים-מחליפי-ניתוח-בישראל.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "קניתי את הפוליסה לפני 100 יום ואני בהריון. אני צריכה ייעוץ שקשור להריון וגם שוקלת ניתוח שאינו דחוף. לשניהם יש תקופת אכשרה? מתי אהיה מכוסה לכל אחד?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (health/files/תנאי-פוליסת-upgrade-אקסטרה-ניתוחים-וטיפולים-מחליפי-ניתוח-בישראל.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "הצטרפתי לפוליסה לפני 45 יום ואני צריכה ניתוח שיקום שד אחרי כריתת שד. אפשר כבר לתבוע או שאני עדיין בתקופת אכשרה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (health/files/טופס-תביעה-השתלות-טיפולים-מיוחדים-בחול-ניתוחים-בחול.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "אני מקבל קצבה חודשית מהביטוח בריאות בעקבות תאונה. קיבלתי את הודעת התשלום הראשונה — מה היא חייבת לפרט לגבי בדיקות זכאות עתידיות, והיכן עוד אני יכול למצוא את הכללים המלאים לבדיקות האלה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "According to the transplant/special treatment abroad claim form (page 1) and the insurer's regulatory obligations detailed on page 8, what specific medical documents must a claimant attach when filing a claim for a transplant or special surgery abroad, and within what maximum timeframe must the insurer send a written continuation-of-investigation notice if additional time is needed to investigate the claim?"
+    },
+    {
+      "kind": "unanswerable",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "unanswerable",
+      "reason": "the corpus does answer this (partially) — e.g. health/pages/faq.txt pNone. Ask about something the documents genuinely do not state",
+      "question": "אני מטופל בסרטן כבר שנתיים, ואני רוצה לעשות טיפול ניסיוני חדש ששמעתי עליו בארה\"ב. הביטוח שלי מכסה ניתוחים בחו\"ל, אבל אני לא בטוח לגבי טיפולים ניסיוניים. האם הביטוח שלי מכסה טיפול ניסיוני בסרטן שמתבצע רק במרכז רפואי ספציפי בארה\"ב?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single payment schedule rule from the policy without arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אישה שלי נפטרה לפני חודש, ואני המוטב שמוזכר בפוליסה. תבעתי את התגמולים, וקיבלתי את התשלום הראשון. מתי אמור להגיע לי התשלום החודשי הבא?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer is stated outright on the page as a single fact, requiring no interpretation, combination, or calculation.), and this category still needs hard/medium questions — aim there instead",
+      "question": "שלחתי את טופס מינוי הסוכן בפקס אתמול בערב. מתי העדכון ייכנס לתוקף בפועל?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single fact from the page about the agent appointment applying automatically to minors on the policy.), and this category still needs hard/medium questions — aim there instead",
+      "question": "יש לי פוליסת בריאות שכוללת גם את הילדים הקטינים שלי. אם אני ממנה עכשיו סוכן חדש בטופס הזה, המינוי יחול אוטומטית גם עליהם או שאני צריך למלא משהו נפרד?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer is a single fact stated outright on the page: submitting the form automatically cancels the previous agent's appointment.), and this category still needs hard/medium questions — aim there instead",
+      "question": "יש לי כבר סוכן ביטוח שמטפל בפוליסות החיים שלי. אם אני ממלא ושולח את הטופס הזה למינוי סוכן חדש, האם אני צריך גם להודיע בנפרד על ביטול המינוי של הסוכן הקודם?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer simply restates a single fact from the page that the insurance amount does not affect other benefits, with no arithmetic or clause combination required.), and this category still needs hard questions — aim there instead",
+      "question": "אני רוצה לעשות ביטוח מגן משלים לילד שלי, והסכום שאני רוצה לבטח בו הוא 500,000 ש\"ח. אם אני בוחר בתשלום חודשי למוטבים, האם סכום הביטוח הזה ישפיע על סכומים אחרים שהילד שלי יקבל ממקורות אחרים?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני רוצה לעשות ביטוח מגן משלים לילד שלי, ואני יודע שהסכום ביטוח צמוד למדד. אם אני בוחר סכום ביטוח של 100,000 ש\"ח היום, כמה כסף יקבלו המוטבים שלי אם הילד שלי ילך לעולמו בעוד 10 שנים, בהנחה שהמדד יעלה ב-2% בשנה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "skip",
+      "reason": "non-answer ground truth: כן, יש גמישות בבחירת מועד תחילת תשלום הפיצוי החודשי, אך לא מצוין בפוליסה האם נית",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני בת 68, עשיתי בדיקה לפני חצי שנה ואובחנה לי בעיה לבבית קלה. עכשיו אני עושה ביטוח חיים, ואני קצת חוששת. אם חלילה יקרה לי משהו בגלל הלב, האם הביטוח יכסה את זה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The answer requires locating a specific time-limited exclusion clause (pre-existing condition exclusion expires after half a year) within the policy, which is a specific condition that sits inside a longer passage.), and this category still needs hard questions — aim there instead",
+      "question": "אני בת 68, עשיתי ביטוח חיים לפני חצי שנה, ואובחנו לי בעיות לב לפני ההצטרפות. אם אני מתה עכשיו בתאונה, האם יקבלו את התביעה או שיגידו שהמוות קשור למצב רפואי קודם?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The answer applies a specific exclusion clause (pre-existing condition for 6 months if age 65+) to the customer's stated facts, correcting the misconception that coverage might apply; this requires locating the relevant clause in a longer policy document.), and this category still needs hard questions — aim there instead",
+      "question": "אני בת 68, עשיתי ניתוח לפני חצי שנה והיום אני מרגישה לא טוב. אם חלילה אמצא שאני צריכה פיצוי בגלל זה, הביטוח יכסה את זה? סכום הביטוח שלי הוא 500,000 ש״ח."
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page provides procedural information about updating beneficiaries in a life insurance policy but does not contain quantitative rules, percentages, conditions, or combinations of clauses that would",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "form",
+      "reason": "The answer points at the source material ('as described in point 5.4.1') as if the customer could see it.",
+      "question": "שאני רכשתי את ביטוח החיים, השבתי שלא סובל ממחלות כרוניות, אבל בפועל יש לי סוכרת שהסתרתי בכוונה. עכשיו, אחרי שנתיים מהקניה, קרה מקרה מוות. האם החברה מחויבת לשלם хоть משהו?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The answer corrects a customer misconception by citing a specific exception clause (intentional concealment of material matter voids all benefits) from a single source page.), and this category still needs hard questions — aim there instead",
+      "question": "שכחתי לדווח על מחלת לב שהובא לי לפני שנתיים כשاملתי את הטופס לפתיחת הפוליסה, ואני מפחד שמשפחתם לא יקבלו את כל הסכום אם משהו יקרה לי. האם יקבלו את כל תגמולי הביטוח?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The answer depends on locating a specific incontestability clause (three-year limit on contesting non-disclosure) within a longer policy text and correcting the customer's misconception that hidden smoking information always allows denial of payment.), and this category still needs hard questions — aim there instead",
+      "question": "שילמתי על הפוליסה שלי כבר 4 שנים, ובזמן שכרתי אותה הסתרתי שאני עישנתי. עכשיו נפטר המבוטח — האם החברה יכולה לסרב לשלם בכלל בטענה שהסתרתי מידע?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single clause from the page about suicide within one year, with no arithmetic or combination of clauses.), and this category still needs hard questions — aim there instead",
+      "question": "ה страховка על החיים שלי נפתחה ב-15.1.2024, ואני מתכנן לבצע התאבדות מחר. האם המשפחה שלי תקבל את סכום הביטוח במקרה הזה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single, explicit rule from the page — that beneficiary changes are only binding if made before the insured's death — with no arithmetic, combination of clauses, or correction of a misconception required.), and this category still needs hard questions — aim there instead",
+      "question": "אני רוצה לשנות את המוטב בפוליסת ביטוח החיים שלי, אבל המבוטח כבר מת. האם עוד אפשר לעשות את השינוי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The customer's scenario embodies a common misconception that a beneficiary change can take effect after the insured's death; the ground truth corrects this by citing the specific policy condition that changes are only binding if made before the insurance event (death), which is a single clause embedded in a longer passage.), and this category still needs hard questions — aim there instead",
+      "question": "אני רוצה לשנות את המוטב בפוליסת ביטוח החיים שלי, אבל המבוטח כבר מת לפני ש успתי לשלוח את הבקשה לחברה. האם המוטב החדש יכול לקבל את הסכום?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (life/pages/life.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "אני בת 30, ואני רוצה לעשות ביטוח חיים. אם אבחר בביטוח 'מגן למקרה מוות', מתי אני יכולה להתחיל, ואם אבחר בביטוח 'חיים - הכנסה למשפחה', מה התקופה המינימלית שאני יכולה לבחור?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני ובעלי שוקלים לעשות ביטוח חיים משותף. ראיתי שיש לכם אפשרות של פוליסה זוגית, וגם ביטוח 'מגן' - מה ההבדל ביניהם מבחינת הגיל המקסימלי שאפשר להתחיל את הביטוח, ומה הגיל המקסימלי שבו הביטוח תקף?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (life/files/טופס-בקשה-לשינוי-מוטבים-במקרה-מוות.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "אני רוצה לעדכן את המוטבים שלי בפוליסת ביטוח חיים, ויש לי גם פוליסה חדשה שאני ממלא עכשיו. אם אני רוצה להגדיר את אותם המוטבים בשתי הפוליסות, וסכום הביטוח בפוליסה הישנה הוא 800,000 ש\"ח, וסכום הביטוח בפוליסה החדשה הוא 1,200,000 ש\"ח - איך אני מציין את זה בטפסים, ומה יקרה אם אני לא מציין את הפוליסות בטופס העדכון?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (life/files/טופס-הצטרפות-לביטוח-חיים-7-שאלות-בהצהרת-הבריאות.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "אני רוצה לעשות ביטוח חיים בהראל, ואני גם רוצה להוסיף את הילדים שלי כמוטבים. מה הסכום המקסימלי שאני יכול לבטח לכל אחד מהילדים, ואיך אני מציין את המוטבים בטופס?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (life/files/תנאי_פוליסת_ביטוח_למקרה_מוות_-_מגן_1.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "אני משלם ביטוח חיים חודשי בהוראת קבע, אבל פיספסתי תשלום אחד לפני חודש. כמה ריבית אני צריך לשלם עליו, אם היום ה-15 בחודש הבא הוא מועד התשלום הקבוע שלי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (life/files/תנאי_פוליסת_ביטוח_למקרה_מוות_-_מגן_1.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "אני משלם ביטוח חיים חודשי בהוראת קבע, אבל פיספסתי תשלום אחד לפני חודש. אם אני רוצה לדעת כמה ריבית אני צריך לשלם, ומה קורה אם אני לא משלם בכלל את החוב הזה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (life/files/טופס-הצטרפות-לביטוח-חיים-7-שאלות-בהצהרת-הבריאות.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "יש לי ביטוח חיים בהראל, ואני שוקל לעשות ביטוח נוסף דרך הראל, אבל יש לי כבר פוליסה דומה בחברה אחרת. אם אני רוצה להוסיף את הביטוח החדש, האם אני צריך לשלם פרמיה נוספת, ואם כן - מה קורה אם אני רוצה לבטל את הפוליסה הישנה בחברה השנייה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (life/files/טופס-הצטרפות-לביטוח-חיים-7-שאלות-בהצהרת-הבריאות.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "אני רוצה לבטל את הפוליסה שלי בהראל, ויש לי גם פוליסה קיימת בחברת ביטוח אחרת על אותו סכום ביטוח. איך אני מבטל את הפוליסה בהראל, ואם אני עושה את זה דרך הסוכן שלי - האם הוא צריך להשוות את הכיסויים בין הפוליסות?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (life/files/טופס-הצטרפות-לביטוח-חיים-7-שאלות-בהצהרת-הבריאות.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "אני רוצה לעשות ביטוח חיים בהראל, ואני ואישתי שניהם רוצים ביטוח 'מגן'. אני שמעתי שאפשר לקבל עד 2 מיליון ש״ח, אבל אני רוצה לדעת - כמה בדיוק אנחנו יכולים לקבל ביחד, אם אני צעיר יותר ממנה, ומה המינימום שאנחנו יכולים לבחור?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (life/files/טופס-הצטרפות-לביטוח-חיים-7-שאלות-בהצהרת-הבריאות.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "אני רוצה לעשות ביטוח חיים בהראל, ואני בן 55. אם אני רוצה ביטוח מוות מתאונה, מה הסכום המקסימלי שאני יכול לבטח, ואם אני רוצה ביטוח הכנסה למשפחה - מה הסכום המקסימלי שאני יכול לקבל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (life/files/טופס-הצטרפות-לביטוח-חיים-7-שאלות-בהצהרת-הבריאות.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "אני ובעלי שוקלים לעשות ביטוח חיים משותף בהראל. אנחנו רוצים לבטח כל אחד בסכום של 800,000 ש\"ח. האם זה אפשרי, ומה הסכום המקסימלי שאנחנו יכולים לבטח בסך הכל, אם נבחר בביטוח 'מגן'?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (life/files/טופס-הצטרפות-לביטוח-חיים-7-שאלות-בהצהרת-הבריאות.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "אני ובעלי שוקלים לעשות ביטוח חיים משותף בהראל. ראיתי באתר שאתם מציעים 'מגן זוגי', אבל גם 'הכנסה למשפחה זוגית Extra'. מה הסכום המקסימלי שאפשר לבטח בכל אחד מהם, ואיך זה משפיע על סכום הביטוח הכולל שאנחנו יכולים לקבל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני בת 30, ואני רוצה לעשות ביטוח חיים שייתן למשפחה שלי הכנסה חודשית קבועה אם חלילה יקרה לי משהו. אם אבחר בביטוח 'הכנסה למשפחה', מה התקופה המינימלית שאני יכולה לבטח את עצמי, ועד איזה גיל הביטוח תקף?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (life/pages/life.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "אני בת 30, ואני רוצה לעשות ביטוח חיים שייתן למשפחה שלי הכנסה חודשית קבועה אם חלילה יקרה לי משהו. עד איזה גיל אוכל להתחיל את הביטוח, ובמשך כמה שנים לפחות אני צריכה לשלם עליו?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (life/files/תנאי_פוליסת_ביטוח_למקרה_מוות_-_מגן_1.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "אני משלם ביטוח חיים בהראל כבר כמה שנים, ואני רואה שהפרמיה שלי עולה כל שנה. אם אני רוצה לדעת בכמה בדיוק תעלה לי הפרמיה בשנה הבאה, וגם אם אני אאחר בתשלום של חודש - כמה ריבית אצטרך לשלם?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (life/files/תנאי_פוליסת_ביטוח_למקרה_מוות_-_מגן_1.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "אני משלם ביטוח חיים בהראל כבר כמה שנים, ואני רוצה לדעת - אם יקרה לי משהו, כמה זמן לוקח לחברה לשלם למוטבים, ואם יש הבדל בין הזמן הזה לתשלום החודשי שאני מקבל אם אשאר בחיים?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "easy",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page is a claim form template with instructions and contact details, but it does not contain any specific policy terms, coverage conditions, or benefits that can be used to form an easy factual qu",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "skip",
+      "reason": "non-answer ground truth: לא מצוין כמה זמן יש לרכוש ביטוח סיעודי פרטי ללא הצהרת בריאות חדשה.",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks about a single condition (use of dressing aids) and the answer directly restates the page's rule that using an aid does not constitute a qualifying condition, with no arithmetic or clause combination required.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אמא שלי מתקשה להתלבש לבד, אבל היא משתמשת בכפתורים מיוחדים שמקלים עליה. האם זה נחשב למצב שבו היא לא עצמאית בהלבשה, לצורך קבלת תגמולים בביטוח הסיעודי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page is a form for reporting a deterioration in nursing condition and does not contain numerical data, rates, or combinable policy clauses required to create a hard question involving arithmetic o",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The question corrects a common misconception by requiring the assistant to locate and cite two distinct eligibility criteria (bathing and mental frailty) from a single source page, which is a medium-difficulty retrieval task with no arithmetic or logical combination of dependent clauses.), and this category still needs hard questions — aim there instead",
+      "question": "אמא שלי בת 78, ויש לה פוליסת 'סיעודי מושלם'. לפני חודש וחצי התחילו להעניק לה טיפול תרופתי קבוע לאבחנה של демנציה, והיא כבר לא מצליחה להתקלח בלי עזרה מלאה כי לא מצליחה להיכנס לבד למקלחת. אני רוצה להבין – האם היא יכולה להיחשב לזכאית לגמלת סיעוד גם בלי שיבוץ בגפה מלאכותית או בעיות ניידות?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page does not contain quantitative rules, percentages, rates, or formulas that can be combined with a customer-provided value to create an arithmetic question, nor does it present two interdepende",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page provides procedural and definitional information about claims handling but does not contain specific numerical rules, coverage limits, or conditions that can be used to form a hard question r",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The page is a sworn declaration form template for a caregiver, not a policy clause containing computable rules, percentages, caps, or combinable conditions. It describes procedural requirements (what ",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly quotes a single clause from the form that explicitly permits receiving claim information including settlement amounts, requiring no inference or calculation.), and this category still needs hard questions — aim there instead",
+      "question": "אני מבוטח בהראל כבר 5 שנים, ואני רוצה להגיש תביעה לביטוח סיעודי. אם אני צריך לתת להם אישור להעביר מידע רפואי מחברת ביטוח אחרת שבה הייתי בעבר, האם הם יכולים לקבל גם מידע על תביעות שהגשתי שם בעבר, כולל הסכומים שקיבלתי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single clause from the source page about the waiver allowing Harel to access National Insurance Institute payment information, with no arithmetic or clause combination needed.), and this category still needs hard questions — aim there instead",
+      "question": "אני מבוטח בהראל ביטוח סיעודי, ואני גם מקבל קצבה חודשית מהביטוח הלאומי בגלל מצב רפואי. אם אני מגיש תביעה לביטוח הסיעודי, האם הראל יכולה לקבל מידע על הקצבה הזו מהביטוח הלאומי, וזה יכול להשפיע על גובה הפיצוי שאקבל מהם?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single clause from the page about the waiver allowing Harel to access National Insurance payment information for claim examination, with no arithmetic or combination of clauses required.), and this category still needs hard questions — aim there instead",
+      "question": "אני מבוטח בהראל ביטוח סיעודי, ואני גם מקבל קצבה חודשית מהביטוח הלאומי בגלל מצב רפואי. אם אני אגיש תביעה להראל בגין טיפול סיעודי, האם הם יכולים לדעת כמה כסף אני מקבל מהביטוח הלאומי? וזה יכול להשפיע על גובה הפיצוי שאקבל מהם?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single explicit statement from the source page about acceptable alternative documentation for the claim.), and this category still needs hard questions — aim there instead",
+      "question": "אני מנסה להגיש תביעה לביטוח סיעודי, ואני צריך להוכיח שאני מקבל טיפולים. אם הרופא שלי לא רוצה למלא את הטופס הזה, האם אני יכול להביא מסמכים מבית חולים פסיכיאטרי או ממרפאה לבריאות הנפש במקום זה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "form",
+      "reason": "The question refers to 'הטופס הזה' as if the customer can see it, which makes it context-dependent and not self-contained.",
+      "question": "אני מנסה למלא את הטופס הזה בשביל אמא שלי, שהיא כבר לא זוכרת את מספר הביטוח הלאומי שלה. האם אני יכול לחתום במקומה על הטופס הזה, ואם כן, מה אני צריך לצרף כדי להוכיח שאני יכול לעשות את זה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single explicit statement from the source page about the form's permission scope.), and this category still needs hard questions — aim there instead",
+      "question": "אני מבוטח בהראל ביטוח סיעודי, ואני צריך למלא טופס שבו אני נותן רשות להראל לקבל מידע רפואי עליי. אם אני רוצה לתת רשות גם לחברת ביטוח אחרת לקבל את המידע הזה, האם אני צריך למלא טופס נפרד עבורה, או שאני יכול לציין את שמה בטופס הזה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates the page's explanation that the form authorizes medical information sharing for assessment and claims, and that it does not indicate distrust.), and this category still needs hard questions — aim there instead",
+      "question": "אני מבוטח בהראל סיעודי כבר 3 שנים. אם אני צריך עכשיו למלא את הטופס הזה כדי שהראל תקבל מידע רפואי ממכבי, האם זה אומר שהראל לא סומכת על הדיווחים שלי או על הרופאים שלי, ואם כן, האם זה יפגע בזכויות שלי לקבל פיצוי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The customer voices a common misconception that the form implies distrust, and the ground-truth answer corrects it by explaining the form's actual purpose from the page.), and this category still needs hard questions — aim there instead",
+      "question": "אני מבוטח בהראל ביטוח סיעודי כבר 3 שנים. אם אני צריך למלא את הטופס הזה, זה אומר שהראל לא סומכת על המידע הרפואי שכבר קיים לה עלי? או שהם פשוט צריכים אישור נוסף?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The question contains a misconception that the form is only needed for current medical problems, and the answer corrects it by stating the form is always required when switching health funds to waive confidentiality.), and this category still needs hard questions — aim there instead",
+      "question": "אני מבוטח בהראל כבר כמה שנים, ואני רוצה לעבור לקופת חולים חדשה. האם אני צריך למלא את הטופס הזה כדי שהביטוח הסיעודי שלי יישאר בתוקף, או שהוא רלוונטי רק אם יש לי בעיה רפואית עכשיו?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (long-term-care/files/טופס-הגשת-תביעה-ביטוח-סיעודי.pdf p7) answers the question on its own — the question must need both pages",
+      "question": "אמא שלי הגישה תביעה לסיוע בביטוח הסיעודי, והרפואים של קופת החולים לא רוצים לשתף את הפרטים הרפואיים שלה עם הראל בלי שהיא תחתום על משהו. אני יודע שיש טופס ויתור סודיות, אבל אמא שלי לא בת מוחלטת – יש לה דEMENTIA קלה, והיא לא לגמרי מבינה מה מתרחש. האם אפשר למלא את הטופס גם במקרה כזה, או שצריך אישור מיוחד?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages provided do not contain complementary information that requires both to answer a single, non-redundant hard question. Page 1 is a list of FAQ items without substantive answers, and Page ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (long-term-care/files/טופס-הגשת-תביעה-ביטוח-סיעודי.pdf p17) answers the question on its own — the question must need both pages",
+      "question": "אמא שלי בת 70 והולכת לעבור בדיקה רפואית כדי לבדוק אם היא זכאית לביטוח סיעודי, ואני צריך למלא טופס ויתור על סודיות לרופאים שלה. כמה זמן ייקח להראל לבדוק את הבדיקה, והאם הם יצרו איתי קשר גם אם אני זה שמסר את המידע?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not support a multi-source hard question. Page 1 is a medical confidentiality waiver form, and Page 2 is a claims procedure guideline. They cover entirely different aspects of the pro",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/כללים-לבדיקה-מחודשת-של-זכאות-ביטוח-סיעודי.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "אמא שלי בת 78, והיא כבר 4 חודשים בדירה בגריאטרי. לפני חודש שלחתי תביעה והתקבלו לה 3 חודשים תגמולים, עכשיו אני רוצה להמשיך לקבל תגמולים כי המצב שלה לא השתפר. אני שולח תעודות רפואיות עדכניות כל חודש, אבל לא עונים לי מה צריך לעשות עכשיו — האם אני צריך לחכות שיתפנו איתי או שאני אמור לשלוח משהו בעצמי לפני שה3 חודשים נגמרים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not support a hard multi-source question requiring both pages for a single answer. Page 1 details the renewal process for long-term care eligibility, while Page 2 is a claim form with",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not support a multi-source question. Page 1 outlines general claims processing rules for various insurance types but does not contain specific information about long-term care benefit",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not support a hard multi-source question. Page 1 is a consent form for disclosure of medical and personal information, while Page 2 discusses the statute of limitations for filing a c",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (long-term-care/files/טופס-הגשת-תביעה-ביטוח-סיעודי.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "קרה לאבא שלי שבית הספר סגר והם לא יכולים להחזיק אותו שם יותר, והוא עכשיו בבית כל היום בלי שיקום. רופא אמר שיש לו דמנציה ואמרו לי שצריך להגיש תביעה לביטוח הסיעודי. אני רוצה לדעת — מתי בדיוק צריך להתחיל להגיש את הבקשה, ומאיזה תאריך זה נחשב כתקרה של מקרה ביטוח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages provided do not support a hard multi-source question that genuinely requires both. Page 1 is a medical assessment form for functional evaluation by a physician, focusing on clinical find",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/מערכת-כללים-לבירור-וליישוב-תביעות-ולטיפול-בפניות-הציבור-ביטוח-סיעודי.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "אמא שלי בת 82, יש לה פוליסה סיעודית רגילה ובה גם כיסוי נוסף כחלק מהקבוצה של כללית – סיעודי מושלם. לפני חודש התחילו להעריך את המצב שלה, והיא לא מצליחה להלביש את עצמה וגם לא לרחוץ בעצמה. רופא הערכה בא לבית ובדק אותה, אבל עד עכשיו לא התקבלה תשובה. כמה זמן עוד צריך לחכות לפני שהם חייבים לשלוח תשובה, והאם מבחינת הזכאות הם בודקים את היכולת ללבוש ולרחוץ שונה בגלל הקופון של סיעודי מושלם?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not support a hard multi-source question requiring both. Page 1 details claims handling procedures (notifications, partial payments, appeals), while Page 2 is a functional assessment ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "קרה לי שבץ לפני חודש, מאז אני לא מצליח להתרחץ ולאכול בלי עזרה של מישהו, וגם יש לי בעיות זיכרון שלוקח לי זמן להבין איפה אני ומה היום. רופא אמר לי שיש לי דמנציה. אני רוצה לדעת אם אני זכאי לגמלת סיעוד, וכמה זמן ייקח עד שאדע את התשובה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not support a hard question that requires both pages and is fully answerable from them. Page 1 defines medical-functional criteria for eligibility for long-term care benefits, while P",
+      "question": ""
+    },
+    {
+      "kind": "unanswerable",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "unanswerable",
+      "reason": "the corpus does answer this (fully) — e.g. long-term-care/files/טופס-הגשת-תביעה-ביטוח-סיעודי.pdf p1. Ask about something the documents genuinely do not state",
+      "question": "אני מטפל באבא שלי שנמצא במצב סיעודי בבית, ואני רוצה להגיש תביעה בפוליסת 'מושלם פלוס' של הכללית. בטופס התביעה כתוב שצריך תצהיר של בן משפחה שמאשר שהוא נותן טיפול אישי 'ברוב שעות היממה והלילה'. כמה שעות בדיוק זה 'רוב שעות'? יש מספר מינימום כמו שיש לעובד זר (12 שעות)?"
+    },
+    {
+      "kind": "unanswerable",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "form",
+      "reason": "The answer points at the source material ('The documents do not contain...') as if the customer could see it.",
+      "question": "מהו סכום הפיצוי היומי המקסימלי שמשלמת פוליסת 'מושלם סיעודי פלוס' עבור טיפול סיעודי בבית, והאם קיים הבדל בסכום זה לעומת פוליסת 'מושלם סיעודי' הרגילה?"
+    },
+    {
+      "kind": "unanswerable",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "generation",
+      "reason": "ValueError: ground_truth_answer too short: ''",
+      "question": ""
+    },
+    {
+      "kind": "unanswerable",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "generation",
+      "reason": "ValueError: ground_truth_answer too short: ''",
+      "question": ""
+    },
+    {
+      "kind": "unanswerable",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "form",
+      "reason": "The QUESTION points at the source material: \"according to the attached forms\".",
+      "question": "מהו הסכום המקסימלי שניתן לקבל כפיצוי חודשי במסגרת פוליסת הסיעוד לחברי קופת חולים כללית לפי הטפסים המצורפים?"
+    },
+    {
+      "kind": "unanswerable",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "generation",
+      "reason": "ValueError: ground_truth_answer too short: ''",
+      "question": ""
+    },
+    {
+      "kind": "unanswerable",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "generation",
+      "reason": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+      "question": ""
+    },
+    {
+      "kind": "unanswerable",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "form",
+      "reason": "The QUESTION points at the source material: \"כפי שמופיע בטופס התביעה\".",
+      "question": "מהו מספר הטלפון הישיר של מחלקת תביעות סיעוד בחברת הראל לטיפול בתביעות של חברי קופת חולים מכבי, כפי שמופיע בטופס התביעה לחברי קופת חולים כללית?"
+    },
+    {
+      "kind": "unanswerable",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "form",
+      "reason": "The answer states the information is not available in the provided materials, which is not a valid answer to a customer question and indicates the question relies on source material the customer doesn't have.",
+      "question": "מהו סכום הפיצוי החודשי המקסימלי המגיע למבוטח השוהה במוסד סיעודי לעומת מבוטח השוהה בביתו לפי פוליסת 'מושלם סיעודי פלוס' לחברי קופת חולים כללית?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "easy",
+      "model": "google/gemma-3-27b-it",
+      "gate": "form",
+      "reason": "The answer states 'yes' but the content contradicts it by saying premiums will be waived, making the response logically inconsistent and confusing.",
+      "question": "אני במצב של אובדן כושר עבודה מוחלט. האם אני עדיין צריך לשלם פרמיות ביטוח?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "easy",
+      "model": "google/gemma-3-27b-it",
+      "gate": "form",
+      "reason": "The answer contains a factual inaccuracy: it states that premiums are waived in case of total disability, but the phrasing 'ישוחררו הפוליסה וכן תוכניות הביטוח, מחובת תשלום פרמיות' is incorrect — policies are not released from payment obligations, the insured person is.",
+      "question": "אם אני במצב של אובדן כושר עבודה מוחלט, האם אני עדיין צריך לשלם את הפרמיות?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "form",
+      "reason": "The answer points at the source material ('סעיף 4 להצהרת המועמד') as if the customer could see it.",
+      "question": "אני ממלא את טופס ההצטרפות לביטוח אובדן כושר עבודה ורואה שיש סעיף שמבקש לוותר על סודיות רפואית. האם זה אומר שכל המוסדות הרפואיים והביטוח הלאומי יכולים למסור להראל את כל המידע הרפואי שלי בלי הגבלה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks for a single procedural fact (forms and where to get them) that is directly stated on the page.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני צריך להגיש תביעה, אבל אני לא בטוח איך. האם יש טפסים מיוחדים שאני צריך למלא, ואם כן, איפה אני יכול להשיג אותם?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single procedural requirement from the page without arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני רוצה להגדיל את סכום הביטוח שלי בפוליסה הזו. מה אני צריך לעשות כדי שהשינוי יהיה תקף?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single condition from the page without arithmetic or combining clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני רוצה להגדיל את סכום הביטוח שלי בפוליסה הזו. מה אני צריך לעשות כדי שהשינוי יהיה תקף?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single policy fact (waiting period range 1–21 years) from one source page with no arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני רוצה להצטרף לביטוח על איבוד כושר עבודה, ובמקרה של נזק אני רוצה שהביטוח יתחיל לשלם לי אחרי חצי שנה. אפשר לעשות השהיה של 6 חודשים?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page provides form fields and options for policy terms but does not contain complex conditions, interdependencies, or exceptions that would support a medium or hard question requiring inference or",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks about a single exclusion (intentional self-harm) and the answer directly restates the policy's exclusion clause without requiring arithmetic or combining multiple clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אם אפגע בעצמי בכוונה, האם אקבל את התגמולים מהביטוח על אובדן כושר עבודה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The answer requires identifying two specific conditions from the page: the effective date rule for coverage reduction and the minimum limit for disability coverage, which are separate clauses within a longer passage.), and this category still needs hard questions — aim there instead",
+      "question": "אני רוצה להקטין את הכיסוי לאובדן כושר עבודה בפוליסה שלי. אני שולח את הטופס החודש, אבל יכול להיות שהוא יגיע אליכם רק בחודש הבא – ממתי בדיוק נכנסת ההקטנה לתוקף? וכמה נמוך אני יכול להוריד את סכום הביטוח בכיסוי הזה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The answer requires identifying a specific condition about when the reduction takes effect and combining it with information about confirmation methods, both located within a longer passage on the same page.), and this category still needs hard questions — aim there instead",
+      "question": "אני עצמאי ורוצה להקטין את הכיסוי לאובדן כושר עבודה בפוליסה שלי. אם אשלח את טופס ההקטנה במייל היום, מתי ההקטנה תיכנס לתוקף, ואיך אדע שהבקשה התקבלה וטופלה אצלכם?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The question presents a common misconception about whether a prior minor injury affects the waiting period start date, and the answer corrects it by stating the waiting period begins at total and permanent loss of work capacity.), and this category still needs hard questions — aim there instead",
+      "question": "אני עובד כבנאי כבר 15 שנה, אבל נפצעתי קל בעבודה לפני חצי שנה, וזה קצת מפריע לי. אם עכשיו אני מאבד את היכולת לעבוד בגלל פציעה אחרת, האם תקופת ההמתנה של 6 חודשים תתחיל מיום הפציעה הקלה הקודמת, או מיום הפציעה החדשה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The question contains a common misconception about when the waiting period starts, and the answer corrects it by citing the policy's definition of accident and the waiting period start date, requiring retrieval of a specific exception clause.), and this category still needs hard questions — aim there instead",
+      "question": "אני עובד כבנאי כבר 15 שנה, ואחרי פציעה קלה בגב לפני כמה חודשים התחלתי לקבל כאבים חזקים יותר. אם עכשיו הרופא קובע שאני לא יכול לעבוד יותר בגלל הכאבים האלה, מתי מתחילים לשלם לי את הביטוח אובדן כושר עבודה? אני מבין שיש תקופת המתנה, אבל מתי היא נספרת?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium (The customer expresses a common misconception about the waiting period, and the answer corrects it by quoting the policy's definition of when the waiting period begins.), and this category still needs hard questions — aim there instead",
+      "question": "אני עובד בניין, נפצעתי בעבודה לפני חודש וחצי, ואמרו לי שאני בטח לא יכול לקבל כסף כי זה לקח יותר מדי זמן מאז הפציעה. מתי בדיוק מתחילים לספור את התקופה שבה אני בכלל יכול להתחיל לקבל תשלומים?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single requirement and procedure from the source page without arithmetic or clause combination.), and this category still needs hard questions — aim there instead",
+      "question": "אני עובד בתור נגר כבר 5 שנים, אבל עכשיו אני מתחיל לקחת קורס צלילה מקצועי בשעות הפנאי. האם אני חייב לעדכן את חברת הביטוח לגבי התחביב החדש שלי, ואיך אני עושה את זה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a general principle from the page about occupation changes affecting coverage and advising to contact the agent, requiring no arithmetic or clause combination.), and this category still needs hard questions — aim there instead",
+      "question": "אני עובד בתור מדריך טיולים, אבל התחלתי גם לצלם סרטוני תיירות כהכנסה נוספת. אם אני אאבד את כושר העבודה שלי בגלל פציעה, האם העיסוק החדש שלי בצלמים משפיע על גובה הפיצוי שאקבל, ואם כן, איך אני מוודא שהביטוח שלי מכסה גם את העיסוק החדש?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer restates a single, explicitly stated policy requirement about reporting changes in profession or hobbies and their potential impact on benefits, with no arithmetic or clause combination needed.), and this category still needs hard questions — aim there instead",
+      "question": "אני עובד בתור נגר כבר 10 שנים, אבל עכשיו אני לומד קורס צלילה מקצועי בשעות הפנאי שלי. אם אצטרך לממש את הביטוח בגלל אובדן כושר עבודה, האם העיסוק החדש שלי בצלילה יכול להשפיע על גובה הפיצוי שאקבל?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates two explicit facts from the source page (one-business-day notice period and credit timing for late notice) with no arithmetic or clause combination.), and this category still needs hard questions — aim there instead",
+      "question": "אני משלם ביטוח חיים וחוסר יכולת עבודה בהוראת קבע, וכרגע יש לי חוב של 300 ש״ח בהראל. אם אני רוצה לבטל את ההוראת קבע, כמה ימים מראש אני צריך להודיע לבנק כדי שהביטול ייכנס לתוקף, ומה יקרה אם אני אשלח את ההודעה אחרי שהחוב כבר חויב?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly states a single explicit rule from the page (one business day notice) without requiring arithmetic or combining clauses.), and this category still needs hard questions — aim there instead",
+      "question": "אני רוצה להגדיר הוראת קבע לביטוח, ואני יודע שאני נוסע לחו\"ל לתקופה ארוכה. אם אני רוצה לבטל את ההוראת קבע הזו בזמן שאני בחו\"ל, כמה ימים מראש אני צריך להודיע לבנק כדי שהביטול ייכנס לתוקף לפני שהם גובים ממני עוד תשלום?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "form",
+      "reason": "The question refers to the source material by implying the customer can see it, using phrases like 'סעיף יד' which indicates a specific section, making it dependent on external document context.",
+      "question": "אני רוצה להגדיר הוראת קבע לתשלום הפוליסה שלי. אם אני רוצה לבטל חיוב ספציפי, אבל אני שוכח לעשות את זה תוך שלושה ימי עסקים ממועד החיוב, מה יקרה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page provides general information about the loss-of-working-ability insurance add-on, including its purpose, eligibility, and application process, but lacks specific numerical rules, percentages, ",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page provided does not contain specific policy terms, coverage limits, or conditions related to loss of working ability insurance that would allow for a hard question involving arithmetic or combi",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "קרה לי תאונה לפני חודש ואיבדתי לגמרי את הראיה בשתי העיניים. אני עדיין לא בטוח אם זה לצמיתות, אבל הרופאים לא רואים סיכוי לשיפור. הפוליסה שלי עם הראל חוסן למחר פלוס, וסכום הביטוח רשום אצלם כ-1,200,000 ש\"ח. האם אני זכאי לתשלום, וכמה יקבלו?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single policy clause that defines total and permanent loss of vision in both eyes as automatic total disability without further assessment.), and this category still needs hard questions — aim there instead",
+      "question": "קרה לי תאונה לפני חודש ואיבדתי לגמרי את הראיה בשתי העיניים. אני לא יכול לעבוד בכלל. אם אני מבוטח אצלכם בפוליסת חוסן למחר פלוס עם הגדרה מקצועית, האם זה נחשב כאובדן מוחלט ותמידי של כושר עבודה גם בלי לבדוק אם אני יכול לעשות עיסוק אחר?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page does not contain quantitative rules, percentages, or multi-clause conditions that require arithmetic or logical combination to derive an answer. All key conditions for total and permanent dis",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "יש לי פוליסת אובדן כושר עבודה נפרדת שאני רוצה לבטל, ובמקומה להצטרף לתכנית 'אפגרייד פלוס לפנסיה'. איך אני מגיש את בקשת הביטול לפוליסה הישנה, ואם אקח במגן 1 סכום ביטוח של 1,000,000 ₪ וההכנסה שלי תגדל ב-20% בשנה הבאה, כמה תוספת ביטוח למקרה מוות אוכל לבקש לפי סעיף גידול ההכנסה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (loss-of-working-ability/pages/cancellation.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "יש לי ביטוח אובדן כושר עבודה בהראל ואני רוצה לבטל אותו ולעבור ל'אפגרייד פלוס' עם כיסוי מטריה. איך אני מבטל את הפוליסה הנוכחית, ואם אצטרף מחדש אקבל את ההנחה של 10% על המטריה ל-5 שנים ואצטרך לעבור חיתום רפואי שוב?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "easy",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page is a form for agent declaration related to updating a life insurance policy due to mortgage cycle changes, and contains no customer-facing information about coverage, conditions, or procedure",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "easy",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The page is only a table of contents listing section titles and page numbers. It contains no substantive policy content (coverage, conditions, limits, exclusions, procedures, etc.) from which a custom",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "easy",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The page is only a blank request form for information about a cancelled mortgage life insurance policy. It contains no coverage details, limits, conditions, or exclusions that a customer could ask abo",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "קרה נזק בדירה שלי לפני חודש, הגשתי תביעה לפני שבועיים ומסרתי את כל המסמכים. מתי אקבל את התשלום?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "קרה נזק בדירה שלי לפני חודש, והגישתי את כל המסמכים למבטח. תוך כמה זמן הם חייבים לשלם לי את התגמולים?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "קרה נזק בדירה שלי לפני חודש, אני כבר שלחתי את כל המסמכים למבטח. תוך כמה זמן הם חייבים לשלם לי את הפיצוי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer states a single fact directly from the page: the 60-day rule for an unoccupied apartment, with no arithmetic or combination of clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "נסענו לחו״ל לחודשיים והשארנו את הדירה ריקה. מאיזה יום בדיוק היא נחשבת ״דירה שאינה תפוסה״ בפוליסה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single fact from the page about the definition of 'apartment' including shared property in a communal building.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני גר בבניין משותף ורוצה לדעת אם החלק שלי ברכוש המשותף של הבניין — לובי, גג, חדר מדרגות — מכוסה במסגרת הגדרת 'דירה' בפוליסה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single definition from the page without requiring inference, arithmetic, or combining clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "הדירה שלי עומדת ריקה כבר חודשיים כי אני בחו\\\"ל. זה נחשב 'דירה שאינה תפוסה' בפוליסה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single fact from the page about who the policy is intended for, with no need for arithmetic or combining clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "הבנק שלי לוחץ עליי לעשות ביטוח מבנה דרכם, אבל אני מעדיף דרך הסוכן שלי. הפוליסה הזו בכלל מיועדת רק ללקוחות של בנק מסוים?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The page is a high-level marketing overview listing covered perils and target audience, but contains no specific limits, conditions, exceptions, or procedural details (e.g., no monetary caps, timefram",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer is a single fact stated outright on the page: the timeframe for payment of undisputed insurance compensation is 30 days.), and this category still needs hard/medium questions — aim there instead",
+      "question": "הגשתי תביעה על נזק בדירה, אבל המבטח חולק רק על חלק מהסכום. תוך כמה זמן חייבים לשלם לי את החלק שלא שנוי במחלוקת?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page provides general information about the mortgage insurance policy but does not contain specific numerical rules, percentages, or conditions required to formulate a hard question involving arit",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "קרה שריפה בדירה שלי שגרים בה, והנזק הוערך ב-180,000 ש\"ח. הסכום המבוטח בפוליסה הוא 1.2 מיליון ש\"ח. האם יכסו לי את כל הנזק, או שיש הגבלה על הסכום שניתן לקבל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (mortgage/files/טופס-הצעה-לביטוח-חיים-ומבנה-למשכנתא-הצהרת-בריאות-מקוצרת.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "לקחתי משכנתא של 800,000 ש\"ח לפני חודש, ואני רוצה לעשות ביטוח חיים למשכנתא. אם אני מפסיק לעשן עכשיו, כמה זמן אני צריך להישאר בלי לעשן כדי שאוכל לקבל תעריף יותר טוב בביטוח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (mortgage/files/טופס-הצעה-לביטוח-חיים-ומבנה-למשכנתא-הצהרת-בריאות-מקוצרת.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "לקחתי משכנתא לפני שלושה חודשים וביטחתי אותה בהראל. עכשיו אני רוצה להחליף בנק למשכנתאות, ואני מבין שאני צריך למלא טופס הצעה חדש. אם סכום המשכנתא החדשה יהיה 1,100,000 ₪, האם אוכל להמשיך עם אותה פוליסת ביטוח, או שאצטרך לעדכן את סכום הביטוח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (mortgage/files/טופס-הצעה-לביטוח-חיים-ומבנה-למשכנתא-הצהרת-בריאות-מקוצרת.pdf p4) answers the question on its own — the question must need both pages",
+      "question": "אני רוצה לעשות ביטוח למשכנתא שלי, והדירה שלי היא דירה בבניין רגיל. אם תהיה לי דליפת מים בדירה, האם אני יכול לבחור בעצמי את האינסטלטור שיטפל בזה, או שאני חייב לבחור מתוך רשימה שלכם? ומה קורה אם אני בוחר בעצמי, כמה כסף יחזירו לי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (mortgage/files/טופס-הצעה-לביטוח-חיים-ומבנה-למשכנתא-הצהרת-בריאות-מקוצרת.pdf p4) answers the question on its own — the question must need both pages",
+      "question": "לקחתי משכנתא ואני רוצה לבטח את הדירה שלי. אני גר בקומה שלישית בבניין עם 8 קומות, ושטח הדירה שלי הוא 80 מ\"ר. מה סכום הביטוח המינימלי שאני צריך לבטח בו את הדירה, ואיך אני בוחר אם לתקן נזקי מים בעצמי או דרך חברת הביטוח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (mortgage/files/טופס-הצעה-לביטוח-חיים-ומבנה-למשכנתא-הצהרת-בריאות-מקוצרת.pdf p4) answers the question on its own — the question must need both pages",
+      "question": "אני רוצה לעשות ביטוח למשכנתא שלי, והדירה שלי היא דירה בבניין רגיל. אם תהיה לי דליפת מים, האם אני יכול לבחור בעצמי את האינסטלטור, או שאני חייב לבחור מתוך רשימה שלכם? ומה קורה אם אני בוחר בעצמי, האם אני מקבל את כל הכסף בחזרה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (mortgage/files/טופס-הצעה-לביטוח-חיים-ומבנה-למשכנתא-הצהרת-בריאות-מקוצרת.pdf p4) answers the question on its own — the question must need both pages",
+      "question": "אני רוצה לעשות ביטוח למשכנתא שלי, ויש לי בריכת שחייה בחצר. מה סכום הביטוח המינימלי שאני צריך לבטח את הבית שלי בו, ואיך אני בוחר אם לתקן נזקי מים בעצמי או דרך חברת הביטוח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "יש לי משכנתא של 800,000 ש\"ח, ואני רוצה להקטין את סכום ביטוח החיים שלי בהתאם. אם החזרתי 50,000 ש\"ח מהמשכנתא, באיזה סכום אוכל להקטין את הביטוח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (mortgage/pages/reduction-amount.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "אני וחבר שלי לקחנו משכנתא ביחד על דירה. שנינו עובדים, אבל אני היחיד מבינינו שיש לו ביטוח חיים פרטי. האם אני יכול להקטין את סכום הביטוח חיים למשכנתא שלי, ואם כן, איך אני עושה את זה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (mortgage/pages/reduction-amount.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "יש לי משכנתא של 800,000 ש״ח, ואני רוצה להקטין את סכום ביטוח החיים שלי בהתאם. אם החזרתי 100,000 ש״ח מהמשכנתא, בכמה כסף אוכל להקטין את סכום הביטוח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (mortgage/files/טופס-הצעה-לביטוח-משכנתה-בטוחה-ב.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "אני רוצה להקטין את סכום הביטוח חיים שלי למשכנתא, כי החזרתי חלק מההלוואה. מצד אחד, הבנתי שאני צריך לפנות לסוכן הביטוח שלי. מצד שני, אם היו לי בעיות ביטוח בעבר, האם אני צריך לדווח על זה בטופס ההצעה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this medium, not hard (The question asks for two specific procedures (where to send conversion request and Extra Mortgage form) that are each located in longer passages, requiring the reader to locate the correct clauses, but no arithmetic or combination of clauses is needed.)",
+      "question": "אני רוצה להמיר את ביטוח החיים שלי למשכנתא חדשה, ואני גם ממלא את הטופס הזה למשכנתא אקסטרא. לאן אני שולח את הבקשה להמרת הפוליסה, ולאיזה פקס או מייל אני שולח את הטופס הזה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "easy",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני מתכנן לעשות צלילה ספורטיבית באיטליה בשבוע הבא, והגעתי לאי שלושה ימים לפני התאריך המתוכנן. האם אני עדיין מחובר לassicurazione של הצלילה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "easy",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page provides general coverage features of the scuba diving insurance but does not specify clear conditions, limits, or requirements that can form a fully self-contained and precisely answerable q",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "form",
+      "reason": "The answer points at the source material (“as explicitly stated in the insurance certificate”) as if the customer could see it.",
+      "question": "אני מתכנן לעשות צלילה ספורטיבית באילת למשך שבוע, וה страховка שלי אמורה לכסות אותי רק ל-14 יום. מתי בעצם הביטוח שלי יתחיל ומתי יסתיים?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single sentence from the page, with no need for inference, arithmetic, or combining clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני ממלא את טופס ההצטרפות לביטוח תאונות אישיות ורואה את סעיף ויתור הסודיות הרפואית. הוויתור הזה חל גם על הילדים הקטינים שלי שמצורפים לפוליסה, או שאני צריך לחתום בנפרד עבורם?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single sentence from the page, with no need for inference, combination, or arithmetic.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני ממלא את טופס ההצטרפות לביטוח תאונות אישיות עבור הילדים שלי. הוויתור על סודיות רפואית שאני חותם עליו תקף גם לגביהם?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The question asks about a single coverage condition (age 21+) stated directly on the page; the answer merely restates that condition without arithmetic or combining clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני בן 20, ונסעתי על אופניים חשמליים וקיבלתי תאונה. האם הביטוח שלי מכסה את זה אם קניתי את הנספח הזה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "אני בן 58, נפצעתי בתאונה לפני חודש ואני לא יכול לעבוד. קניתי ביטוח עם תגמול יומי של 200 ש״ח. כמה זמן אני יכול לקבל את הפיצוי הזה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "אני בן 58, נפצעתי בתאונה לפני חודש ואני לא יכול לעבוד. קניתי ביטוח עם תגמול יומי של 200 ש״ח. כמה זמן אני יכול לקבל את הפיצוי הזה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "אני בן 58, נפצעתי בתאונה לפני חודש ואני לא יכול לעבוד. קניתי ביטוח עם תגמול יומי של 200 ש״ח. כמה זמן אני יכול לקבל את הפיצוי הזה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page does not contain specific coverage details, limits, or procedures related to travel insurance claims that can form a medium-difficulty question. It is primarily about the general claims handl",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "medium",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "נסעתי לחו\"ל באוגוסט 2022 ונפגעתי שם, אבל רק עכשיו שמעתי שאפשר להגיש תביעה. האם עוד אפשר להגיש תביעה על הנזק?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The page is a promotional marketing flyer for an eSIM benefit (20% discount + 1000 free minutes to Israel) for Harel travel insurance customers. It lacks specific policy clauses, base prices, or quant",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The page is a marketing overview of the 'First Class' travel insurance product listing features (up to $10,000 for follow-up treatment in Israel, up to $155 for delayed baggage, Air Doctor service, ap",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single explicit fact from the source page about policy transfer continuity without any arithmetic or clause combination.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני טס לחו\"ל בעוד שבוע, ויש לי פוליסת 'שיר לנוסע' שהייתה לי דרך שירביט. אם אני מזמין טיסה הלוך ושוב ליוון, ואני יודע שהביטוח שלי עבר להראל ב-1 בדצמבר, האם הביטוח שלי תקף לנסיעה הזו?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "skip",
+      "reason": "non-answer ground truth: הפוליסה שלך הועברה להראל ב-1 בדצמבר 2021, ותנאיה נשארו ללא שינוי. עם זאת, הדף אי",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "אני טסה לטיול של 20 יום בתאילנד, ואני ממש חוששת לאבד את המזוודה שלי. אם המזוודה תאבד, כמה כסף הראל יחזירו לי על זה, אם ערך המזוודה והתוכן שלה הוא 5,000 ש\"ח?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני טסה לחו\"ל בעוד שבוע, ואני קצת חוששת. אם אצטרך פינוי רפואי דחוף בחו\"ל, האם ביטוח הנסיעות שלכם מכסה את העלויות של הטיסה חזרה לארץ אם זה יהיה הכרחי?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "אני טסה לחו\"ל בעוד שבוע, ויש לי ביטוח נסיעות של הראל. אם אצטרך חילוץ מסוק בגלל מצב רפואי רציני, האם הביטוח מכסה את כל העלות, או שיש לי השתתפות עצמית?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "skip",
+      "reason": "non-answer ground truth: מערכת הכללים הזו חלה על ביטוח מטען בנסיעות לחוץ לארץ. עם זאת, הדף אינו מציין סכו",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "נסעתי לחו\"ל לפני שבוע והกระเปון שלי נגנב בשדה התעופה. שילמתי 8,500 ש\"ח למזוודה חדשה. הסכום המבוטח שלי למטען הוא 10,000 ש\"ח. כמה יחזירו לי מהביטוח?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The page provides general information about filing a claim for lost or stolen luggage but does not specify coverage limits, percentages, deductibles, or conditions that can be combined with customer-p",
+      "question": ""
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly states a single fact from the source page without requiring arithmetic or combining clauses.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני נוסע לחו\"ל בעוד שבוע ורוצה לקנות חבילת גלישה ל-10 ימים דרך פייקול. השם שלי מופיע בפוליסת ביטוח נסיעות של הראל, ואני רוצה להשתמש בהטבה. כמה דקות לשיחה ישירות לישראל אני אקבל בחינם בנוסף להנחה?"
+    },
+    {
+      "kind": "standard",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "difficulty",
+      "reason": "an independent judge rates this easy (The answer directly restates a single fact from the source page about the included minutes, with no arithmetic or clause combination needed.), and this category still needs hard/medium questions — aim there instead",
+      "question": "אני נוסע לחו\"ל בעוד שלושה ימים ורוצה לקנות חבילת גלישה ל-eSIM דרך פייקול. יש לי ביטוח נסיעות של הראל. כמה דקות לשיחה ישירות לישראל אני אקבל עם הקנייה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-דרכון-פרימיום.pdf p16) answers the question on its own — the question must need both pages",
+      "question": "אני טס לטרק בגובה רב בפרו עוד שבועיים. קראתי על מחלת גבהים ויש צוות חילוץ 'הראל 669' למבוטחים. אם אפתח מחלת גבהים קשה ואאבד קשר עם המשפחה ל-45 יום, כמה ימים יהיה חיפוש אקטיבי וכמה פסיבי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-דרכון-פרימיום.pdf p16) answers the question on its own — the question must need both pages",
+      "question": "אני מתכנן טרק בגובה רב בנפאל בחודש הבא. אם חס וחלילה אקבל מחלת גבהים ואצטרך חילוץ — מה הצעדים המיידיים שעלי לעשות בשטח, ומה בדיוק מכסה הפוליסה שלי (דרכון פרימיום) מבחינת חיפוש, איתור וחילוץ, כולל מגבלות הזמן?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "Page 2 is a list of FAQ questions only, with no answers or factual content provided. It cannot supply a ground-truth answer half; only Page 1 contains usable information (marketing claims about worldw",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (travel/pages/information.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "אני מתכנן טיול סקי באלפים ורוצה לדעת – אם חס וחלילה אצטרך חילוץ, יש לכם צוות חילוץ משלכם שפועל בחו\"ל? וגם, אם אצטרך טיפול רפואי דחוף בחו\"ל, האם האפליקציה שלכם נותנת מקדמה כספית מיידית?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (travel/pages/information.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "אני טס לטרק בנפאל בחודש הבא וחושש ממצב חירום רפואי בגובה. שמעתי שלהראל יש צוות חילוץ וגם אפליקציה שמשלמת מראש במקרי חירום – מה כל אחד נותן לי במצב כזה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (travel/pages/travel.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "יש לי ביטוח בריאות ש.ר.פ פרימיום ואני מתכנן חופשת סקי בחו\"ל בחודש הבא. אני זכאי לקנות את ביטוח הנסיעות פרימיום של הראל? ומה אני צריך לעשות אם אני מרגיש רע בגובה רב במהלך הטיול?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (travel/pages/emergency-trip-travel.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "אני בחו״ל ויש התראת צונאמי – לאיזה מוקד של הראל 669 אני פונה לקבלת עזרה 24/7, וכמה זמן הצוות כבר עוסק בחילוצים בינלאומיים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "Both pages are informational travel-tip articles (packing advice and weather safety tips) with no policy rules, coverage limits, percentages, formulas, or specific insurance terms. Neither page contai",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "Page 1 is an informational article about emergency preparedness tips during travel, listing emergency types and mentioning the Harel 669 rescue unit. Page 2 is a product marketing page for Harel trave",
+      "question": ""
+    }
+  ],
+  "failures": [
+    "v2-010-apartment-hard (multi_source/hard): exhausted 8 pairs",
+    "v2-018-business-hard (standard/hard): exhausted 3 pages",
+    "v2-021-business-hard (multi_source/hard): exhausted 8 pairs",
+    "v2-031-car-hard (standard/hard): exhausted 3 pages",
+    "v2-037-dental-medium (standard/medium): exhausted 3 pages",
+    "v2-038-dental-medium (standard/medium): exhausted 3 pages",
+    "v2-039-dental-medium (standard/medium): exhausted 3 pages",
+    "v2-040-dental-hard (standard/hard): exhausted 3 pages",
+    "v2-041-dental-hard (standard/hard): exhausted 3 pages",
+    "v2-042-dental-hard (standard/hard): exhausted 3 pages",
+    "v2-043-dental-hard (multi_source/hard): no page pair available",
+    "v2-050-diseases-disabilities-medium (standard/medium): exhausted 3 pages",
+    "v2-051-diseases-disabilities-hard (standard/hard): exhausted 3 pages",
+    "v2-054-diseases-disabilities-hard (multi_source/hard): exhausted 8 pairs",
+    "v2-063-health-hard (standard/hard): exhausted 3 pages",
+    "v2-074-life-hard (standard/hard): exhausted 3 pages",
+    "v2-076-life-hard (multi_source/hard): exhausted 8 pairs",
+    "v2-084-long-term-care-hard (standard/hard): exhausted 3 pages",
+    "v2-086-long-term-care-hard (standard/hard): exhausted 3 pages",
+    "v2-087-long-term-care-hard (multi_source/hard): exhausted 8 pairs",
+    "v2-088-long-term-care-medium (unanswerable/medium): exhausted 3 pages",
+    "v2-096-loss-of-working-ability-hard (standard/hard): exhausted 3 pages",
+    "v2-097-loss-of-working-ability-hard (standard/hard): exhausted 3 pages",
+    "v2-129-travel-hard (standard/hard): exhausted 3 pages"
+  ],
+  "schema_problems": [
+    "apartment: 0 multi_source items, expected 1",
+    "business/hard: 2 standard items, expected 3",
+    "business: 0 multi_source items, expected 1",
+    "car/hard: 2 standard items, expected 3",
+    "dental/medium: 0 standard items, expected 3",
+    "dental/hard: 0 standard items, expected 3",
+    "dental: 0 multi_source items, expected 1",
+    "diseases-disabilities/medium: 2 standard items, expected 3",
+    "diseases-disabilities/hard: 2 standard items, expected 3",
+    "diseases-disabilities: 0 multi_source items, expected 1",
+    "health/hard: 2 standard items, expected 3",
+    "life/hard: 2 standard items, expected 3",
+    "life: 0 multi_source items, expected 1",
+    "long-term-care/hard: 1 standard items, expected 3",
+    "long-term-care: 0 multi_source items, expected 1",
+    "long-term-care: 0 unanswerable items, expected 1",
+    "loss-of-working-ability/hard: 1 standard items, expected 3",
+    "travel/medium: 2 standard items, expected 3"
+  ],
+  "coverage": {
+    "apartment": {
+      "items": 10,
+      "distinct_files": 9,
+      "distinct_pages": 9,
+      "overused_files": []
+    },
+    "business": {
+      "items": 9,
+      "distinct_files": 8,
+      "distinct_pages": 8,
+      "overused_files": []
+    },
+    "car": {
+      "items": 10,
+      "distinct_files": 10,
+      "distinct_pages": 10,
+      "overused_files": []
+    },
+    "dental": {
+      "items": 4,
+      "distinct_files": 3,
+      "distinct_pages": 3,
+      "overused_files": []
+    },
+    "diseases-disabilities": {
+      "items": 8,
+      "distinct_files": 6,
+      "distinct_pages": 7,
+      "overused_files": []
+    },
+    "health": {
+      "items": 10,
+      "distinct_files": 10,
+      "distinct_pages": 10,
+      "overused_files": []
+    },
+    "life": {
+      "items": 9,
+      "distinct_files": 8,
+      "distinct_pages": 8,
+      "overused_files": []
+    },
+    "long-term-care": {
+      "items": 7,
+      "distinct_files": 7,
+      "distinct_pages": 7,
+      "overused_files": []
+    },
+    "loss-of-working-ability": {
+      "items": 9,
+      "distinct_files": 9,
+      "distinct_pages": 9,
+      "overused_files": []
+    },
+    "mortgage": {
+      "items": 11,
+      "distinct_files": 10,
+      "distinct_pages": 11,
+      "overused_files": []
+    },
+    "personal-accident": {
+      "items": 11,
+      "distinct_files": 10,
+      "distinct_pages": 11,
+      "overused_files": []
+    },
+    "travel": {
+      "items": 10,
+      "distinct_files": 9,
+      "distinct_pages": 10,
+      "overused_files": []
+    }
+  }
+}
