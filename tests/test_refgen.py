@@ -291,6 +291,18 @@ def test_rejection_reason_is_fed_back_to_the_generator(llm):
     assert "voice" in retries[0]["last"], "the reason must be the gate's own"
 
 
+def test_a_schema_violation_is_a_rejection_not_a_crash(llm):
+    """The LLM gates do let things past: a non-Hebrew question survived the
+    form gate in the full run and the schema raised, which propagated out of
+    the worker and killed all twelve categories."""
+    llm["generation"] = {"question": "Does my policy cover this dental treatment?",
+                         "ground_truth_answer": "Yes, up to 500 NIS.", "rationale": "r"}
+    outcome = build()  # must not raise
+    assert outcome.item is None
+    assert {a.gate for a in outcome.attempts} == {"schema"}
+    assert "Hebrew" in outcome.attempts[0].reason
+
+
 def test_a_non_answer_ground_truth_is_treated_as_a_skip(llm):
     """Handed a thin page, generators write "the page does not state X" rather
     than declining. That is not a ground truth — and arguing with it wastes

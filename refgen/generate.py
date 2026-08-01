@@ -10,6 +10,8 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 
+from pydantic import ValidationError
+
 from evalharness.judge import _call_judge
 
 from . import prompts, schema, verify
@@ -149,20 +151,32 @@ def build_item(kind: str, difficulty: str, category: str, sampler: Sampler,
                 continue
 
             sources = [{"any_of": [{"file": p.file, "page": p.page}]} for p in drawn]
+            # The schema is the last gate, and the LLM gates do let things past
+            # it (a non-Hebrew question survived the form gate once). Treat a
+            # violation as one more rejection to retry against, never as an
+            # exception — it would take down every other category's thread.
             # The judge's classification wins for standard items; multi-source
             # items are hard by definition and unanswerable ones carry the
             # difficulty of the gap, which no page-based rubric can rate.
             earned = gates.get("difficulty", difficulty) if kind == "standard" else difficulty
-            outcome.item = RefQuestion(
-                id=item_id.rsplit("-", 1)[0] + f"-{earned}",
-                domain=category, difficulty=earned, kind=kind,
-                answerable=kind != "unanswerable",
-                question=candidate["question"],
-                ground_truth_answer=candidate["ground_truth_answer"],
-                ground_truth_sources=sources,
-                provenance={"generator_model": model, "verifier_models": verifiers,
-                            "attempts": len(outcome.attempts) + 1, "gates": gates},
-            )
+            try:
+                outcome.item = RefQuestion(
+                    id=item_id.rsplit("-", 1)[0] + f"-{earned}",
+                    domain=category, difficulty=earned, kind=kind,
+                    answerable=kind != "unanswerable",
+                    question=candidate["question"],
+                    ground_truth_answer=candidate["ground_truth_answer"],
+                    ground_truth_sources=sources,
+                    provenance={"generator_model": model, "verifier_models": verifiers,
+                                "attempts": len(outcome.attempts) + 1, "gates": gates},
+                )
+            except ValidationError as invalid:
+                messages = "; ".join(error["msg"] for error in invalid.errors())
+                logger.info("%s rejected at schema: %s", item_id, messages)
+                outcome.attempts.append(Attempt(kind, difficulty, model, "schema",
+                                                messages, candidate["question"]))
+                reason = messages
+                continue
             return outcome
 
         sampler.release(*drawn)  # this page did not work out; try a different one
