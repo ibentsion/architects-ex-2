@@ -8,12 +8,23 @@ The first converter use downloads the docling layout/table models (~500 MB)
 into the HF cache; CPU parsing is the slow path — budget hours for the full
 350-PDF corpus. The read-through parse cache (``rag/parsing/cache.py``) means
 each file is parsed once, ever.
+
+Every parse then goes through the BiDi word-order repair
+(``rag/parsing/rtl_repair.py``) — Docling emits Hebrew table cells in visual
+(backwards) word order, so the repair is part of what "parsed" means here, not
+an optional post-step. It is unconditional: reversed text is a defect, never a
+mode. ``cache/parsed/`` therefore holds repaired documents; existing caches are
+brought forward by ``python -m rag.cli.repair_cache``.
 """
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from rag.parsing import ParsedDoc, SourceFile
+from rag.parsing.rtl_repair import repair_docling
+
+logger = logging.getLogger(__name__)
 
 
 class ParseError(Exception):
@@ -49,4 +60,15 @@ class DoclingParser:
             result = converter.convert(source.abs_path)
         except Exception as exc:  # noqa: BLE001 — per-file failures are recorded, not fatal
             raise ParseError(f"Docling failed on {source.rel_path}: {exc}") from exc
-        return ParsedDoc(source=source, docling=result.document.export_to_dict())
+        doc_dict = result.document.export_to_dict()
+        stats = repair_docling(doc_dict, source.abs_path)
+        if stats.repaired:
+            logger.debug(
+                "BiDi repair on %s: %d/%d cells, %d/%d text items",
+                source.rel_path,
+                stats.cells_repaired,
+                stats.cells_total,
+                stats.texts_repaired,
+                stats.texts_total,
+            )
+        return ParsedDoc(source=source, docling=doc_dict)

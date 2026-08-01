@@ -5,4 +5,5 @@ __pycache__/
 venv
 cache/
 rag_index/
+backups/
 .pytest_cache/
