@@ -103,17 +103,36 @@ def gate_form(item: dict, model: str) -> str:
     return "pass"
 
 
-def gate_difficulty(item: dict, difficulty: str, n_sources: int, model: str) -> str:
-    """An independent model must agree with the requested difficulty label."""
+def gate_difficulty(item: dict, difficulty: str, n_sources: int, model: str,
+                    wanted: set | None = None) -> str:
+    """Classify the item's difficulty, and return the label it actually earns.
+
+    The label is the independent judge's, not the generator's claim. Forcing
+    the requested label instead made the two fight: dense policy pages
+    naturally yield questions about a specific buried limit, which is `medium`
+    by definition, so nearly every `easy` request was rejected. Classifying and
+    then filing the item into whichever cell still needs one converts that
+    argument into progress, and makes the dataset's difficulty labels mean
+    "an independent model rated this" rather than "a generator was told to".
+
+    `wanted` is the set of difficulties this category still needs; an item is
+    rejected only when its earned difficulty is not one of them.
+    """
     got = _call_judge(prompts.build_difficulty_messages(item, n_sources), model,
                       prompts.parse_difficulty)
     if "error" in got:
         raise Rejected("judge_error", got["error"])
-    if got["difficulty"] != difficulty:
+    earned = got["difficulty"]
+    if wanted is not None and earned not in wanted:
         raise Rejected("difficulty",
-                       f"an independent judge rates this {got['difficulty']}, not "
-                       f"{difficulty} ({got['reason']})")
-    return difficulty
+                       f"an independent judge rates this {earned} ({got['reason']}), "
+                       f"and this category still needs {'/'.join(sorted(wanted))} "
+                       "questions — aim there instead")
+    if wanted is None and earned != difficulty:
+        raise Rejected("difficulty",
+                       f"an independent judge rates this {earned}, not {difficulty} "
+                       f"({got['reason']})")
+    return earned
 
 
 def gate_topicality(item: dict, category: str, category_pages: list, model: str) -> str:
@@ -130,7 +149,7 @@ def gate_topicality(item: dict, category: str, category_pages: list, model: str)
 
 
 def run_gates(kind: str, item: dict, difficulty: str, pages: list, category: str,
-              category_pages: list, verifiers: list) -> dict:
+              category_pages: list, verifiers: list, wanted: set | None = None) -> dict:
     """Every gate for one candidate, run concurrently.
 
     The gates are independent, and each is a slow reasoning-model call — run
@@ -153,7 +172,8 @@ def run_gates(kind: str, item: dict, difficulty: str, pages: list, category: str
         jobs = {
             "form": lambda: gate_form(item, pick(0)),
             "derivable": lambda: gate_derivable(item, pages, pick(1)),
-            "difficulty": lambda: gate_difficulty(item, difficulty, len(pages), pick(3)),
+            "difficulty": lambda: gate_difficulty(item, difficulty, len(pages),
+                                                  pick(3), wanted),
         }
         if kind == "multi_source":
             jobs["needs_both"] = lambda: gate_needs_both(item, pages, pick(2))

@@ -84,7 +84,7 @@ def build(kind="standard", difficulty="easy", pages=None, **kwargs):
     defaults = dict(category=CATEGORY, sampler=Sampler(pages, seed=0),
                     category_pages=pages, examples=EXAMPLES,
                     model=generate.GENERATOR_MODELS[0], item_id=f"v2-001-{CATEGORY}-{difficulty}",
-                    cell_used=set(), existing_questions=[])
+                    cell_used=set(), existing_questions=[], wanted=None)
     return generate.build_item(kind, difficulty, **{**defaults, **kwargs})
 
 
@@ -190,11 +190,31 @@ def test_multi_source_rejected_when_one_page_answers_alone(llm):
     assert {a.gate for a in outcome.attempts} == {"needs_both"}
 
 
-def test_difficulty_mismatch_is_rejected(llm):
+def test_difficulty_mismatch_is_rejected_when_no_cell_is_open(llm):
+    """multi_source and unanswerable items pass wanted=None: their difficulty
+    is fixed by kind, so a mismatch is a rejection."""
     llm["difficulty"] = "easy"
     outcome = build(difficulty="hard")
     assert outcome.item is None
     assert "rates this easy, not hard" in outcome.attempts[0].reason
+
+
+def test_item_is_filed_under_the_difficulty_the_judge_gives_it(llm):
+    """Classify and place: the label is the independent judge's verdict, not
+    the generator's claim, so asking for easy and earning medium is fine as
+    long as the medium cell has room."""
+    llm["difficulty"] = "medium"
+    outcome = build(difficulty="easy", wanted={"easy", "medium", "hard"})
+    assert outcome.item is not None
+    assert outcome.item.difficulty == "medium"
+    assert outcome.item.id.endswith("-medium"), "the id must follow the earned label"
+
+
+def test_item_is_rejected_when_its_earned_cell_is_already_full(llm):
+    llm["difficulty"] = "medium"
+    outcome = build(difficulty="easy", wanted={"easy"})
+    assert outcome.item is None
+    assert "still needs easy questions" in outcome.attempts[0].reason
 
 
 def test_form_failure_is_rejected(llm):

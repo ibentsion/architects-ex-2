@@ -7,3 +7,4 @@ cache/
 rag_index/
 backups/
 .pytest_cache/
+*.partial.jsonl

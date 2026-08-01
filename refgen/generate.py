@@ -18,11 +18,19 @@ from .schema import DIFFICULTIES, RefQuestion
 
 logger = logging.getLogger(__name__)
 
-#: Question writers. Round-robin per item so no single model's habits shape the
-#: dataset; every item's gates run on the other two.
+#: Question writers: three labs, round-robin per item so no single model's
+#: habits shape the dataset; every item's gates run on the other two.
+#:
+#: Measured on a real two-page generation prompt (11k chars): gemma 5.8 s,
+#: Qwen 12.5 s, Nemotron 25.0 s. GLM-5.1 was the original third member and
+#: took 537 s on the same call — it is a reasoning model that spent the whole
+#: budget thinking, which is what made the first trial run unusable.
+#: gpt-oss-120b is faster still (3.6 s) but is deliberately absent: it
+#: generates the RAG system's answers and sits on the judge committee, so
+#: letting it also write the questions would tune the dataset to one model.
 GENERATOR_MODELS = (
     "google/gemma-3-27b-it",
-    "zai-org/GLM-5.1",
+    "Qwen/Qwen3-235B-A22B-Instruct-2507",
     "nvidia/Nemotron-3-Ultra-550b-a55b",
 )
 #: Re-prompts with the rejection reason before giving up on a page.
@@ -79,8 +87,15 @@ def _generate_candidate(kind: str, difficulty: str, pages: list, examples: list,
 
 def build_item(kind: str, difficulty: str, category: str, sampler: Sampler,
                category_pages: list, examples: list, model: str, item_id: str,
-               cell_used: set, existing_questions: list) -> Outcome:
-    """Draw pages and write one accepted item, or report why it could not be."""
+               cell_used: set, existing_questions: list,
+               wanted: set | None = None) -> Outcome:
+    """Draw pages and write one accepted item, or report why it could not be.
+
+    `difficulty` steers the generator; for standard items the accepted item's
+    difficulty is the one an independent judge assigns (see
+    `verify.gate_difficulty`), and `wanted` is the set of difficulties this
+    category still has room for.
+    """
     verifiers = [m for m in GENERATOR_MODELS if m != model]
     outcome = Outcome()
 
@@ -113,7 +128,7 @@ def build_item(kind: str, difficulty: str, category: str, sampler: Sampler,
                                           "this repeats an existing question in the "
                                           f"dataset: {duplicate[:80]}")
                 gates = verify.run_gates(kind, candidate, difficulty, drawn, category,
-                                         category_pages, verifiers)
+                                         category_pages, verifiers, wanted)
             except Skipped as skip:
                 outcome.attempts.append(Attempt(kind, difficulty, model, "skip", str(skip)))
                 break  # the page is unusable — draw another
@@ -126,8 +141,13 @@ def build_item(kind: str, difficulty: str, category: str, sampler: Sampler,
                 continue
 
             sources = [{"any_of": [{"file": p.file, "page": p.page}]} for p in drawn]
+            # The judge's classification wins for standard items; multi-source
+            # items are hard by definition and unanswerable ones carry the
+            # difficulty of the gap, which no page-based rubric can rate.
+            earned = gates.get("difficulty", difficulty) if kind == "standard" else difficulty
             outcome.item = RefQuestion(
-                id=item_id, domain=category, difficulty=difficulty, kind=kind,
+                id=item_id.rsplit("-", 1)[0] + f"-{earned}",
+                domain=category, difficulty=earned, kind=kind,
                 answerable=kind != "unanswerable",
                 question=candidate["question"],
                 ground_truth_answer=candidate["ground_truth_answer"],

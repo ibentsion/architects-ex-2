@@ -53,17 +53,30 @@ def build_category(category: str, index: int, store: PageStore, v1_items: list,
     for slot_index, (kind, difficulty) in enumerate(slots):
         model = generate.GENERATOR_MODELS[(index + slot_index) % len(generate.GENERATOR_MODELS)]
         item_id = f"v2-{index * len(slots) + slot_index + 1:03d}-{category}-{difficulty}"
+        # Standard items are placed by the difficulty they earn, so aim at
+        # whatever this category still has room for — with a preference for the
+        # slot's own difficulty, to keep the mix spread across the corpus.
+        wanted = None
+        if kind == "standard":
+            filled = Counter(i.difficulty for i in items if i.kind == "standard")
+            wanted = {d for d in schema.DIFFICULTIES
+                      if filled[d] < schema.STANDARD_PER_CELL}
+            if not wanted:
+                continue
+            if difficulty not in wanted:
+                difficulty = sorted(wanted)[0]
         used = cell_used.setdefault(difficulty, set())
         outcome = generate.build_item(
             kind, difficulty, category, sampler, pages,
             _examples_for(v1_items, difficulty, category, rng), model, item_id,
-            used, existing + [i.question for i in items])
+            used, existing + [i.question for i in items], wanted)
         attempts += outcome.attempts
         if outcome.item is None:
             failures.append(f"{item_id} ({kind}/{difficulty}): {outcome.failure}")
         else:
             items.append(outcome.item)
-            used.update(outcome.item.pages())
+            # File the pages under the difficulty the item actually earned.
+            cell_used.setdefault(outcome.item.difficulty, set()).update(outcome.item.pages())
             if checkpoint:
                 checkpoint(outcome.item)
         progress(category, len(items), len(slots))
