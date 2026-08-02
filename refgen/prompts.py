@@ -98,19 +98,39 @@ SYSTEM_STANDARD = """You write evaluation questions for a Hebrew insurance custo
 """ + _OUTPUT
 
 
-SYSTEM_MULTI = """You write evaluation questions for a Hebrew insurance customer-support RAG system. You are given TWO pages from two different documents of the same insurance category. Write one question whose answer needs BOTH pages.
+_MULTI_HEAD = """You write evaluation questions for a Hebrew insurance customer-support RAG system. You are given TWO pages from two different documents of the same insurance category. Write one question whose answer needs BOTH pages.
 
 """ + _FORM_RULES + """
 
 The two-page requirement is tested mechanically, so it must genuinely hold. A judge is shown each page ALONE; if either one establishes your answer by itself, the question is rejected. This is the failure to avoid, and it is by far the most common one: a question about a single subject that one page happens to cover fully.
 
 The shape that works is a question with TWO parts, one answered by each page. The customer wants two things at once, and the ground-truth answer has two halves — one drawn from page 1, the other from page 2. Neither half is optional.
+"""
 
+_MULTI_VARIANTS = """
 Three reliable variants:
 - TWO PRODUCTS: the customer holds or wants two different things, one described on each page, and asks the same thing about both. E.g. "I'm on the building committee and want to insure the shared building, and I also have a private art collection to insure — how do I sign up for each?" The answer states the route for each, one per page.
 - COMPARISON: the two pages are different policies/documents covering the same subject, and the customer is choosing between them. The answer states what each one says.
 - RULE PLUS FIGURE: one page states a rule, condition or entitlement, the other states the specific number, limit or exception that governs it. The answer needs both, and neither page carries the whole.
+"""
 
+#: v3's variant: same two-page requirement, aimed at the shape the eval set is
+#: thinnest on — answers that COMBINE figures across the two pages (the agent
+#: harness's calculator path). Prefer numbers over prose, but never invent a
+#: pairing that isn't there: skipping stays better than forcing arithmetic.
+_MULTI_CALC_VARIANTS = """
+Prefer, in this order:
+1. RULE PLUS FIGURE (best): one page states a rule, rate, percentage, cap, waiting period or formula; the other states the number it applies to (a sum insured, a benefit, a premium, a period, a ceiling). The answer APPLIES one to the other and states the computed result.
+2. TWO FIGURES COMBINED: each page carries one number the customer's answer needs, and the answer sums, subtracts, compares or ranges over them (total cover across both, the gap between two limits, which of the two binds first).
+3. COMPARISON of two documents' figures for the same subject, where the answer states both numbers and which one governs.
+Only if the pair genuinely carries no usable numbers, fall back to a non-numeric two-part question (one part per page).
+
+When the answer involves arithmetic, the ground-truth answer must show its working: every operand, where each one comes from in plain customer language, and the result. E.g. "cover for garden plants is capped at 2 percent of the sum insured, and your policy's sum insured is 1,200,000 - so the maximum payout is 24,000". A reader must be able to check the number without the pages.
+
+The customer may supply one figure of their own (their sum insured, what they paid, how many days passed) — but at least one operand must come from EACH page, or the leave-one-out judge will reject the item.
+"""
+
+_MULTI_TAIL = """
 Before you write, name to yourself which part comes from page 1 and which from page 2. If you cannot split it that way, these two pages do not support a multi-source question — return the skip object rather than a question one page answers.
 
 The question must make both parts visible: a reader should see that two different things are being asked.
@@ -120,6 +140,9 @@ The question must make both parts visible: a reader should see that two differen
 """ + _NO_INVENTED_GAP + """
 
 """ + _OUTPUT
+
+SYSTEM_MULTI = _MULTI_HEAD + _MULTI_VARIANTS + _MULTI_TAIL
+SYSTEM_MULTI_CALC = _MULTI_HEAD + _MULTI_CALC_VARIANTS + _MULTI_TAIL
 
 
 SYSTEM_UNANSWERABLE = """You write evaluation questions for a Hebrew insurance customer-support RAG system. Your job here is the opposite of usual: write a question the corpus CANNOT answer, to test whether the system correctly says "I don't have enough information" instead of inventing an answer.
@@ -156,12 +179,18 @@ UNANSWERABLE_RULES = {
 
 
 def build_generation_messages(kind: str, difficulty: str, pages: list,
-                              examples: list[dict], category: str) -> list:
-    """Messages for writing one item of `kind` at `difficulty`."""
+                              examples: list[dict], category: str,
+                              variant: str | None = None) -> list:
+    """Messages for writing one item of `kind` at `difficulty`.
+
+    `variant="calc"` swaps the multi-source prompt for the calculation-biased
+    one (the v3 profile); it is ignored for the other kinds.
+    """
     fill = {"difficulty": difficulty,
             "difficulty_rule": DIFFICULTY_RULES[difficulty],
             "unanswerable_rule": UNANSWERABLE_RULES.get(difficulty, "")}
-    system = {"standard": SYSTEM_STANDARD, "multi_source": SYSTEM_MULTI,
+    multi = SYSTEM_MULTI_CALC if variant == "calc" else SYSTEM_MULTI
+    system = {"standard": SYSTEM_STANDARD, "multi_source": multi,
               "unanswerable": SYSTEM_UNANSWERABLE}[kind] % fill
 
     header = (f"Insurance category: {category}\n\n"

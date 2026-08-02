@@ -497,6 +497,87 @@ def test_a_full_category_needs_nothing_more():
     assert generate.category_plan(have) == []
 
 
+# -- v3 profile: multi-source/calculation top-up -----------------------------
+
+
+def v3_item(n: int, category: str = CATEGORY) -> dict:
+    return item_dict(
+        id=f"v3-{n:03d}-{category}-hard", domain=category, difficulty="hard",
+        kind="multi_source",
+        question=f"שאלה {n} בנושא {category} " + " ".join(f"מילה{n}{w}" for w in range(6)),
+        ground_truth_sources=[
+            {"any_of": [{"file": f"{category}/files/f{n}.pdf", "page": 1}]},
+            {"any_of": [{"file": f"{category}/files/g{n}.pdf", "page": 1}]},
+        ])
+
+
+def test_v3_plan_is_three_multi_source_items_per_category():
+    assert generate.plan_for("v3") == [("multi_source", "hard")] * 3
+
+
+def test_v3_plan_asks_only_for_the_shortfall():
+    have = [RefQuestion(**v3_item(1))]
+    assert generate.plan_for("v3", have) == [("multi_source", "hard")] * 2
+
+
+def test_v3_ids_are_accepted_and_recognised_as_a_profile():
+    items = [RefQuestion(**v3_item(n)) for n in range(1, 4)]
+    assert schema.profile_of(items) == "v3"
+    assert schema.profile_of([RefQuestion(**item_dict())]) == "v2"
+    assert schema.profile_of(items + [RefQuestion(**item_dict())]) == "v2"
+
+
+def test_v3_dataset_passes_without_v2s_per_cell_shape():
+    """v3 tops up one shape; the counts check is v2's and would fail it."""
+    items = [RefQuestion(**v3_item(n)) for n in range(1, 4)]
+    assert schema.check_dataset(items, strict_counts=False) == []
+    assert schema.check_dataset(items) != []  # the v2 shape check still bites
+
+
+def test_holdout_excludes_the_pages_and_questions_of_every_held_out_file(tmp_path):
+    v1 = tmp_path / "v1.json"
+    v2 = tmp_path / "v2.json"
+    v1.write_text(json.dumps([item_dict()], ensure_ascii=False), encoding="utf-8")
+    v2.write_text(json.dumps([v3_item(9)], ensure_ascii=False), encoding="utf-8")
+    pages, questions = schema.load_exclusions([v1, v2])
+    assert pages == {("dental/files/f0.pdf", 1), ("dental/files/f9.pdf", 1),
+                     ("dental/files/g9.pdf", 1)}
+    assert len(questions) == 2
+    # A single path is accepted too (the v2 run passes one file).
+    assert schema.load_exclusions(v1)[0] == {("dental/files/f0.pdf", 1)}
+
+
+def test_v3_audit_reports_no_shape_problems(tmp_path, capsys):
+    path = tmp_path / "reference_questions_v3.json"
+    path.write_text(json.dumps([v3_item(n) for n in range(1, 4)], ensure_ascii=False),
+                    encoding="utf-8")
+    assert audit.main([str(path), "--no-sources", "--holdout", str(tmp_path / "absent.json")]) == 0
+
+
+def test_v3_multi_source_prompt_asks_for_combined_figures():
+    pages = make_pages(2)
+    calc = prompts.build_generation_messages(
+        "multi_source", "hard", pages, EXAMPLES, CATEGORY, "calc")[0]["content"]
+    mixed = prompts.build_generation_messages(
+        "multi_source", "hard", pages, EXAMPLES, CATEGORY)[0]["content"]
+    assert "RULE PLUS FIGURE (best)" in calc and "TWO FIGURES COMBINED" in calc
+    assert "show its working" in calc  # operands and result must be in the ground truth
+    assert "TWO PRODUCTS" in mixed and "RULE PLUS FIGURE (best)" not in mixed
+    # Both keep the two-page requirement the leave-one-out gate enforces.
+    for system in (calc, mixed):
+        assert "each page ALONE" in system
+
+
+def test_the_calc_variant_reaches_the_generator(llm):
+    llm["support"] = {1: "partially", 2: "fully"}  # neither page answers alone
+    llm["difficulty"] = "hard"
+    outcome = build("multi_source", "hard", pages=make_pages(2), variant="calc",
+                    item_id=f"v3-001-{CATEGORY}-hard")
+    assert outcome.item is not None and outcome.item.id.startswith("v3-")
+    generation = [c for c in llm["calls"] if "TWO FIGURES COMBINED" in c["system"]]
+    assert generation, "the calculation-biased prompt was not the one sent"
+
+
 def test_audit_reports_every_malformed_item_at_once(tmp_path):
     path = tmp_path / "bad.json"
     path.write_text(json.dumps([item_dict(id="nope"), item_dict(difficulty="trivial")],
@@ -509,7 +590,7 @@ def test_audit_reports_every_malformed_item_at_once(tmp_path):
 def test_audit_passes_a_conforming_file(tmp_path, capsys):
     path = tmp_path / "ok.json"
     path.write_text(json.dumps([item_dict()], ensure_ascii=False), encoding="utf-8")
-    assert audit.main([str(path), "--no-sources", "--v1", str(tmp_path / "absent.json")]) == 1
+    assert audit.main([str(path), "--no-sources", "--holdout", str(tmp_path / "absent.json")]) == 1
     assert "1 items" in capsys.readouterr().err  # structure fine, counts incomplete
 
 

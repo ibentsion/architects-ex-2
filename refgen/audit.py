@@ -98,7 +98,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("dataset")
-    ap.add_argument("--v1", default="reference_questions.json")
+    ap.add_argument("--holdout", nargs="+", default=["reference_questions.json"],
+                    help="held-out dataset file(s) whose pages and questions this "
+                         "one must not reuse (v3 holds out both v1 and v2)")
     ap.add_argument("--corpus", default="corpus")
     ap.add_argument("--cache-dir", default="cache")
     ap.add_argument("--gates", action="store_true", help="re-run the LLM gates on a sample")
@@ -114,11 +116,13 @@ def main(argv=None):
         print(f"{args.dataset}: {error}", file=sys.stderr)
         return 1
     store = None if args.no_sources else PageStore(args.corpus, args.cache_dir)
-    v1_pages, v1_questions = ((), ())
-    if Path(args.v1).is_file():
-        v1_pages, v1_questions = schema.load_v1_exclusions(args.v1)
+    present = [p for p in args.holdout if Path(p).is_file()]
+    held_pages, held_questions = schema.load_exclusions(present) if present else ((), ())
 
-    problems = schema.check_dataset(items, v1_pages, v1_questions, store)
+    # v3 is a multi-source top-up, not a full dataset: the per-cell counts and
+    # every-category shape checks are v2's, and would fail it by design.
+    problems = schema.check_dataset(items, held_pages, held_questions, store,
+                                    strict_counts=schema.profile_of(items) == "v2")
 
     print(f"{args.dataset}: {len(items)} items, "
           f"{len({i.domain for i in items})}/{len(KNOWN_CATEGORIES)} categories",

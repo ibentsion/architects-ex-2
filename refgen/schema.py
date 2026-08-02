@@ -1,4 +1,4 @@
-"""The v2 dataset spec, as code.
+"""The reference-dataset spec, as code (v2's full shape; v3 tops up one cell).
 
 Two layers:
 
@@ -82,7 +82,7 @@ class RefQuestion(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    id: str = Field(..., pattern=r"^v2-\d{3}-[a-z-]+-(easy|medium|hard)$")
+    id: str = Field(..., pattern=r"^v[23]-\d{3}-[a-z-]+-(easy|medium|hard)$")
     domain: str
     difficulty: Literal["easy", "medium", "hard"]
     kind: Literal["standard", "multi_source", "unanswerable"] = "standard"
@@ -149,19 +149,34 @@ def is_duplicate(question: str, existing: list[str],
                  if jaccard(question, other) >= threshold), None)
 
 
-def load_v1_exclusions(path) -> tuple[set[tuple[str, int | None]], list[str]]:
-    """Pages and questions of the held-out v1 set, which v2 must not reuse.
+def load_exclusions(paths) -> tuple[set[tuple[str, int | None]], list[str]]:
+    """Pages and questions of the held-out sets a new dataset must not reuse.
 
     v1 is the validation set: a v2 item built from a page v1 quizzes on — or
-    paraphrasing a v1 question — would leak the test set into the dev set.
+    paraphrasing a v1 question — would leak the test set into the dev set. v3
+    holds out v1 AND v2, so it adds questions rather than re-asking them; a
+    single path is accepted as well as a list.
     """
     import json
     from pathlib import Path
 
-    items = json.loads(Path(path).read_text(encoding="utf-8"))
-    pages = {(s["file"], s.get("page"))
-             for item in items for g in item["ground_truth_sources"] for s in g["any_of"]}
-    return pages, [item["question"] for item in items]
+    if isinstance(paths, (str, Path)):
+        paths = [paths]
+    pages: set[tuple[str, int | None]] = set()
+    questions: list[str] = []
+    for path in paths:
+        items = json.loads(Path(path).read_text(encoding="utf-8"))
+        pages |= {(s["file"], s.get("page"))
+                  for item in items for g in item["ground_truth_sources"] for s in g["any_of"]}
+        questions += [item["question"] for item in items]
+    return pages, questions
+
+
+def profile_of(items: list[RefQuestion]) -> str:
+    """Which profile produced a dataset, read off the item ids. v3 is a
+    multi-source top-up and carries none of v2's per-cell counts, so the shape
+    checks must know which one they are looking at."""
+    return "v3" if items and all(item.id.startswith("v3-") for item in items) else "v2"
 
 
 def check_item_sources(item: RefQuestion, store) -> list[str]:

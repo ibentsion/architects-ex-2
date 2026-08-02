@@ -47,6 +47,10 @@ MAX_PAIRS = 8
 MAX_RETRIES_MULTI = 1
 #: Pages shown to an unanswerable-question writer as category context.
 UNANSWERABLE_CONTEXT_PAGES = 8
+#: v3's per-category count: three multi-source items, written from the
+#: calculation-biased prompt. v1 and v2 carry one multi-source item per
+#: category, and that is the shape the harness eval separated systems on.
+V3_MULTI_SOURCE_PER_CATEGORY = 3
 #: Generation prompts carry whole corpus pages, and the writers are reasoning
 #: models — at the judges' 4096 budget GLM-5.1 spent it all thinking and
 #: returned nothing on two-page multi-source prompts.
@@ -79,9 +83,11 @@ class Skipped(Exception):
 
 
 def _generate_candidate(kind: str, difficulty: str, pages: list, examples: list,
-                        category: str, model: str, reason: str | None) -> dict:
+                        category: str, model: str, reason: str | None,
+                        variant: str | None = None) -> dict:
     """One generator call. `reason` re-prompts after a rejection."""
-    messages = prompts.build_generation_messages(kind, difficulty, pages, examples, category)
+    messages = prompts.build_generation_messages(kind, difficulty, pages, examples,
+                                                 category, variant)
     if reason:
         messages = messages + [prompts.retry_message(reason)]
     result = _call_judge(messages, model, prompts.parse_generation,
@@ -100,13 +106,14 @@ def _generate_candidate(kind: str, difficulty: str, pages: list, examples: list,
 def build_item(kind: str, difficulty: str, category: str, sampler: Sampler,
                category_pages: list, examples: list, model: str, item_id: str,
                cell_used: set, existing_questions: list,
-               wanted: set | None = None) -> Outcome:
+               wanted: set | None = None, variant: str | None = None) -> Outcome:
     """Draw pages and write one accepted item, or report why it could not be.
 
     `difficulty` steers the generator; for standard items the accepted item's
     difficulty is the one an independent judge assigns (see
     `verify.gate_difficulty`), and `wanted` is the set of difficulties this
-    category still has room for.
+    category still has room for. `variant` selects a prompt flavour within the
+    kind (v3's calculation-biased multi-source prompt).
     """
     verifiers = [m for m in GENERATOR_MODELS if m != model]
     outcome = Outcome()
@@ -135,7 +142,7 @@ def build_item(kind: str, difficulty: str, category: str, sampler: Sampler,
             candidate = None
             try:
                 candidate = _generate_candidate(kind, difficulty, pages, examples,
-                                                category, model, reason)
+                                                category, model, reason, variant)
                 duplicate = schema.is_duplicate(candidate["question"], existing_questions)
                 if duplicate is not None:
                     raise verify.Rejected("duplicate",
@@ -219,3 +226,28 @@ def unanswerable_difficulty(category_index: int) -> str:
     """Rotate the 12 unanswerable items across difficulties (4 each): for these,
     difficulty is how tempting the gap is, not how hard the lookup is."""
     return DIFFICULTIES[category_index % len(DIFFICULTIES)]
+
+
+def category_plan_v3(existing: list | None = None) -> list[tuple[str, str]]:
+    """v3's slots for one category: multi-source items only.
+
+    v1 and v2 give one multi-source item per category, and the harness eval
+    showed multi-source/arithmetic questions are where the systems separate —
+    v3 is a targeted top-up of that shape, not another full dataset.
+    """
+    have = sum(1 for item in (existing or []) if item.kind == "multi_source")
+    return [("multi_source", "hard")] * max(0, V3_MULTI_SOURCE_PER_CATEGORY - have)
+
+
+PROFILES = ("v2", "v3")
+#: Which generation-prompt flavour each profile writes with (see
+#: prompts.build_generation_messages).
+PROFILE_VARIANT = {"v2": None, "v3": "calc"}
+
+
+def plan_for(profile: str, existing: list | None = None,
+             category_index: int = 0) -> list[tuple[str, str]]:
+    """The (kind, difficulty) slots one category still needs under `profile`."""
+    if profile == "v3":
+        return category_plan_v3(existing)
+    return category_plan(existing, unanswerable_difficulty(category_index))
