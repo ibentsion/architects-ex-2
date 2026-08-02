@@ -1,0 +1,32 @@
+extends: configs/embedder-bge-m3.yaml
+# SHIP CONFIG — the measured production candidate.
+#
+#   python -m rag.cli.query --config configs/ship.yaml --engine agent \
+#       --questions reference_questions.json --out answers.jsonl
+#
+# Index: rag_index/bge-m3 (Docling parse + BiDi repair, per_table chunks,
+# bge-m3 embeddings, stanza lemmas). Synthesis: DeepSeek-V4-Pro, the arm that
+# scored correctness 6.46 on v1 and 4.80 on v2 (agent-eval-20260801T193537Z).
+#
+# This file exists to pin the two knobs that changed after that eval and were
+# never scored end-to-end. Everything else the agent gained since — the
+# unfiltered retry on an empty filtered pool, the family category filter, the
+# classifier's decision rules and retrieval hint — is kept: each was measured
+# on its own axis and each attacks the top failure mode of that eval (refusal
+# inflation from wrong category filters).
+
+retrieval:
+  dense_top_k: 20             # default.yaml runs 100 for the tuning studies.
+  sparse_top_k: 20            #   260802-005: at the shipped top_n/gate a 100-deep
+                              #   pool delivered +3 of 84 ground-truth groups and
+                              #   costs 100 cross-encoder pairs per query (~0.9 s on
+                              #   an L40S) instead of 20. It only pays off together
+                              #   with a looser top_n/gate, which is not scored yet.
+
+harness:
+  fast_synthesis_model: null  # default.yaml routes easy/medium single-topic questions
+                              #   to gpt-oss-120b. The routing rests on the committee's
+                              #   easy/medium tie, but has never been scored end-to-end;
+                              #   6.46 was measured with DeepSeek answering everything.
+                              #   Set it back to openai/gpt-oss-120b to cut cost once a
+                              #   scored run says the tie holds.
