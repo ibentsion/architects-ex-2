@@ -68,6 +68,15 @@ def _confidence(retrieved: list[RetrievedChunk]) -> float:
     return max(scores) if scores else 0.0
 
 
+def build_answer_engine(config: RagConfig, engine: str = "rag") -> QueryEngine | AgentEngine:
+    """Build the answer engine used by both the CLI and FastAPI contract."""
+    if engine == "agent":
+        return AgentEngine(config)
+    if engine == "rag":
+        return QueryEngine(config)
+    raise ValueError(f"Unknown answer engine: {engine}")
+
+
 class QueryEngine:
     """Stage 0 load & validate (manifest compatibility, lazy/warm component
     loads), then stateless ``answer(question, category=None)`` per query
@@ -446,7 +455,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         config = load_config(args.config)
-        engine = AgentEngine(config) if args.engine == "agent" else QueryEngine(config)
+        engine = build_answer_engine(config, args.engine)
     except (ConfigError, ManifestError, ManifestMismatchError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return EXIT_CONFIG_ERROR
