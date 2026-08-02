@@ -13,10 +13,20 @@ Run this stub as-is to see the contract in action:
 
 Replace `answer_question` with your actual system. Do not change the models.
 """
+import os
+import threading
+import time
+from contextlib import asynccontextmanager
+from functools import lru_cache
 from typing import List, Optional
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+
+from rag.cli.query import build_answer_engine
+from rag.config import ConfigError, load_config
+from rag.index.manifest import ManifestError, ManifestMismatchError
+from rag.types import Answer
 
 
 class AskRequest(BaseModel):
@@ -39,7 +49,64 @@ class AskResponse(BaseModel):
     cost_usd: Optional[float] = Field(None, description="Estimated $ cost of answering this question")
 
 
-app = FastAPI(title="APEX Exercise 2 -- Harel Support Agent")
+DEFAULT_RAG_CONFIG = "configs/ship.yaml"
+
+_engine_lock = threading.Lock()
+
+
+def _rag_config_path() -> str:
+    return os.environ.get("RAG_CONFIG", DEFAULT_RAG_CONFIG)
+
+
+@lru_cache(maxsize=1)
+def _get_engine():
+    config_path = _rag_config_path()
+    config = load_config(config_path)
+    return build_answer_engine(config, "agent")
+
+
+def answer_question(question: str) -> AskResponse:
+    """Run the production agentic RAG pipeline behind the FastAPI contract."""
+    t0 = time.monotonic()
+    try:
+        # The submit runner is serial, but a shared retriever/generator instance
+        # has mutable diagnostics state. Serialize endpoint calls for correctness.
+        with _engine_lock:
+            answer = _get_engine().answer(question)
+    except (ConfigError, ManifestError, ManifestMismatchError) as exc:
+        raise HTTPException(status_code=500, detail=f"RAG configuration error: {exc}") from exc
+
+    latency_ms = answer.latency_ms
+    if latency_ms is None:
+        latency_ms = (time.monotonic() - t0) * 1000
+    return _to_ask_response(answer, latency_ms=latency_ms)
+
+
+def _to_ask_response(answer: Answer, *, latency_ms: float | None = None) -> AskResponse:
+    return AskResponse(
+        answer=answer.text,
+        citations=[
+            Citation(file=c.file, page=c.page, quote=c.quote)
+            for c in answer.citations
+        ],
+        domain=answer.category,
+        confidence=answer.confidence,
+        latency_ms=latency_ms,
+        cost_usd=answer.cost_estimate,
+    )
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    try:
+        yield
+    finally:
+        if _get_engine.cache_info().currsize:
+            _get_engine().close()
+            _get_engine.cache_clear()
+
+
+app = FastAPI(title="APEX Exercise 2 -- Harel Support Agent", lifespan=lifespan)
 
 
 @app.get("/health")
@@ -49,9 +116,5 @@ def health():
 
 @app.post("/ask", response_model=AskResponse)
 def ask(req: AskRequest) -> AskResponse:
-    # TODO: replace this stub with your system.
-    return AskResponse(
-        answer="אין לי עדיין מערכת מאחורי ה-API הזה.",
-        citations=[],
-        confidence=0.0,
-    )
+    return answer_question(req.question)
+
