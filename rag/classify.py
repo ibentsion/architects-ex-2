@@ -104,6 +104,34 @@ def _base_prompt() -> str:
 - אל תמציא תת-שאלות שהלקוח לא שאל."""
 
 
+#: Groups of categories the classifier actually confuses, derived from the 23
+#: wrong filters 260802-003 measured over both reference sets: mortgage ->
+#: apartment (8), the health cluster (4), and the personal-risk cluster (5)
+#: account for 18 of them. A set-valued filter over the family keeps the right
+#: category in the pool when the single tag lands on a sibling.
+#: Families deliberately overlap (diseases-disabilities is both a medical and a
+#: personal-risk product) — expansion takes the union of every family a tag
+#: belongs to. car and travel are in none: they are not confused with anything.
+CATEGORY_FAMILIES: dict[str, frozenset[str]] = {
+    "property": frozenset({"apartment", "business", "mortgage"}),
+    "medical": frozenset({"dental", "diseases-disabilities", "health", "long-term-care"}),
+    "personal-risk": frozenset(
+        {"diseases-disabilities", "life", "loss-of-working-ability", "personal-accident"}
+    ),
+}
+
+
+def expand_families(categories: list[str]) -> list[str]:
+    """Every category in the same family as one of ``categories`` (the tags
+    themselves always included), ordered for a stable filter."""
+    expanded = set(categories)
+    for category in categories:
+        for members in CATEGORY_FAMILIES.values():
+            if category in members:
+                expanded |= members
+    return sorted(expanded)
+
+
 def _system_prompt() -> str:
     """Task definition + abstain rule + decision rules — the arm that won the
     260802-003 sweep (``decision-rules-abstain``). Composed from the parts

@@ -38,7 +38,7 @@ from typing import Any
 from tf_client import chat as tf_chat
 
 from rag.agent.calculator import CalculationError, calculate
-from rag.classify import CATEGORIES, build_classifier, build_hint
+from rag.classify import CATEGORIES, build_classifier, expand_families, build_hint
 from rag.generate.generator import Generator, build_generator
 from rag.generate.prompts import FALLBACK_TEXT
 from rag.retrieve.retriever import Retriever, load_retriever
@@ -214,7 +214,7 @@ class AgentEngine:
         # Prefetch all sub-questions concurrently.
         t1 = time.monotonic()
         requests = [
-            (sq.question, sq.categories[0] if len(sq.categories) == 1 else None)
+            (sq.question, self._filter_categories(sq.categories))
             for sq in classification.sub_questions
         ]
         pool: dict[str, RetrievedChunk] = {}
@@ -337,8 +337,27 @@ class AgentEngine:
     # Concurrency helpers
     # ------------------------------------------------------------------ #
 
+    def _filter_categories(self, categories: list[str]) -> str | list[str] | None:
+        """The retrieval filter for one sub-question's tags, under
+        ``harness.category_filter``.
+
+        ``single`` is the historical behaviour and the reason a filter is a
+        coin flip: one wrong tag filters the answer out of reach entirely
+        (260802-004 measured +7/-6 groups against no filter, where a gold tag
+        is +9/-0). ``family`` widens the filter to the categories that tag is
+        confused with, which is the cheapest way to keep the right one in.
+        """
+        policy = self.harness.category_filter
+        if policy == "none" or not categories:
+            return None
+        if policy == "single":
+            return categories[0] if len(categories) == 1 else None
+        if policy == "family":
+            return expand_families(categories)
+        return list(categories)
+
     def _retrieve_sub(
-        self, question: str, category: str | None
+        self, question: str, category: str | list[str] | None
     ) -> tuple[list[RetrievedChunk], dict[str, dict[str, int]], bool]:
         """One sub-question retrieval with the unfiltered-retry policy: a
         category filter must never be the reason for an empty pool (the
@@ -355,7 +374,7 @@ class AgentEngine:
         return results, stats, True
 
     def _retrieve_many(
-        self, requests: list[tuple[str, str | None]]
+        self, requests: list[tuple[str, str | list[str] | None]]
     ) -> list[tuple[list[RetrievedChunk], dict[str, dict[str, int]], bool]]:
         """Run retrievals concurrently (embedding is HTTP-bound; the sparse
         stage self-serializes inside Retriever). Order preserved."""
@@ -487,7 +506,10 @@ class AgentEngine:
                     category = None
                 if not query:
                     return "error: empty query", {"error": "empty-query"}, []
-                results, _stats, retried = self._retrieve_sub(query, category)
+                # The tool's category is a single name (the enum the model sees),
+                # widened by the same policy the prefetch uses.
+                results, _stats, retried = self._retrieve_sub(
+                    query, self._filter_categories([category] if category else []))
                 detail = {"query": query, "category": category, "n_gated": len(results)}
                 if retried:
                     detail["retried_unfiltered"] = True

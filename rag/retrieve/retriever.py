@@ -40,6 +40,17 @@ def _file_of(chunk_id: str) -> str:
     return chunk_id.rsplit("#p", 1)[0]
 
 
+def _as_categories(category: str | list[str] | None) -> list[str] | None:
+    """One name, several names, or no filter — normalized to a list (or None).
+    A category filter is set-valued because the classifier can often only place
+    a query in a family (property, personal-risk) and forcing it to pick one
+    directory is how a good tag becomes a wrong filter."""
+    if not category:
+        return None
+    names = [category] if isinstance(category, str) else list(dict.fromkeys(category))
+    return names or None
+
+
 def _stage_counts(chunk_ids: list[str]) -> dict[str, int]:
     """``{n_chunks, n_documents}`` for one retrieval stage — the raw signal
     for measuring how much each stage (dense/sparse/fusion/rerank+gate)
@@ -88,24 +99,28 @@ class Retriever:
     # ------------------------------------------------------------------ #
 
     def dense_search(
-        self, question: str, *, top_k: int | None = None, category: str | None = None
+        self, question: str, *, top_k: int | None = None,
+        category: str | list[str] | None = None
     ) -> list[tuple[Chunk, float]]:
         vector = self.embedder.embed_query(question)
         top_k = self.dense_top_k if top_k is None else top_k
-        return self.dense.search(vector, top_k=top_k, category=category)
+        return self.dense.search(vector, top_k=top_k, category=_as_categories(category))
 
     def sparse_search(
-        self, question: str, *, top_k: int | None = None, category: str | None = None
+        self, question: str, *, top_k: int | None = None,
+        category: str | list[str] | None = None
     ) -> list[tuple[str, float]]:
         """With a category filter, fetch 3x and post-filter by the chunk_id's
         category prefix (rag_plan.md §6 stage 2 — small corpus, cheap)."""
         top_k = self.sparse_top_k if top_k is None else top_k
-        fetch_k = top_k * 3 if category else top_k
+        categories = _as_categories(category)
+        fetch_k = top_k * 3 if categories else top_k
         with self._sparse_lock:
             query_tokens = self.normalizer.tokens(question)
             hits = self.sparse.search(query_tokens, top_k=fetch_k)
-        if category is not None:
-            hits = [(cid, score) for cid, score in hits if _category_of(cid) == category]
+        if categories is not None:
+            wanted = set(categories)
+            hits = [(cid, score) for cid, score in hits if _category_of(cid) in wanted]
         return hits[:top_k]
 
     def fuse(
@@ -115,7 +130,7 @@ class Retriever:
         dense_top_k: int | None = None,
         sparse_top_k: int | None = None,
         rrf_k: int | None = None,
-        category: str | None = None,
+        category: str | list[str] | None = None,
     ) -> list[RetrievedChunk]:
         """Stages 2-3: dual search + RRF fusion, hydrated but NOT reranked.
         Populates ``last_stats`` for dense/sparse/fused (``retrieve`` adds the
@@ -137,7 +152,7 @@ class Retriever:
         dense_top_k: int | None = None,
         sparse_top_k: int | None = None,
         rrf_k: int | None = None,
-        category: str | None = None,
+        category: str | list[str] | None = None,
     ) -> tuple[list[RetrievedChunk], dict[str, dict[str, int]]]:
         """Pure fuse core: returns (candidates, stats) and mutates no shared
         state, so concurrent per-sub-question retrievals stay correct."""
@@ -207,7 +222,7 @@ class Retriever:
     def retrieve(
         self,
         question: str,
-        category: str | None = None,
+        category: str | list[str] | None = None,
         *,
         dense_top_k: int | None = None,
         sparse_top_k: int | None = None,
@@ -230,7 +245,7 @@ class Retriever:
     def retrieve_with_stats(
         self,
         question: str,
-        category: str | None = None,
+        category: str | list[str] | None = None,
         *,
         dense_top_k: int | None = None,
         sparse_top_k: int | None = None,

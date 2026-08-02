@@ -26,7 +26,7 @@ class VectorIndex(Protocol):
     def add(self, chunks: list[Chunk], vectors: list[list[float]]) -> None: ...
 
     def search(
-        self, vector: list[float], top_k: int, category: str | None = None
+        self, vector: list[float], top_k: int, category: str | list[str] | None = None
     ) -> list[tuple[Chunk, float]]: ...
 
 
@@ -107,17 +107,19 @@ class QdrantIndex:
         )
 
     def search(
-        self, vector: list[float], top_k: int, category: str | None = None
+        self, vector: list[float], top_k: int, category: str | list[str] | None = None
     ) -> list[tuple[Chunk, float]]:
+        """``category`` filters the payload index: one name, or a set of names
+        (MatchAny) when the classifier can only narrow the query to a family
+        rather than to a single corpus directory."""
         from qdrant_client import models
 
         query_filter = None
-        if category is not None:
+        if category:
+            names = [category] if isinstance(category, str) else list(category)
             query_filter = models.Filter(
                 must=[
-                    models.FieldCondition(
-                        key="category", match=models.MatchValue(value=category)
-                    )
+                    models.FieldCondition(key="category", match=models.MatchAny(any=names))
                 ]
             )
         response = self._client.query_points(

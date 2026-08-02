@@ -89,7 +89,10 @@ class FakeStatsRetriever:
 
     def retrieve_with_stats(self, question, category=None, **overrides):
         self.calls.append((question, category))
-        if category in self.empty_for_categories:
+        # A filter is one category or a set of them; the fake gates to zero when
+        # every category it filters on is one the corpus has nothing for.
+        names = [category] if isinstance(category, str) else list(category or ())
+        if names and set(names) <= self.empty_for_categories:
             results = []  # wrong category tag -> filtered pool is empty
         else:
             results = self.results_by_question.get(question, [])
@@ -128,12 +131,14 @@ def make_engine(
     max_hops=4,
     empty_for_categories=(),
     fast_generator=None,
+    category_filter="single",
 ):
     engine = AgentEngine.__new__(AgentEngine)
     engine.harness = SimpleNamespace(
         orchestrator_model="fake-orch",
         orchestrator_max_tokens=512,
         orchestrator_extra_params={},
+        category_filter=category_filter,
         max_hops=max_hops,
         max_workers=4,
     )
@@ -492,3 +497,72 @@ def test_build_fast_generator_inherits_the_generation_answer_contract():
 
     config.harness.fast_synthesis_model = None
     assert engine_mod.build_fast_generator(config) is None
+
+
+# --------------------------------------------------------------------------- #
+# Category-set filters — one wrong tag must not put the answer out of reach
+# --------------------------------------------------------------------------- #
+
+
+@pytest.mark.parametrize(
+    ("policy", "categories", "expected"),
+    [
+        # `single` is the historical behaviour: one tag filters, anything else
+        # throws the filter away entirely.
+        ("single", ["apartment"], "apartment"),
+        ("single", ["apartment", "car"], None),
+        ("single", [], None),
+        # `set` keeps every tag the classifier produced.
+        ("set", ["apartment", "car"], ["apartment", "car"]),
+        ("set", ["apartment"], ["apartment"]),
+        # `none` never filters, whatever the classifier says.
+        ("none", ["apartment"], None),
+    ],
+)
+def test_category_filter_policies(policy, categories, expected):
+    engine = make_engine(single_classification(), {}, category_filter=policy)
+    assert engine._filter_categories(categories) == expected
+
+
+def test_family_policy_keeps_the_confused_sibling_in_the_pool():
+    """mortgage -> apartment is 8 of the 23 wrong filters 260802-003 measured;
+    the family filter is what stops that tag from hiding the answer."""
+    engine = make_engine(single_classification(), {}, category_filter="family")
+    assert engine._filter_categories(["apartment"]) == ["apartment", "business", "mortgage"]
+    # A category confused with nothing stays exactly itself — widening it would
+    # only dilute a filter that was never wrong.
+    assert engine._filter_categories(["car"]) == ["car"]
+    # A tag in two families widens to both (diseases-disabilities is a medical
+    # product AND a personal-risk one).
+    assert set(engine._filter_categories(["diseases-disabilities"])) > {
+        "health", "life", "long-term-care"}
+
+
+def test_the_filter_policy_reaches_the_retriever():
+    engine = make_engine(
+        single_classification(),
+        {"שאלת דירה": [make_candidate(APT1, rerank_score=0.9)]},
+        category_filter="family",
+    )
+    engine._answer("שאלה")
+    question, category = engine.retriever.calls[0]
+    assert category == ["apartment", "business", "mortgage"]
+
+
+def test_the_loop_s_retrieve_tool_uses_the_same_policy(monkeypatch):
+    engine = make_engine(
+        single_classification(dependent=True),
+        {"שאלת דירה": [make_candidate(APT1, rerank_score=0.9)],
+         "מה ההשתתפות העצמית": [make_candidate(TRV1, rerank_score=0.8)]},
+        category_filter="family",
+    )
+    orchestrator_turns(
+        monkeypatch,
+        [
+            (None, [tool_call("retrieve", {"query": "מה ההשתתפות העצמית",
+                                           "category": "mortgage"})]),
+            ("DONE", None),
+        ],
+    )
+    engine._answer("שאלה")
+    assert ("מה ההשתתפות העצמית", ["apartment", "business", "mortgage"]) in engine.retriever.calls

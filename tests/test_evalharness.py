@@ -485,8 +485,10 @@ class FakeAuditRetriever:
 
     def fuse(self, question, *, dense_top_k=None, sparse_top_k=None, category=None):
         self.calls.append({"top_k": dense_top_k, "category": category})
+        wanted = ({category} if isinstance(category, str)
+                  else set(category or ()))
         ids = [c for c in self.candidates
-               if category is None or c.startswith(f"{category}/")]
+               if not wanted or c.split("/", 1)[0] in wanted]
         return [self._wrap(cid) for cid in ids[:dense_top_k or 20]]
 
     def score(self, question, candidates):
@@ -605,21 +607,42 @@ def test_coverage_curve_says_what_each_pool_depth_would_have_covered():
     assert curves["depth_percentiles"] == {"p50": 25, "p80": None, "p90": None}
 
 
-def test_filter_modes_pick_none_gold_or_the_classifier_s_own_tag(tmp_path):
+def test_filter_modes_pick_none_gold_or_the_classifier_s_own_tags(tmp_path):
     from evalharness.retrieval_audit import filter_for, load_predicted_filters
 
     predictions = tmp_path / "predictions.jsonl"
     predictions.write_text(
-        json.dumps({"id": "q1", "effective_filter": "car"}) + "\n"
-        + json.dumps({"id": "q2", "effective_filter": None}) + "\n", encoding="utf-8")
+        json.dumps({"id": "q1", "categories": ["car"]}) + "\n"
+        + json.dumps({"id": "q2", "categories": ["car", "travel"]}) + "\n"
+        + json.dumps({"id": "q3", "categories": []}) + "\n", encoding="utf-8")
     predicted = load_predicted_filters(predictions)
-    q1, q2 = _question("q1", domain="dental"), _question("q2", domain="dental")
+    q1, q2, q3 = (_question("q1", domain="dental"), _question("q2", domain="dental"),
+                  _question("q3", domain="dental"))
 
     assert filter_for("none", q1, predicted) is None
     assert filter_for("gold", q1, predicted) == "dental"
     assert filter_for("predicted", q1, predicted) == "car"   # a wrong filter, replayed
-    # No tag, or 2+ tags, means production filters nothing — so neither does this.
+    # Production's `single` policy filters on one tag only; 2+ or 0 means no filter.
     assert filter_for("predicted", q2, predicted) is None
+    assert filter_for("predicted", q3, predicted) is None
+    # The set policy keeps both tags instead of throwing the filter away.
+    assert filter_for("predicted-set", q2, predicted) == ["car", "travel"]
+    assert filter_for("predicted-set", q3, predicted) is None
+
+
+def test_family_modes_widen_a_tag_to_the_categories_it_is_confused_with(tmp_path):
+    from evalharness.retrieval_audit import filter_for
+
+    predicted = {"q1": ["apartment"], "q2": ["car"]}
+    # The gold tag is mortgage and the classifier said apartment — the single-tag
+    # filter puts the answer out of reach; the family filter keeps it in.
+    q1 = _question("q1", domain="mortgage")
+    assert filter_for("predicted", q1, predicted) == "apartment"
+    assert "mortgage" in filter_for("predicted-family", q1, predicted)
+    assert "mortgage" in filter_for("gold-family", q1, predicted)
+    # A category in no family stays exactly itself — widening it would only
+    # dilute a filter that is not confused with anything.
+    assert filter_for("predicted-family", _question("q2", domain="car"), predicted) == ["car"]
 
 
 def test_a_wrong_predicted_filter_costs_the_ground_truth_page():
@@ -629,7 +652,7 @@ def test_a_wrong_predicted_filter_costs_the_ground_truth_page():
                                                 "car/files/b.pdf#p1#c0"])
     question = _question("q1", domain="dental",
                          sources=[_group(("dental/files/a.pdf", 1))])
-    predicted = {"q1": "car"}
+    predicted = {"q1": ["car"]}
     filtered = audit_question(retriever, question, set(),
                               category=filter_for("predicted", question, predicted))
     unfiltered = audit_question(retriever, question, set(),

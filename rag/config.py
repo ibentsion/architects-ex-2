@@ -19,7 +19,7 @@ import hashlib
 import importlib
 import json
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
@@ -94,6 +94,14 @@ class HarnessConfig(BaseModel):
         default_factory=dict,
         description="Passed through to tf_client.chat for orchestrator calls "
         "(e.g. reasoning_effort: low for gpt-oss's Harmony template)",
+    )
+    category_filter: Literal["single", "set", "family", "none"] = Field(
+        "single",
+        description="How a sub-question's category tags become a retrieval filter. "
+        "single: filter only when the classifier gives exactly one tag (2+ or 0 = no "
+        "filter). set: filter on whatever tags it gives. family: widen each tag to the "
+        "categories it is confused with (rag.classify.CATEGORY_FAMILIES). none: never "
+        "filter. An empty filtered pool always retries unfiltered, whatever the policy.",
     )
     fast_synthesis_model: str | None = Field(
         None,

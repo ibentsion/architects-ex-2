@@ -68,8 +68,14 @@ sparse_index:
   params: {}                  # persisted mmap at <index_dir>/bm25
 
 retrieval:
-  dense_top_k: 20
-  sparse_top_k: 20            # with a category filter, sparse fetches 60 and post-filters
+  dense_top_k: 100            # 260802-004: at K=20 the pool holds 63% of the ground-truth
+  sparse_top_k: 100           #   pages, at K=100 83%. The reranker sees everything the pool
+                              #   holds, so a deeper pool is the only way the missing 20
+                              #   points can ever reach an answer — but on its own it
+                              #   delivered +3 of 84 groups, because top_n/gate_threshold
+                              #   discard what it reaches. Costs 100 cross-encoder pairs per
+                              #   query (~0.9 s on an L40S) instead of 20.
+                              # with a category filter, sparse fetches 3x and post-filters
   rrf_k: 60                   # standard RRF constant
   rerank:
     impl: bge                 # alternatives: jina (CC-BY-NC — non-commercial only!)
@@ -94,6 +100,9 @@ harness:                      # agent engine (--engine agent): model roles + lim
   orchestrator_extra_params:
     reasoning_effort: low     # structured tool calls, not open-ended reasoning
     allowed_openai_params: [reasoning_effort]
+  category_filter: single     # single | set | family | none — how a sub-question's tags
+                              #   become a retrieval filter. Set by the 260802-005
+                              #   measurement; see that task's analysis before changing.
   fast_synthesis_model: openai/gpt-oss-120b
                               # easy/medium single-topic questions synthesize here: the
                               #   committee eval had the two models tied on easy/medium

@@ -284,31 +284,48 @@ def load_questions(path: str, limit: int | None) -> list[dict]:
 
 
 #: How the category filter is chosen for a question.
-#:   none       no filter — what the unfiltered-retry fix converges to
-#:   gold       the item's own domain — the ceiling a perfect classifier buys
-#:   predicted  the classifier's own filter, replayed from a classify_eval run
-FILTER_MODES = ("none", "gold", "predicted")
+#:   none              no filter — what the unfiltered-retry fix converges to
+#:   gold              the item's own domain — the ceiling a perfect tag buys
+#:   gold-family       the right tag, widened to its family — the cost of widening
+#:                     when the tag is already right
+#:   predicted         the classifier's tag, filtering only when it gives exactly
+#:                     one (production's `single` policy)
+#:   predicted-set     whatever tags it gives, however many (`set`)
+#:   predicted-family  those tags widened to their families (`family`)
+FILTER_MODES = ("none", "gold", "gold-family", "predicted", "predicted-set",
+                "predicted-family")
 
 
-def load_predicted_filters(path: str) -> dict[str, str | None]:
-    """`{question id: effective_filter}` from a classify_eval arm's
-    predictions.jsonl. `effective_filter` is null when the classifier produced
-    zero or 2+ categories, which the agent engine reads as "no filter" — so
-    replaying it here reproduces what production would have filtered by,
-    without spending a single classification call."""
+def load_predicted_filters(path: str) -> dict[str, list[str]]:
+    """`{question id: predicted categories}` from a classify_eval arm's
+    predictions.jsonl — the derived union the engine reads, so replaying it
+    reproduces exactly what production would have filtered by, without
+    spending a single classification call."""
     predictions = {}
     for line in Path(path).read_text(encoding="utf-8").splitlines():
         if line.strip():
             record = json.loads(line)
-            predictions[record["id"]] = record.get("effective_filter")
+            predictions[record["id"]] = list(record.get("categories") or [])
     return predictions
 
 
-def filter_for(mode: str, question: dict, predicted: dict[str, str | None]) -> str | None:
+def filter_for(mode: str, question: dict, predicted: dict[str, list[str]]
+               ) -> str | list[str] | None:
+    from rag.classify import expand_families
+
     if mode == "gold":
         return question["domain"]
-    if mode == "predicted":
-        return predicted.get(question["id"])
+    if mode == "gold-family":
+        return expand_families([question["domain"]])
+    if mode.startswith("predicted"):
+        categories = predicted.get(question["id"]) or []
+        if not categories:
+            return None
+        if mode == "predicted":  # production today: one tag or no filter at all
+            return categories[0] if len(categories) == 1 else None
+        if mode == "predicted-family":
+            return expand_families(categories)
+        return categories
     return None
 
 

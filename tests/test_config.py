@@ -69,7 +69,7 @@ def test_default_config_loads_and_validates(default_config_path: Path):
     assert cfg.embedder.params["dimensions"] == 4096
     assert cfg.dense_index.impl == "qdrant_local"
     assert cfg.sparse_index.impl == "bm25s"
-    assert cfg.retrieval.dense_top_k == 20
+    assert cfg.retrieval.dense_top_k == 100
     assert cfg.retrieval.rrf_k == 60
     assert cfg.retrieval.rerank.impl == "bge"
     assert cfg.retrieval.rerank.top_n == 6
@@ -140,7 +140,7 @@ def test_extends_partial_block_merges(tmp_path: Path, default_config_path: Path)
     )
     cfg = load_config(override)
     assert cfg.retrieval.dense_top_k == 5
-    assert cfg.retrieval.sparse_top_k == 20  # untouched sibling key survives
+    assert cfg.retrieval.sparse_top_k == 100  # untouched sibling key survives
     assert cfg.retrieval.rerank.top_n == 6  # untouched nested block survives
 
 
