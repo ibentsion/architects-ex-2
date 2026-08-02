@@ -1,0 +1,2295 @@
+{
+  "meta": {
+    "run_name": "classify-sweep-20260802T043108Z",
+    "date": "2026-08-02",
+    "config": "configs/default.yaml",
+    "questions_files": [
+      "reference_questions.json",
+      "reference_questions_v2.json"
+    ],
+    "n_questions": 169,
+    "arms": [
+      "baseline",
+      "abstain",
+      "examples",
+      "rich-desc",
+      "decision-rules",
+      "hint-sparse",
+      "hint-vote",
+      "model-qwen",
+      "model-deepseek",
+      "effort-medium",
+      "selfcons-3",
+      "verify-2stage"
+    ],
+    "concurrency": 6,
+    "total_cost_usd": 1.6947,
+    "max_cost_usd": 6.0,
+    "aborted": false
+  },
+  "arms": {
+    "baseline": {
+      "what": "today's production prompt, gpt-oss-120b, reasoning low, temp 0",
+      "arm": {
+        "id": "baseline",
+        "what": "today's production prompt, gpt-oss-120b, reasoning low, temp 0",
+        "strategy": "llm",
+        "prompt": "baseline",
+        "model": null,
+        "extra_params": null,
+        "temperature": 0.0,
+        "samples": 1,
+        "min_votes": 1,
+        "use_hint": false,
+        "hint_vote_threshold": 0.6
+      },
+      "sets": {
+        "v1": {
+          "n": 48,
+          "harmful_rate": 0.1042,
+          "filter_correct_rate": 0.7292,
+          "no_filter_rate": 0.1667,
+          "recall_any": 0.75,
+          "mean_tags_per_sub": 0.8689,
+          "mean_sub_questions": 1.2708,
+          "parse_fail_rate": 0.0625,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 694,
+          "mean_cost_usd": 0.000591,
+          "total_cost_usd": 0.0284,
+          "sub_filter_count": 53,
+          "sub_harmful_rate": 0.1132
+        },
+        "v2": {
+          "n": 121,
+          "harmful_rate": 0.1983,
+          "filter_correct_rate": 0.6612,
+          "no_filter_rate": 0.1405,
+          "recall_any": 0.686,
+          "mean_tags_per_sub": 0.8961,
+          "mean_sub_questions": 1.2727,
+          "parse_fail_rate": 0.0331,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 732,
+          "mean_cost_usd": 0.000614,
+          "total_cost_usd": 0.0743,
+          "sub_filter_count": 134,
+          "sub_harmful_rate": 0.2537
+        },
+        "pooled": {
+          "n": 169,
+          "harmful_rate": 0.1716,
+          "filter_correct_rate": 0.6805,
+          "no_filter_rate": 0.1479,
+          "recall_any": 0.7041,
+          "mean_tags_per_sub": 0.8884,
+          "mean_sub_questions": 1.2722,
+          "parse_fail_rate": 0.0414,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 720,
+          "mean_cost_usd": 0.000608,
+          "total_cost_usd": 0.1027,
+          "sub_filter_count": 187,
+          "sub_harmful_rate": 0.2139
+        }
+      },
+      "confusion": {
+        "apartment": {
+          "apartment": 12,
+          "(none)": 2,
+          "personal-accident": 2
+        },
+        "business": {
+          "business": 12,
+          "(none)": 3,
+          "apartment": 1,
+          "health": 1
+        },
+        "car": {
+          "car": 15,
+          "(none)": 1,
+          "personal-accident": 1
+        },
+        "dental": {
+          "dental": 10,
+          "health": 1
+        },
+        "diseases-disabilities": {
+          "diseases-disabilities": 7,
+          "(none)": 2,
+          "health": 1,
+          "life": 1
+        },
+        "health": {
+          "health": 14,
+          "(none)": 3
+        },
+        "life": {
+          "life": 10,
+          "personal-accident": 3,
+          "(none)": 2
+        },
+        "long-term-care": {
+          "long-term-care": 6,
+          "(none)": 1,
+          "health": 1,
+          "loss-of-working-ability": 1
+        },
+        "loss-of-working-ability": {
+          "loss-of-working-ability": 6,
+          "(none)": 1,
+          "diseases-disabilities": 1,
+          "health": 1,
+          "life": 1,
+          "personal-accident": 1
+        },
+        "mortgage": {
+          "(none)": 7,
+          "apartment": 7,
+          "mortgage": 2,
+          "life": 1
+        },
+        "personal-accident": {
+          "personal-accident": 8,
+          "travel": 2,
+          "health": 1
+        },
+        "travel": {
+          "travel": 13,
+          "(none)": 3,
+          "personal-accident": 1
+        }
+      }
+    },
+    "abstain": {
+      "what": "+ a wrong tag is worse than none — abstain when undetermined",
+      "arm": {
+        "id": "abstain",
+        "what": "+ a wrong tag is worse than none — abstain when undetermined",
+        "strategy": "llm",
+        "prompt": "abstain",
+        "model": null,
+        "extra_params": null,
+        "temperature": 0.0,
+        "samples": 1,
+        "min_votes": 1,
+        "use_hint": false,
+        "hint_vote_threshold": 0.6
+      },
+      "sets": {
+        "v1": {
+          "n": 48,
+          "harmful_rate": 0.1042,
+          "filter_correct_rate": 0.75,
+          "no_filter_rate": 0.1458,
+          "recall_any": 0.75,
+          "mean_tags_per_sub": 0.871,
+          "mean_sub_questions": 1.2917,
+          "parse_fail_rate": 0.0625,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 618,
+          "mean_cost_usd": 0.000617,
+          "total_cost_usd": 0.0296,
+          "sub_filter_count": 54,
+          "sub_harmful_rate": 0.0926
+        },
+        "v2": {
+          "n": 121,
+          "harmful_rate": 0.157,
+          "filter_correct_rate": 0.6116,
+          "no_filter_rate": 0.2314,
+          "recall_any": 0.6446,
+          "mean_tags_per_sub": 0.8323,
+          "mean_sub_questions": 1.281,
+          "parse_fail_rate": 0.1074,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 659,
+          "mean_cost_usd": 0.000638,
+          "total_cost_usd": 0.0772,
+          "sub_filter_count": 129,
+          "sub_harmful_rate": 0.2481
+        },
+        "pooled": {
+          "n": 169,
+          "harmful_rate": 0.142,
+          "filter_correct_rate": 0.6509,
+          "no_filter_rate": 0.2071,
+          "recall_any": 0.6746,
+          "mean_tags_per_sub": 0.8433,
+          "mean_sub_questions": 1.284,
+          "parse_fail_rate": 0.0947,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 643,
+          "mean_cost_usd": 0.000632,
+          "total_cost_usd": 0.1068,
+          "sub_filter_count": 183,
+          "sub_harmful_rate": 0.2022
+        }
+      },
+      "confusion": {
+        "apartment": {
+          "apartment": 10,
+          "(none)": 6
+        },
+        "business": {
+          "business": 11,
+          "(none)": 4,
+          "apartment": 1,
+          "personal-accident": 1
+        },
+        "car": {
+          "car": 15,
+          "(none)": 1,
+          "personal-accident": 1
+        },
+        "dental": {
+          "dental": 10,
+          "health": 1
+        },
+        "diseases-disabilities": {
+          "diseases-disabilities": 6,
+          "(none)": 3,
+          "health": 1,
+          "life": 1
+        },
+        "health": {
+          "health": 14,
+          "(none)": 3
+        },
+        "life": {
+          "life": 9,
+          "personal-accident": 3,
+          "(none)": 2,
+          "mortgage": 1
+        },
+        "long-term-care": {
+          "long-term-care": 6,
+          "(none)": 1,
+          "diseases-disabilities": 1,
+          "health": 1
+        },
+        "loss-of-working-ability": {
+          "loss-of-working-ability": 7,
+          "(none)": 2,
+          "diseases-disabilities": 1,
+          "personal-accident": 1
+        },
+        "mortgage": {
+          "(none)": 10,
+          "apartment": 5,
+          "mortgage": 2
+        },
+        "personal-accident": {
+          "personal-accident": 7,
+          "travel": 2,
+          "(none)": 1,
+          "health": 1
+        },
+        "travel": {
+          "travel": 13,
+          "(none)": 2,
+          "personal-accident": 2
+        }
+      },
+      "paired_vs_baseline": {
+        "pooled": {
+          "n_pairs": 169,
+          "n_fixed": 10,
+          "n_broken": 5,
+          "mcnemar_p": 0.301758,
+          "fixed_ids": [
+            "dev-04-apartment-medium",
+            "dev-10-business-medium",
+            "v2-007-apartment-hard",
+            "v2-089-loss-of-working-ability-medium",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-102-mortgage-medium",
+            "v2-104-mortgage-easy",
+            "v2-105-mortgage-hard",
+            "v2-110-mortgage-easy",
+            "v2-211-long-term-care-hard"
+          ],
+          "broken_ids": [
+            "dev-38-mortgage-easy",
+            "dev-45-travel-medium",
+            "v2-014-business-easy",
+            "v2-068-life-easy",
+            "v2-078-long-term-care-easy"
+          ]
+        },
+        "v1": {
+          "n_pairs": 48,
+          "n_fixed": 2,
+          "n_broken": 2,
+          "mcnemar_p": 1.0,
+          "fixed_ids": [
+            "dev-04-apartment-medium",
+            "dev-10-business-medium"
+          ],
+          "broken_ids": [
+            "dev-38-mortgage-easy",
+            "dev-45-travel-medium"
+          ]
+        },
+        "v2": {
+          "n_pairs": 121,
+          "n_fixed": 8,
+          "n_broken": 3,
+          "mcnemar_p": 0.226562,
+          "fixed_ids": [
+            "v2-007-apartment-hard",
+            "v2-089-loss-of-working-ability-medium",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-102-mortgage-medium",
+            "v2-104-mortgage-easy",
+            "v2-105-mortgage-hard",
+            "v2-110-mortgage-easy",
+            "v2-211-long-term-care-hard"
+          ],
+          "broken_ids": [
+            "v2-014-business-easy",
+            "v2-068-life-easy",
+            "v2-078-long-term-care-easy"
+          ]
+        }
+      }
+    },
+    "examples": {
+      "what": "+ 2 invented example questions per category",
+      "arm": {
+        "id": "examples",
+        "what": "+ 2 invented example questions per category",
+        "strategy": "llm",
+        "prompt": "examples",
+        "model": null,
+        "extra_params": null,
+        "temperature": 0.0,
+        "samples": 1,
+        "min_votes": 1,
+        "use_hint": false,
+        "hint_vote_threshold": 0.6
+      },
+      "sets": {
+        "v1": {
+          "n": 48,
+          "harmful_rate": 0.1667,
+          "filter_correct_rate": 0.7292,
+          "no_filter_rate": 0.1042,
+          "recall_any": 0.75,
+          "mean_tags_per_sub": 0.9344,
+          "mean_sub_questions": 1.2708,
+          "parse_fail_rate": 0.0208,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 682,
+          "mean_cost_usd": 0.000882,
+          "total_cost_usd": 0.0423,
+          "sub_filter_count": 57,
+          "sub_harmful_rate": 0.1754
+        },
+        "v2": {
+          "n": 121,
+          "harmful_rate": 0.2149,
+          "filter_correct_rate": 0.686,
+          "no_filter_rate": 0.0992,
+          "recall_any": 0.7107,
+          "mean_tags_per_sub": 0.9419,
+          "mean_sub_questions": 1.281,
+          "parse_fail_rate": 0.0165,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 651,
+          "mean_cost_usd": 0.000912,
+          "total_cost_usd": 0.1103,
+          "sub_filter_count": 144,
+          "sub_harmful_rate": 0.2431
+        },
+        "pooled": {
+          "n": 169,
+          "harmful_rate": 0.2012,
+          "filter_correct_rate": 0.6982,
+          "no_filter_rate": 0.1006,
+          "recall_any": 0.7219,
+          "mean_tags_per_sub": 0.9398,
+          "mean_sub_questions": 1.2781,
+          "parse_fail_rate": 0.0178,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 654,
+          "mean_cost_usd": 0.000903,
+          "total_cost_usd": 0.1527,
+          "sub_filter_count": 201,
+          "sub_harmful_rate": 0.2239
+        }
+      },
+      "confusion": {
+        "apartment": {
+          "apartment": 12,
+          "(none)": 3,
+          "personal-accident": 1
+        },
+        "business": {
+          "business": 13,
+          "(none)": 2,
+          "apartment": 1,
+          "health": 1
+        },
+        "car": {
+          "car": 13,
+          "(none)": 2,
+          "personal-accident": 1,
+          "travel": 1
+        },
+        "dental": {
+          "dental": 10,
+          "health": 1
+        },
+        "diseases-disabilities": {
+          "diseases-disabilities": 8,
+          "health": 1,
+          "life": 1,
+          "mortgage": 1
+        },
+        "health": {
+          "health": 14,
+          "(none)": 2,
+          "life": 1
+        },
+        "life": {
+          "life": 12,
+          "personal-accident": 2,
+          "diseases-disabilities": 1
+        },
+        "long-term-care": {
+          "long-term-care": 5,
+          "(none)": 1,
+          "diseases-disabilities": 1,
+          "health": 1,
+          "life": 1
+        },
+        "loss-of-working-ability": {
+          "loss-of-working-ability": 7,
+          "(none)": 1,
+          "diseases-disabilities": 1,
+          "life": 1,
+          "personal-accident": 1
+        },
+        "mortgage": {
+          "apartment": 9,
+          "(none)": 4,
+          "mortgage": 3,
+          "life": 1
+        },
+        "personal-accident": {
+          "personal-accident": 9,
+          "travel": 2
+        },
+        "travel": {
+          "travel": 12,
+          "(none)": 2,
+          "personal-accident": 2,
+          "health": 1
+        }
+      },
+      "paired_vs_baseline": {
+        "pooled": {
+          "n_pairs": 169,
+          "n_fixed": 3,
+          "n_broken": 8,
+          "mcnemar_p": 0.226562,
+          "fixed_ids": [
+            "dev-04-apartment-medium",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-121-personal-accident-medium"
+          ],
+          "broken_ids": [
+            "dev-17-car-hard",
+            "dev-38-mortgage-easy",
+            "dev-44-travel-easy",
+            "dev-45-travel-medium",
+            "v2-060-health-medium",
+            "v2-078-long-term-care-easy",
+            "v2-108-mortgage-medium",
+            "v2-178-diseases-disabilities-hard"
+          ]
+        },
+        "v1": {
+          "n_pairs": 48,
+          "n_fixed": 1,
+          "n_broken": 4,
+          "mcnemar_p": 0.375,
+          "fixed_ids": [
+            "dev-04-apartment-medium"
+          ],
+          "broken_ids": [
+            "dev-17-car-hard",
+            "dev-38-mortgage-easy",
+            "dev-44-travel-easy",
+            "dev-45-travel-medium"
+          ]
+        },
+        "v2": {
+          "n_pairs": 121,
+          "n_fixed": 2,
+          "n_broken": 4,
+          "mcnemar_p": 0.6875,
+          "fixed_ids": [
+            "v2-090-loss-of-working-ability-easy",
+            "v2-121-personal-accident-medium"
+          ],
+          "broken_ids": [
+            "v2-060-health-medium",
+            "v2-078-long-term-care-easy",
+            "v2-108-mortgage-medium",
+            "v2-178-diseases-disabilities-hard"
+          ]
+        }
+      }
+    },
+    "rich-desc": {
+      "what": "category descriptions with belongs / does-NOT-belong + overlap disambiguation",
+      "arm": {
+        "id": "rich-desc",
+        "what": "category descriptions with belongs / does-NOT-belong + overlap disambiguation",
+        "strategy": "llm",
+        "prompt": "rich-desc",
+        "model": null,
+        "extra_params": null,
+        "temperature": 0.0,
+        "samples": 1,
+        "min_votes": 1,
+        "use_hint": false,
+        "hint_vote_threshold": 0.6
+      },
+      "sets": {
+        "v1": {
+          "n": 48,
+          "harmful_rate": 0.125,
+          "filter_correct_rate": 0.7083,
+          "no_filter_rate": 0.1667,
+          "recall_any": 0.7083,
+          "mean_tags_per_sub": 0.85,
+          "mean_sub_questions": 1.25,
+          "parse_fail_rate": 0.0833,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 647,
+          "mean_cost_usd": 0.001318,
+          "total_cost_usd": 0.0633,
+          "sub_filter_count": 51,
+          "sub_harmful_rate": 0.1176
+        },
+        "v2": {
+          "n": 121,
+          "harmful_rate": 0.1983,
+          "filter_correct_rate": 0.6942,
+          "no_filter_rate": 0.1074,
+          "recall_any": 0.7107,
+          "mean_tags_per_sub": 0.9122,
+          "mean_sub_questions": 1.2231,
+          "parse_fail_rate": 0.0331,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 596,
+          "mean_cost_usd": 0.00134,
+          "total_cost_usd": 0.1622,
+          "sub_filter_count": 135,
+          "sub_harmful_rate": 0.2222
+        },
+        "pooled": {
+          "n": 169,
+          "harmful_rate": 0.1775,
+          "filter_correct_rate": 0.6982,
+          "no_filter_rate": 0.1243,
+          "recall_any": 0.7101,
+          "mean_tags_per_sub": 0.8942,
+          "mean_sub_questions": 1.2308,
+          "parse_fail_rate": 0.0473,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 616,
+          "mean_cost_usd": 0.001334,
+          "total_cost_usd": 0.2254,
+          "sub_filter_count": 186,
+          "sub_harmful_rate": 0.1935
+        }
+      },
+      "confusion": {
+        "apartment": {
+          "apartment": 11,
+          "(none)": 4,
+          "business": 1
+        },
+        "business": {
+          "business": 14,
+          "(none)": 1,
+          "apartment": 1,
+          "personal-accident": 1
+        },
+        "car": {
+          "car": 15,
+          "(none)": 1,
+          "personal-accident": 1
+        },
+        "dental": {
+          "dental": 10,
+          "health": 1
+        },
+        "diseases-disabilities": {
+          "diseases-disabilities": 7,
+          "health": 2,
+          "(none)": 1,
+          "life": 1
+        },
+        "health": {
+          "health": 14,
+          "(none)": 3
+        },
+        "life": {
+          "life": 9,
+          "personal-accident": 4,
+          "(none)": 2
+        },
+        "long-term-care": {
+          "long-term-care": 8,
+          "health": 1
+        },
+        "loss-of-working-ability": {
+          "loss-of-working-ability": 7,
+          "(none)": 1,
+          "diseases-disabilities": 1,
+          "life": 1,
+          "personal-accident": 1
+        },
+        "mortgage": {
+          "apartment": 7,
+          "(none)": 6,
+          "mortgage": 3,
+          "diseases-disabilities": 1
+        },
+        "personal-accident": {
+          "personal-accident": 8,
+          "travel": 2,
+          "health": 1
+        },
+        "travel": {
+          "travel": 12,
+          "(none)": 2,
+          "personal-accident": 2,
+          "health": 1
+        }
+      },
+      "paired_vs_baseline": {
+        "pooled": {
+          "n_pairs": 169,
+          "n_fixed": 7,
+          "n_broken": 8,
+          "mcnemar_p": 1.0,
+          "fixed_ids": [
+            "dev-04-apartment-medium",
+            "dev-10-business-medium",
+            "v2-007-apartment-hard",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-102-mortgage-medium",
+            "v2-110-mortgage-easy",
+            "v2-211-long-term-care-hard"
+          ],
+          "broken_ids": [
+            "dev-05-apartment-hard",
+            "dev-40-mortgage-medium",
+            "dev-44-travel-easy",
+            "v2-045-diseases-disabilities-medium",
+            "v2-075-life-hard",
+            "v2-108-mortgage-medium",
+            "v2-124-travel-easy",
+            "v2-144-business-hard"
+          ]
+        },
+        "v1": {
+          "n_pairs": 48,
+          "n_fixed": 2,
+          "n_broken": 3,
+          "mcnemar_p": 1.0,
+          "fixed_ids": [
+            "dev-04-apartment-medium",
+            "dev-10-business-medium"
+          ],
+          "broken_ids": [
+            "dev-05-apartment-hard",
+            "dev-40-mortgage-medium",
+            "dev-44-travel-easy"
+          ]
+        },
+        "v2": {
+          "n_pairs": 121,
+          "n_fixed": 5,
+          "n_broken": 5,
+          "mcnemar_p": 1.0,
+          "fixed_ids": [
+            "v2-007-apartment-hard",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-102-mortgage-medium",
+            "v2-110-mortgage-easy",
+            "v2-211-long-term-care-hard"
+          ],
+          "broken_ids": [
+            "v2-045-diseases-disabilities-medium",
+            "v2-075-life-hard",
+            "v2-108-mortgage-medium",
+            "v2-124-travel-easy",
+            "v2-144-business-hard"
+          ]
+        }
+      }
+    },
+    "decision-rules": {
+      "what": "+ ordered decision rules with a stated precedence for overlaps",
+      "arm": {
+        "id": "decision-rules",
+        "what": "+ ordered decision rules with a stated precedence for overlaps",
+        "strategy": "llm",
+        "prompt": "decision-rules",
+        "model": null,
+        "extra_params": null,
+        "temperature": 0.0,
+        "samples": 1,
+        "min_votes": 1,
+        "use_hint": false,
+        "hint_vote_threshold": 0.6
+      },
+      "sets": {
+        "v1": {
+          "n": 48,
+          "harmful_rate": 0.0833,
+          "filter_correct_rate": 0.75,
+          "no_filter_rate": 0.1667,
+          "recall_any": 0.7708,
+          "mean_tags_per_sub": 0.8833,
+          "mean_sub_questions": 1.25,
+          "parse_fail_rate": 0.0625,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 729,
+          "mean_cost_usd": 0.000772,
+          "total_cost_usd": 0.0371,
+          "sub_filter_count": 53,
+          "sub_harmful_rate": 0.0943
+        },
+        "v2": {
+          "n": 121,
+          "harmful_rate": 0.1818,
+          "filter_correct_rate": 0.7273,
+          "no_filter_rate": 0.0909,
+          "recall_any": 0.7438,
+          "mean_tags_per_sub": 0.9306,
+          "mean_sub_questions": 1.1901,
+          "parse_fail_rate": 0,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 727,
+          "mean_cost_usd": 0.000777,
+          "total_cost_usd": 0.094,
+          "sub_filter_count": 134,
+          "sub_harmful_rate": 0.209
+        },
+        "pooled": {
+          "n": 169,
+          "harmful_rate": 0.1538,
+          "filter_correct_rate": 0.7337,
+          "no_filter_rate": 0.1124,
+          "recall_any": 0.7515,
+          "mean_tags_per_sub": 0.9167,
+          "mean_sub_questions": 1.2071,
+          "parse_fail_rate": 0.0178,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 727,
+          "mean_cost_usd": 0.000775,
+          "total_cost_usd": 0.1311,
+          "sub_filter_count": 187,
+          "sub_harmful_rate": 0.1765
+        }
+      },
+      "confusion": {
+        "apartment": {
+          "apartment": 13,
+          "(none)": 3
+        },
+        "business": {
+          "business": 14,
+          "(none)": 2,
+          "apartment": 1
+        },
+        "car": {
+          "car": 15,
+          "(none)": 1,
+          "personal-accident": 1
+        },
+        "dental": {
+          "dental": 10,
+          "health": 1
+        },
+        "diseases-disabilities": {
+          "diseases-disabilities": 8,
+          "(none)": 1,
+          "health": 1,
+          "life": 1
+        },
+        "health": {
+          "health": 14,
+          "(none)": 3
+        },
+        "life": {
+          "life": 11,
+          "personal-accident": 3,
+          "(none)": 1
+        },
+        "long-term-care": {
+          "long-term-care": 8,
+          "health": 1
+        },
+        "loss-of-working-ability": {
+          "loss-of-working-ability": 6,
+          "(none)": 1,
+          "diseases-disabilities": 1,
+          "health": 1,
+          "life": 1,
+          "personal-accident": 1
+        },
+        "mortgage": {
+          "apartment": 9,
+          "(none)": 4,
+          "mortgage": 4
+        },
+        "personal-accident": {
+          "personal-accident": 8,
+          "travel": 2,
+          "health": 1
+        },
+        "travel": {
+          "travel": 13,
+          "(none)": 3,
+          "personal-accident": 1
+        }
+      },
+      "paired_vs_baseline": {
+        "pooled": {
+          "n_pairs": 169,
+          "n_fixed": 5,
+          "n_broken": 2,
+          "mcnemar_p": 0.453125,
+          "fixed_ids": [
+            "dev-04-apartment-medium",
+            "dev-10-business-medium",
+            "v2-007-apartment-hard",
+            "v2-102-mortgage-medium",
+            "v2-211-long-term-care-hard"
+          ],
+          "broken_ids": [
+            "dev-38-mortgage-easy",
+            "v2-108-mortgage-medium"
+          ]
+        },
+        "v1": {
+          "n_pairs": 48,
+          "n_fixed": 2,
+          "n_broken": 1,
+          "mcnemar_p": 1.0,
+          "fixed_ids": [
+            "dev-04-apartment-medium",
+            "dev-10-business-medium"
+          ],
+          "broken_ids": [
+            "dev-38-mortgage-easy"
+          ]
+        },
+        "v2": {
+          "n_pairs": 121,
+          "n_fixed": 3,
+          "n_broken": 1,
+          "mcnemar_p": 0.625,
+          "fixed_ids": [
+            "v2-007-apartment-hard",
+            "v2-102-mortgage-medium",
+            "v2-211-long-term-care-hard"
+          ],
+          "broken_ids": [
+            "v2-108-mortgage-medium"
+          ]
+        }
+      }
+    },
+    "hint-sparse": {
+      "what": "baseline prompt + retrieval evidence block",
+      "arm": {
+        "id": "hint-sparse",
+        "what": "baseline prompt + retrieval evidence block",
+        "strategy": "llm",
+        "prompt": "baseline",
+        "model": null,
+        "extra_params": null,
+        "temperature": 0.0,
+        "samples": 1,
+        "min_votes": 1,
+        "use_hint": true,
+        "hint_vote_threshold": 0.6
+      },
+      "sets": {
+        "v1": {
+          "n": 48,
+          "harmful_rate": 0.125,
+          "filter_correct_rate": 0.7917,
+          "no_filter_rate": 0.0833,
+          "recall_any": 0.8125,
+          "mean_tags_per_sub": 0.95,
+          "mean_sub_questions": 1.25,
+          "parse_fail_rate": 0.0208,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 618,
+          "mean_cost_usd": 0.000791,
+          "total_cost_usd": 0.0379,
+          "sub_filter_count": 57,
+          "sub_harmful_rate": 0.1228
+        },
+        "v2": {
+          "n": 121,
+          "harmful_rate": 0.1818,
+          "filter_correct_rate": 0.7603,
+          "no_filter_rate": 0.0579,
+          "recall_any": 0.7851,
+          "mean_tags_per_sub": 0.9801,
+          "mean_sub_questions": 1.2479,
+          "parse_fail_rate": 0.0165,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 725,
+          "mean_cost_usd": 0.000834,
+          "total_cost_usd": 0.1009,
+          "sub_filter_count": 146,
+          "sub_harmful_rate": 0.1918
+        },
+        "pooled": {
+          "n": 169,
+          "harmful_rate": 0.1657,
+          "filter_correct_rate": 0.7692,
+          "no_filter_rate": 0.0651,
+          "recall_any": 0.7929,
+          "mean_tags_per_sub": 0.9716,
+          "mean_sub_questions": 1.2485,
+          "parse_fail_rate": 0.0178,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 699,
+          "mean_cost_usd": 0.000822,
+          "total_cost_usd": 0.1389,
+          "sub_filter_count": 203,
+          "sub_harmful_rate": 0.1724
+        }
+      },
+      "confusion": {
+        "apartment": {
+          "apartment": 12,
+          "(none)": 2,
+          "car": 2
+        },
+        "business": {
+          "business": 16,
+          "apartment": 1
+        },
+        "car": {
+          "car": 14,
+          "(none)": 3
+        },
+        "dental": {
+          "dental": 9,
+          "health": 2
+        },
+        "diseases-disabilities": {
+          "diseases-disabilities": 8,
+          "health": 1,
+          "life": 1,
+          "mortgage": 1
+        },
+        "health": {
+          "health": 15,
+          "(none)": 2
+        },
+        "life": {
+          "life": 13,
+          "personal-accident": 2
+        },
+        "long-term-care": {
+          "long-term-care": 8,
+          "health": 1
+        },
+        "loss-of-working-ability": {
+          "loss-of-working-ability": 8,
+          "life": 2,
+          "personal-accident": 1
+        },
+        "mortgage": {
+          "apartment": 8,
+          "mortgage": 5,
+          "(none)": 3,
+          "life": 1
+        },
+        "personal-accident": {
+          "personal-accident": 8,
+          "travel": 2,
+          "business": 1
+        },
+        "travel": {
+          "travel": 14,
+          "personal-accident": 2,
+          "(none)": 1
+        }
+      },
+      "paired_vs_baseline": {
+        "pooled": {
+          "n_pairs": 169,
+          "n_fixed": 11,
+          "n_broken": 10,
+          "mcnemar_p": 1.0,
+          "fixed_ids": [
+            "dev-04-apartment-medium",
+            "dev-10-business-medium",
+            "v2-007-apartment-hard",
+            "v2-025-car-medium",
+            "v2-077-life-easy",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-102-mortgage-medium",
+            "v2-111-personal-accident-easy",
+            "v2-121-personal-accident-medium",
+            "v2-211-long-term-care-hard",
+            "v2-221-loss-of-working-ability-hard"
+          ],
+          "broken_ids": [
+            "dev-01-apartment-easy",
+            "dev-38-mortgage-easy",
+            "dev-45-travel-medium",
+            "v2-008-apartment-hard",
+            "v2-044-dental-easy",
+            "v2-095-loss-of-working-ability-hard",
+            "v2-103-mortgage-medium",
+            "v2-116-personal-accident-medium",
+            "v2-117-personal-accident-hard",
+            "v2-178-diseases-disabilities-hard"
+          ]
+        },
+        "v1": {
+          "n_pairs": 48,
+          "n_fixed": 2,
+          "n_broken": 3,
+          "mcnemar_p": 1.0,
+          "fixed_ids": [
+            "dev-04-apartment-medium",
+            "dev-10-business-medium"
+          ],
+          "broken_ids": [
+            "dev-01-apartment-easy",
+            "dev-38-mortgage-easy",
+            "dev-45-travel-medium"
+          ]
+        },
+        "v2": {
+          "n_pairs": 121,
+          "n_fixed": 9,
+          "n_broken": 7,
+          "mcnemar_p": 0.803619,
+          "fixed_ids": [
+            "v2-007-apartment-hard",
+            "v2-025-car-medium",
+            "v2-077-life-easy",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-102-mortgage-medium",
+            "v2-111-personal-accident-easy",
+            "v2-121-personal-accident-medium",
+            "v2-211-long-term-care-hard",
+            "v2-221-loss-of-working-ability-hard"
+          ],
+          "broken_ids": [
+            "v2-008-apartment-hard",
+            "v2-044-dental-easy",
+            "v2-095-loss-of-working-ability-hard",
+            "v2-103-mortgage-medium",
+            "v2-116-personal-accident-medium",
+            "v2-117-personal-accident-hard",
+            "v2-178-diseases-disabilities-hard"
+          ]
+        }
+      }
+    },
+    "hint-vote": {
+      "what": "no LLM — filter = top hint category when its share is high enough",
+      "arm": {
+        "id": "hint-vote",
+        "what": "no LLM — filter = top hint category when its share is high enough",
+        "strategy": "hint_vote",
+        "prompt": "baseline",
+        "model": null,
+        "extra_params": null,
+        "temperature": 0.0,
+        "samples": 1,
+        "min_votes": 1,
+        "use_hint": false,
+        "hint_vote_threshold": 0.6
+      },
+      "sets": {
+        "v1": {
+          "n": 48,
+          "harmful_rate": 0.125,
+          "filter_correct_rate": 0.5625,
+          "no_filter_rate": 0.3125,
+          "recall_any": 0.5625,
+          "mean_tags_per_sub": 0.6875,
+          "mean_sub_questions": 1,
+          "parse_fail_rate": 0,
+          "calls_per_question": 0,
+          "truncation_rate": 0,
+          "p50_ms": 0,
+          "mean_cost_usd": 0,
+          "total_cost_usd": 0,
+          "sub_filter_count": 33,
+          "sub_harmful_rate": 0.1818
+        },
+        "v2": {
+          "n": 121,
+          "harmful_rate": 0.0579,
+          "filter_correct_rate": 0.4711,
+          "no_filter_rate": 0.4711,
+          "recall_any": 0.4711,
+          "mean_tags_per_sub": 0.5289,
+          "mean_sub_questions": 1,
+          "parse_fail_rate": 0,
+          "calls_per_question": 0,
+          "truncation_rate": 0,
+          "p50_ms": 0,
+          "mean_cost_usd": 0,
+          "total_cost_usd": 0,
+          "sub_filter_count": 64,
+          "sub_harmful_rate": 0.1094
+        },
+        "pooled": {
+          "n": 169,
+          "harmful_rate": 0.0769,
+          "filter_correct_rate": 0.497,
+          "no_filter_rate": 0.426,
+          "recall_any": 0.497,
+          "mean_tags_per_sub": 0.574,
+          "mean_sub_questions": 1,
+          "parse_fail_rate": 0,
+          "calls_per_question": 0,
+          "truncation_rate": 0,
+          "p50_ms": 0,
+          "mean_cost_usd": 0,
+          "total_cost_usd": 0,
+          "sub_filter_count": 97,
+          "sub_harmful_rate": 0.134
+        }
+      },
+      "confusion": {
+        "apartment": {
+          "(none)": 8,
+          "apartment": 5,
+          "business": 2,
+          "car": 1
+        },
+        "business": {
+          "business": 10,
+          "(none)": 6,
+          "health": 1
+        },
+        "car": {
+          "car": 12,
+          "(none)": 4,
+          "travel": 1
+        },
+        "dental": {
+          "(none)": 5,
+          "dental": 5,
+          "health": 1
+        },
+        "diseases-disabilities": {
+          "(none)": 6,
+          "diseases-disabilities": 5
+        },
+        "health": {
+          "health": 12,
+          "(none)": 5
+        },
+        "life": {
+          "(none)": 12,
+          "life": 3
+        },
+        "long-term-care": {
+          "long-term-care": 6,
+          "(none)": 2,
+          "health": 1
+        },
+        "loss-of-working-ability": {
+          "loss-of-working-ability": 6,
+          "(none)": 5
+        },
+        "mortgage": {
+          "(none)": 11,
+          "apartment": 3,
+          "mortgage": 2,
+          "business": 1
+        },
+        "personal-accident": {
+          "(none)": 5,
+          "personal-accident": 4,
+          "business": 1,
+          "travel": 1
+        },
+        "travel": {
+          "travel": 14,
+          "(none)": 3
+        }
+      },
+      "paired_vs_baseline": {
+        "pooled": {
+          "n_pairs": 169,
+          "n_fixed": 23,
+          "n_broken": 7,
+          "mcnemar_p": 0.005223,
+          "fixed_ids": [
+            "dev-12-business-hard",
+            "dev-37-mortgage-easy",
+            "v2-007-apartment-hard",
+            "v2-025-car-medium",
+            "v2-036-dental-easy",
+            "v2-046-diseases-disabilities-easy",
+            "v2-052-diseases-disabilities-hard",
+            "v2-069-life-medium",
+            "v2-072-life-medium",
+            "v2-077-life-easy",
+            "v2-089-loss-of-working-ability-medium",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-102-mortgage-medium",
+            "v2-106-mortgage-hard",
+            "v2-107-mortgage-hard",
+            "v2-110-mortgage-easy",
+            "v2-111-personal-accident-easy",
+            "v2-114-personal-accident-easy",
+            "v2-121-personal-accident-medium",
+            "v2-122-travel-easy",
+            "v2-211-long-term-care-hard",
+            "v2-221-loss-of-working-ability-hard",
+            "v2-222-loss-of-working-ability-hard"
+          ],
+          "broken_ids": [
+            "dev-01-apartment-easy",
+            "dev-16-car-medium",
+            "dev-38-mortgage-easy",
+            "v2-005-apartment-medium",
+            "v2-044-dental-easy",
+            "v2-116-personal-accident-medium",
+            "v2-117-personal-accident-hard"
+          ]
+        },
+        "v1": {
+          "n_pairs": 48,
+          "n_fixed": 2,
+          "n_broken": 3,
+          "mcnemar_p": 1.0,
+          "fixed_ids": [
+            "dev-12-business-hard",
+            "dev-37-mortgage-easy"
+          ],
+          "broken_ids": [
+            "dev-01-apartment-easy",
+            "dev-16-car-medium",
+            "dev-38-mortgage-easy"
+          ]
+        },
+        "v2": {
+          "n_pairs": 121,
+          "n_fixed": 21,
+          "n_broken": 4,
+          "mcnemar_p": 0.000911,
+          "fixed_ids": [
+            "v2-007-apartment-hard",
+            "v2-025-car-medium",
+            "v2-036-dental-easy",
+            "v2-046-diseases-disabilities-easy",
+            "v2-052-diseases-disabilities-hard",
+            "v2-069-life-medium",
+            "v2-072-life-medium",
+            "v2-077-life-easy",
+            "v2-089-loss-of-working-ability-medium",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-102-mortgage-medium",
+            "v2-106-mortgage-hard",
+            "v2-107-mortgage-hard",
+            "v2-110-mortgage-easy",
+            "v2-111-personal-accident-easy",
+            "v2-114-personal-accident-easy",
+            "v2-121-personal-accident-medium",
+            "v2-122-travel-easy",
+            "v2-211-long-term-care-hard",
+            "v2-221-loss-of-working-ability-hard",
+            "v2-222-loss-of-working-ability-hard"
+          ],
+          "broken_ids": [
+            "v2-005-apartment-medium",
+            "v2-044-dental-easy",
+            "v2-116-personal-accident-medium",
+            "v2-117-personal-accident-hard"
+          ]
+        }
+      }
+    },
+    "model-qwen": {
+      "what": "baseline prompt on Qwen3-235B-A22B-Instruct",
+      "arm": {
+        "id": "model-qwen",
+        "what": "baseline prompt on Qwen3-235B-A22B-Instruct",
+        "strategy": "llm",
+        "prompt": "baseline",
+        "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+        "extra_params": {},
+        "temperature": 0.0,
+        "samples": 1,
+        "min_votes": 1,
+        "use_hint": false,
+        "hint_vote_threshold": 0.6
+      },
+      "sets": {
+        "v1": {
+          "n": 48,
+          "harmful_rate": 0.1875,
+          "filter_correct_rate": 0.7292,
+          "no_filter_rate": 0.0833,
+          "recall_any": 0.7708,
+          "mean_tags_per_sub": 1,
+          "mean_sub_questions": 1.3333,
+          "parse_fail_rate": 0,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 1821,
+          "mean_cost_usd": 0.000452,
+          "total_cost_usd": 0.0217,
+          "sub_filter_count": 60,
+          "sub_harmful_rate": 0.15
+        },
+        "v2": {
+          "n": 121,
+          "harmful_rate": 0.1901,
+          "filter_correct_rate": 0.719,
+          "no_filter_rate": 0.0909,
+          "recall_any": 0.7521,
+          "mean_tags_per_sub": 0.9876,
+          "mean_sub_questions": 1.3306,
+          "parse_fail_rate": 0,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 1676,
+          "mean_cost_usd": 0.000473,
+          "total_cost_usd": 0.0572,
+          "sub_filter_count": 151,
+          "sub_harmful_rate": 0.2318
+        },
+        "pooled": {
+          "n": 169,
+          "harmful_rate": 0.1893,
+          "filter_correct_rate": 0.7219,
+          "no_filter_rate": 0.0888,
+          "recall_any": 0.7574,
+          "mean_tags_per_sub": 0.9911,
+          "mean_sub_questions": 1.3314,
+          "parse_fail_rate": 0,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 1699,
+          "mean_cost_usd": 0.000467,
+          "total_cost_usd": 0.079,
+          "sub_filter_count": 211,
+          "sub_harmful_rate": 0.2085
+        }
+      },
+      "confusion": {
+        "apartment": {
+          "apartment": 13,
+          "(none)": 2,
+          "personal-accident": 1
+        },
+        "business": {
+          "business": 14,
+          "apartment": 1,
+          "dental": 1,
+          "personal-accident": 1
+        },
+        "car": {
+          "car": 15,
+          "(none)": 1,
+          "personal-accident": 1
+        },
+        "dental": {
+          "dental": 10,
+          "health": 1
+        },
+        "diseases-disabilities": {
+          "diseases-disabilities": 8,
+          "(none)": 1,
+          "health": 1,
+          "life": 1
+        },
+        "health": {
+          "health": 12,
+          "(none)": 3,
+          "diseases-disabilities": 1,
+          "personal-accident": 1
+        },
+        "life": {
+          "life": 11,
+          "personal-accident": 4
+        },
+        "long-term-care": {
+          "long-term-care": 9
+        },
+        "loss-of-working-ability": {
+          "loss-of-working-ability": 6,
+          "life": 2,
+          "personal-accident": 2,
+          "diseases-disabilities": 1
+        },
+        "mortgage": {
+          "apartment": 8,
+          "(none)": 6,
+          "mortgage": 3
+        },
+        "personal-accident": {
+          "personal-accident": 9,
+          "travel": 2
+        },
+        "travel": {
+          "travel": 12,
+          "(none)": 2,
+          "personal-accident": 2,
+          "health": 1
+        }
+      },
+      "paired_vs_baseline": {
+        "pooled": {
+          "n_pairs": 169,
+          "n_fixed": 5,
+          "n_broken": 8,
+          "mcnemar_p": 0.581055,
+          "fixed_ids": [
+            "v2-007-apartment-hard",
+            "v2-081-long-term-care-easy",
+            "v2-102-mortgage-medium",
+            "v2-121-personal-accident-medium",
+            "v2-211-long-term-care-hard"
+          ],
+          "broken_ids": [
+            "dev-28-health-medium",
+            "dev-38-mortgage-easy",
+            "dev-44-travel-easy",
+            "dev-45-travel-medium",
+            "v2-017-business-medium",
+            "v2-057-health-easy",
+            "v2-075-life-hard",
+            "v2-095-loss-of-working-ability-hard"
+          ]
+        },
+        "v1": {
+          "n_pairs": 48,
+          "n_fixed": 0,
+          "n_broken": 4,
+          "mcnemar_p": 0.125,
+          "fixed_ids": [],
+          "broken_ids": [
+            "dev-28-health-medium",
+            "dev-38-mortgage-easy",
+            "dev-44-travel-easy",
+            "dev-45-travel-medium"
+          ]
+        },
+        "v2": {
+          "n_pairs": 121,
+          "n_fixed": 5,
+          "n_broken": 4,
+          "mcnemar_p": 1.0,
+          "fixed_ids": [
+            "v2-007-apartment-hard",
+            "v2-081-long-term-care-easy",
+            "v2-102-mortgage-medium",
+            "v2-121-personal-accident-medium",
+            "v2-211-long-term-care-hard"
+          ],
+          "broken_ids": [
+            "v2-017-business-medium",
+            "v2-057-health-easy",
+            "v2-075-life-hard",
+            "v2-095-loss-of-working-ability-hard"
+          ]
+        }
+      }
+    },
+    "model-deepseek": {
+      "what": "baseline prompt on DeepSeek-V4-Pro",
+      "arm": {
+        "id": "model-deepseek",
+        "what": "baseline prompt on DeepSeek-V4-Pro",
+        "strategy": "llm",
+        "prompt": "baseline",
+        "model": "deepseek-ai/DeepSeek-V4-Pro",
+        "extra_params": {},
+        "temperature": 0.0,
+        "samples": 1,
+        "min_votes": 1,
+        "use_hint": false,
+        "hint_vote_threshold": 0.6
+      },
+      "sets": {
+        "v1": {
+          "n": 48,
+          "harmful_rate": 0.1042,
+          "filter_correct_rate": 0.7083,
+          "no_filter_rate": 0.1875,
+          "recall_any": 0.8125,
+          "mean_tags_per_sub": 1.0758,
+          "mean_sub_questions": 1.375,
+          "parse_fail_rate": 0,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 2332,
+          "mean_cost_usd": 0.00054,
+          "total_cost_usd": 0.0259,
+          "sub_filter_count": 57,
+          "sub_harmful_rate": 0.0877
+        },
+        "v2": {
+          "n": 121,
+          "harmful_rate": 0.1322,
+          "filter_correct_rate": 0.6364,
+          "no_filter_rate": 0.2314,
+          "recall_any": 0.8017,
+          "mean_tags_per_sub": 1.117,
+          "mean_sub_questions": 1.5537,
+          "parse_fail_rate": 0,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 2708,
+          "mean_cost_usd": 0.000569,
+          "total_cost_usd": 0.0689,
+          "sub_filter_count": 152,
+          "sub_harmful_rate": 0.1974
+        },
+        "pooled": {
+          "n": 169,
+          "harmful_rate": 0.1243,
+          "filter_correct_rate": 0.6568,
+          "no_filter_rate": 0.2189,
+          "recall_any": 0.8047,
+          "mean_tags_per_sub": 1.1063,
+          "mean_sub_questions": 1.503,
+          "parse_fail_rate": 0,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 2571,
+          "mean_cost_usd": 0.000561,
+          "total_cost_usd": 0.0948,
+          "sub_filter_count": 209,
+          "sub_harmful_rate": 0.1675
+        }
+      },
+      "confusion": {
+        "apartment": {
+          "apartment": 13,
+          "(none)": 2,
+          "personal-accident": 1
+        },
+        "business": {
+          "business": 14,
+          "(none)": 2,
+          "apartment": 1
+        },
+        "car": {
+          "car": 13,
+          "(none)": 4
+        },
+        "dental": {
+          "dental": 10,
+          "health": 1
+        },
+        "diseases-disabilities": {
+          "diseases-disabilities": 7,
+          "(none)": 2,
+          "health": 1,
+          "life": 1
+        },
+        "health": {
+          "health": 13,
+          "(none)": 3,
+          "car": 1
+        },
+        "life": {
+          "life": 9,
+          "personal-accident": 4,
+          "(none)": 2
+        },
+        "long-term-care": {
+          "long-term-care": 8,
+          "(none)": 1
+        },
+        "loss-of-working-ability": {
+          "(none)": 5,
+          "loss-of-working-ability": 5,
+          "diseases-disabilities": 1
+        },
+        "mortgage": {
+          "apartment": 8,
+          "(none)": 7,
+          "mortgage": 2
+        },
+        "personal-accident": {
+          "personal-accident": 6,
+          "(none)": 3,
+          "travel": 2
+        },
+        "travel": {
+          "travel": 11,
+          "(none)": 6
+        }
+      },
+      "paired_vs_baseline": {
+        "pooled": {
+          "n_pairs": 169,
+          "n_fixed": 11,
+          "n_broken": 3,
+          "mcnemar_p": 0.057373,
+          "fixed_ids": [
+            "dev-10-business-medium",
+            "v2-007-apartment-hard",
+            "v2-025-car-medium",
+            "v2-081-long-term-care-easy",
+            "v2-089-loss-of-working-ability-medium",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-102-mortgage-medium",
+            "v2-121-personal-accident-medium",
+            "v2-122-travel-easy",
+            "v2-211-long-term-care-hard",
+            "v2-222-loss-of-working-ability-hard"
+          ],
+          "broken_ids": [
+            "dev-38-mortgage-easy",
+            "v2-075-life-hard",
+            "v2-188-health-hard"
+          ]
+        },
+        "v1": {
+          "n_pairs": 48,
+          "n_fixed": 1,
+          "n_broken": 1,
+          "mcnemar_p": 1.0,
+          "fixed_ids": [
+            "dev-10-business-medium"
+          ],
+          "broken_ids": [
+            "dev-38-mortgage-easy"
+          ]
+        },
+        "v2": {
+          "n_pairs": 121,
+          "n_fixed": 10,
+          "n_broken": 2,
+          "mcnemar_p": 0.038574,
+          "fixed_ids": [
+            "v2-007-apartment-hard",
+            "v2-025-car-medium",
+            "v2-081-long-term-care-easy",
+            "v2-089-loss-of-working-ability-medium",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-102-mortgage-medium",
+            "v2-121-personal-accident-medium",
+            "v2-122-travel-easy",
+            "v2-211-long-term-care-hard",
+            "v2-222-loss-of-working-ability-hard"
+          ],
+          "broken_ids": [
+            "v2-075-life-hard",
+            "v2-188-health-hard"
+          ]
+        }
+      }
+    },
+    "effort-medium": {
+      "what": "gpt-oss-120b at reasoning_effort medium",
+      "arm": {
+        "id": "effort-medium",
+        "what": "gpt-oss-120b at reasoning_effort medium",
+        "strategy": "llm",
+        "prompt": "baseline",
+        "model": null,
+        "extra_params": {
+          "reasoning_effort": "medium",
+          "allowed_openai_params": [
+            "reasoning_effort"
+          ]
+        },
+        "temperature": 0.0,
+        "samples": 1,
+        "min_votes": 1,
+        "use_hint": false,
+        "hint_vote_threshold": 0.6
+      },
+      "sets": {
+        "v1": {
+          "n": 48,
+          "harmful_rate": 0.125,
+          "filter_correct_rate": 0.7292,
+          "no_filter_rate": 0.1458,
+          "recall_any": 0.75,
+          "mean_tags_per_sub": 0.8871,
+          "mean_sub_questions": 1.2917,
+          "parse_fail_rate": 0.0417,
+          "calls_per_question": 1,
+          "truncation_rate": 0,
+          "p50_ms": 1258,
+          "mean_cost_usd": 0.001016,
+          "total_cost_usd": 0.0488,
+          "sub_filter_count": 55,
+          "sub_harmful_rate": 0.1273
+        },
+        "v2": {
+          "n": 121,
+          "harmful_rate": 0.1736,
+          "filter_correct_rate": 0.6529,
+          "no_filter_rate": 0.1736,
+          "recall_any": 0.686,
+          "mean_tags_per_sub": 0.8868,
+          "mean_sub_questions": 1.314,
+          "parse_fail_rate": 0.0661,
+          "calls_per_question": 1,
+          "truncation_rate": 0.0331,
+          "p50_ms": 1340,
+          "mean_cost_usd": 0.001095,
+          "total_cost_usd": 0.1325,
+          "sub_filter_count": 139,
+          "sub_harmful_rate": 0.2374
+        },
+        "pooled": {
+          "n": 169,
+          "harmful_rate": 0.1598,
+          "filter_correct_rate": 0.6746,
+          "no_filter_rate": 0.1657,
+          "recall_any": 0.7041,
+          "mean_tags_per_sub": 0.8869,
+          "mean_sub_questions": 1.3077,
+          "parse_fail_rate": 0.0592,
+          "calls_per_question": 1,
+          "truncation_rate": 0.0237,
+          "p50_ms": 1320,
+          "mean_cost_usd": 0.001073,
+          "total_cost_usd": 0.1813,
+          "sub_filter_count": 194,
+          "sub_harmful_rate": 0.2062
+        }
+      },
+      "confusion": {
+        "apartment": {
+          "apartment": 11,
+          "(none)": 5
+        },
+        "business": {
+          "business": 13,
+          "(none)": 2,
+          "apartment": 1,
+          "health": 1
+        },
+        "car": {
+          "car": 14,
+          "(none)": 3
+        },
+        "dental": {
+          "dental": 10,
+          "health": 1
+        },
+        "diseases-disabilities": {
+          "diseases-disabilities": 7,
+          "health": 2,
+          "(none)": 1,
+          "life": 1
+        },
+        "health": {
+          "health": 14,
+          "(none)": 3
+        },
+        "life": {
+          "life": 10,
+          "personal-accident": 4,
+          "(none)": 1
+        },
+        "long-term-care": {
+          "long-term-care": 7,
+          "health": 1,
+          "loss-of-working-ability": 1
+        },
+        "loss-of-working-ability": {
+          "loss-of-working-ability": 7,
+          "(none)": 1,
+          "diseases-disabilities": 1,
+          "life": 1,
+          "personal-accident": 1
+        },
+        "mortgage": {
+          "apartment": 8,
+          "(none)": 5,
+          "mortgage": 4
+        },
+        "personal-accident": {
+          "personal-accident": 6,
+          "(none)": 3,
+          "health": 1,
+          "travel": 1
+        },
+        "travel": {
+          "travel": 11,
+          "(none)": 4,
+          "personal-accident": 2
+        }
+      },
+      "paired_vs_baseline": {
+        "pooled": {
+          "n_pairs": 169,
+          "n_fixed": 6,
+          "n_broken": 4,
+          "mcnemar_p": 0.753906,
+          "fixed_ids": [
+            "dev-04-apartment-medium",
+            "v2-007-apartment-hard",
+            "v2-025-car-medium",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-102-mortgage-medium",
+            "v2-114-personal-accident-easy"
+          ],
+          "broken_ids": [
+            "dev-38-mortgage-easy",
+            "dev-45-travel-medium",
+            "v2-045-diseases-disabilities-medium",
+            "v2-075-life-hard"
+          ]
+        },
+        "v1": {
+          "n_pairs": 48,
+          "n_fixed": 1,
+          "n_broken": 2,
+          "mcnemar_p": 1.0,
+          "fixed_ids": [
+            "dev-04-apartment-medium"
+          ],
+          "broken_ids": [
+            "dev-38-mortgage-easy",
+            "dev-45-travel-medium"
+          ]
+        },
+        "v2": {
+          "n_pairs": 121,
+          "n_fixed": 5,
+          "n_broken": 2,
+          "mcnemar_p": 0.453125,
+          "fixed_ids": [
+            "v2-007-apartment-hard",
+            "v2-025-car-medium",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-102-mortgage-medium",
+            "v2-114-personal-accident-easy"
+          ],
+          "broken_ids": [
+            "v2-045-diseases-disabilities-medium",
+            "v2-075-life-hard"
+          ]
+        }
+      }
+    },
+    "selfcons-3": {
+      "what": "baseline prompt, temp 0.7, 3 samples, keep categories with >=2 votes",
+      "arm": {
+        "id": "selfcons-3",
+        "what": "baseline prompt, temp 0.7, 3 samples, keep categories with >=2 votes",
+        "strategy": "llm",
+        "prompt": "baseline",
+        "model": null,
+        "extra_params": null,
+        "temperature": 0.7,
+        "samples": 3,
+        "min_votes": 2,
+        "use_hint": false,
+        "hint_vote_threshold": 0.6
+      },
+      "sets": {
+        "v1": {
+          "n": 48,
+          "harmful_rate": 0.125,
+          "filter_correct_rate": 0.7083,
+          "no_filter_rate": 0.1667,
+          "recall_any": 0.7292,
+          "mean_tags_per_sub": 0.8689,
+          "mean_sub_questions": 1.2708,
+          "parse_fail_rate": 0.1875,
+          "calls_per_question": 3,
+          "truncation_rate": 0,
+          "p50_ms": 1862,
+          "mean_cost_usd": 0.001775,
+          "total_cost_usd": 0.0852,
+          "sub_filter_count": 53,
+          "sub_harmful_rate": 0.1321
+        },
+        "v2": {
+          "n": 121,
+          "harmful_rate": 0.157,
+          "filter_correct_rate": 0.6777,
+          "no_filter_rate": 0.1653,
+          "recall_any": 0.6942,
+          "mean_tags_per_sub": 0.875,
+          "mean_sub_questions": 1.2562,
+          "parse_fail_rate": 0.0909,
+          "calls_per_question": 3,
+          "truncation_rate": 0,
+          "p50_ms": 2232,
+          "mean_cost_usd": 0.001849,
+          "total_cost_usd": 0.2238,
+          "sub_filter_count": 131,
+          "sub_harmful_rate": 0.1985
+        },
+        "pooled": {
+          "n": 169,
+          "harmful_rate": 0.1479,
+          "filter_correct_rate": 0.6864,
+          "no_filter_rate": 0.1657,
+          "recall_any": 0.7041,
+          "mean_tags_per_sub": 0.8732,
+          "mean_sub_questions": 1.2604,
+          "parse_fail_rate": 0.1183,
+          "calls_per_question": 3,
+          "truncation_rate": 0,
+          "p50_ms": 2119,
+          "mean_cost_usd": 0.001828,
+          "total_cost_usd": 0.309,
+          "sub_filter_count": 184,
+          "sub_harmful_rate": 0.1793
+        }
+      },
+      "confusion": {
+        "apartment": {
+          "apartment": 13,
+          "(none)": 3
+        },
+        "business": {
+          "business": 13,
+          "(none)": 2,
+          "apartment": 1,
+          "health": 1
+        },
+        "car": {
+          "car": 15,
+          "(none)": 1,
+          "personal-accident": 1
+        },
+        "dental": {
+          "dental": 10,
+          "health": 1
+        },
+        "diseases-disabilities": {
+          "diseases-disabilities": 7,
+          "(none)": 2,
+          "health": 1,
+          "life": 1
+        },
+        "health": {
+          "health": 13,
+          "(none)": 4
+        },
+        "life": {
+          "life": 11,
+          "personal-accident": 3,
+          "(none)": 1
+        },
+        "long-term-care": {
+          "long-term-care": 7,
+          "(none)": 1,
+          "diseases-disabilities": 1
+        },
+        "loss-of-working-ability": {
+          "loss-of-working-ability": 5,
+          "(none)": 3,
+          "diseases-disabilities": 1,
+          "life": 1,
+          "personal-accident": 1
+        },
+        "mortgage": {
+          "apartment": 9,
+          "(none)": 5,
+          "mortgage": 2,
+          "life": 1
+        },
+        "personal-accident": {
+          "personal-accident": 9,
+          "(none)": 2
+        },
+        "travel": {
+          "travel": 11,
+          "(none)": 4,
+          "personal-accident": 2
+        }
+      },
+      "paired_vs_baseline": {
+        "pooled": {
+          "n_pairs": 169,
+          "n_fixed": 8,
+          "n_broken": 4,
+          "mcnemar_p": 0.387695,
+          "fixed_ids": [
+            "dev-04-apartment-medium",
+            "v2-007-apartment-hard",
+            "v2-077-life-easy",
+            "v2-081-long-term-care-easy",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-111-personal-accident-easy",
+            "v2-114-personal-accident-easy",
+            "v2-121-personal-accident-medium"
+          ],
+          "broken_ids": [
+            "dev-38-mortgage-easy",
+            "dev-45-travel-medium",
+            "v2-075-life-hard",
+            "v2-108-mortgage-medium"
+          ]
+        },
+        "v1": {
+          "n_pairs": 48,
+          "n_fixed": 1,
+          "n_broken": 2,
+          "mcnemar_p": 1.0,
+          "fixed_ids": [
+            "dev-04-apartment-medium"
+          ],
+          "broken_ids": [
+            "dev-38-mortgage-easy",
+            "dev-45-travel-medium"
+          ]
+        },
+        "v2": {
+          "n_pairs": 121,
+          "n_fixed": 7,
+          "n_broken": 2,
+          "mcnemar_p": 0.179688,
+          "fixed_ids": [
+            "v2-007-apartment-hard",
+            "v2-077-life-easy",
+            "v2-081-long-term-care-easy",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-111-personal-accident-easy",
+            "v2-114-personal-accident-easy",
+            "v2-121-personal-accident-medium"
+          ],
+          "broken_ids": [
+            "v2-075-life-hard",
+            "v2-108-mortgage-medium"
+          ]
+        }
+      }
+    },
+    "verify-2stage": {
+      "what": "baseline tags, then a cheap call that sees the evidence and may retract a tag",
+      "arm": {
+        "id": "verify-2stage",
+        "what": "baseline tags, then a cheap call that sees the evidence and may retract a tag",
+        "strategy": "verify_2stage",
+        "prompt": "baseline",
+        "model": null,
+        "extra_params": null,
+        "temperature": 0.0,
+        "samples": 1,
+        "min_votes": 1,
+        "use_hint": false,
+        "hint_vote_threshold": 0.6
+      },
+      "sets": {
+        "v1": {
+          "n": 48,
+          "harmful_rate": 0.125,
+          "filter_correct_rate": 0.7083,
+          "no_filter_rate": 0.1667,
+          "recall_any": 0.7292,
+          "mean_tags_per_sub": 0.8689,
+          "mean_sub_questions": 1.2708,
+          "parse_fail_rate": 0.0625,
+          "calls_per_question": 1.875,
+          "truncation_rate": 0,
+          "p50_ms": 1076,
+          "mean_cost_usd": 0.000982,
+          "total_cost_usd": 0.0471,
+          "sub_filter_count": 53,
+          "sub_harmful_rate": 0.1321
+        },
+        "v2": {
+          "n": 121,
+          "harmful_rate": 0.1488,
+          "filter_correct_rate": 0.6612,
+          "no_filter_rate": 0.1901,
+          "recall_any": 0.686,
+          "mean_tags_per_sub": 0.8377,
+          "mean_sub_questions": 1.2727,
+          "parse_fail_rate": 0.0248,
+          "calls_per_question": 1.9091,
+          "truncation_rate": 0,
+          "p50_ms": 1000,
+          "mean_cost_usd": 0.001042,
+          "total_cost_usd": 0.126,
+          "sub_filter_count": 127,
+          "sub_harmful_rate": 0.2205
+        },
+        "pooled": {
+          "n": 169,
+          "harmful_rate": 0.142,
+          "filter_correct_rate": 0.6746,
+          "no_filter_rate": 0.1834,
+          "recall_any": 0.6982,
+          "mean_tags_per_sub": 0.8465,
+          "mean_sub_questions": 1.2722,
+          "parse_fail_rate": 0.0355,
+          "calls_per_question": 1.8994,
+          "truncation_rate": 0,
+          "p50_ms": 1028,
+          "mean_cost_usd": 0.001025,
+          "total_cost_usd": 0.1732,
+          "sub_filter_count": 180,
+          "sub_harmful_rate": 0.1944
+        }
+      },
+      "confusion": {
+        "apartment": {
+          "apartment": 10,
+          "(none)": 6
+        },
+        "business": {
+          "business": 12,
+          "(none)": 3,
+          "apartment": 1,
+          "health": 1
+        },
+        "car": {
+          "car": 14,
+          "(none)": 3
+        },
+        "dental": {
+          "dental": 10,
+          "health": 1
+        },
+        "diseases-disabilities": {
+          "diseases-disabilities": 8,
+          "(none)": 1,
+          "health": 1,
+          "life": 1
+        },
+        "health": {
+          "health": 14,
+          "(none)": 3
+        },
+        "life": {
+          "life": 11,
+          "(none)": 2,
+          "personal-accident": 2
+        },
+        "long-term-care": {
+          "long-term-care": 7,
+          "(none)": 1,
+          "health": 1
+        },
+        "loss-of-working-ability": {
+          "loss-of-working-ability": 5,
+          "(none)": 2,
+          "life": 2,
+          "diseases-disabilities": 1,
+          "personal-accident": 1
+        },
+        "mortgage": {
+          "(none)": 7,
+          "apartment": 7,
+          "mortgage": 2,
+          "life": 1
+        },
+        "personal-accident": {
+          "personal-accident": 8,
+          "(none)": 1,
+          "health": 1,
+          "travel": 1
+        },
+        "travel": {
+          "travel": 13,
+          "(none)": 2,
+          "personal-accident": 2
+        }
+      },
+      "paired_vs_baseline": {
+        "pooled": {
+          "n_pairs": 169,
+          "n_fixed": 9,
+          "n_broken": 4,
+          "mcnemar_p": 0.266846,
+          "fixed_ids": [
+            "dev-04-apartment-medium",
+            "v2-007-apartment-hard",
+            "v2-025-car-medium",
+            "v2-077-life-easy",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-104-mortgage-easy",
+            "v2-105-mortgage-hard",
+            "v2-111-personal-accident-easy",
+            "v2-211-long-term-care-hard"
+          ],
+          "broken_ids": [
+            "dev-38-mortgage-easy",
+            "dev-45-travel-medium",
+            "v2-095-loss-of-working-ability-hard",
+            "v2-108-mortgage-medium"
+          ]
+        },
+        "v1": {
+          "n_pairs": 48,
+          "n_fixed": 1,
+          "n_broken": 2,
+          "mcnemar_p": 1.0,
+          "fixed_ids": [
+            "dev-04-apartment-medium"
+          ],
+          "broken_ids": [
+            "dev-38-mortgage-easy",
+            "dev-45-travel-medium"
+          ]
+        },
+        "v2": {
+          "n_pairs": 121,
+          "n_fixed": 8,
+          "n_broken": 2,
+          "mcnemar_p": 0.109375,
+          "fixed_ids": [
+            "v2-007-apartment-hard",
+            "v2-025-car-medium",
+            "v2-077-life-easy",
+            "v2-090-loss-of-working-ability-easy",
+            "v2-104-mortgage-easy",
+            "v2-105-mortgage-hard",
+            "v2-111-personal-accident-easy",
+            "v2-211-long-term-care-hard"
+          ],
+          "broken_ids": [
+            "v2-095-loss-of-working-ability-hard",
+            "v2-108-mortgage-medium"
+          ]
+        }
+      }
+    }
+  }
+}
