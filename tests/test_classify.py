@@ -146,6 +146,87 @@ def test_classify_fallback_difficulty_is_medium(monkeypatch):
     assert QueryClassifier("m").classify(QUESTION).estimated_difficulty == "medium"
 
 
+# --------------------------------------------------------------------------- #
+# Malformed-JSON repair
+#
+# Every reply below is a verbatim gpt-oss-120b emission recorded in
+# eval_results/classify-sweep-20260802T043108Z. Between them the two defects
+# accounted for 60 of the sweep's 64 broken replies (4-12% per arm), each of
+# which used to throw away a usable classification.
+# --------------------------------------------------------------------------- #
+
+#: The model closes `sub_questions` twice: `...}]], "needs_calculation"`.
+DUPLICATED_BRACKET = (
+    '{"sub_questions": [{"question": "מי נחשב לאדם עם מוגבלות מקצרת חיים לצורך '
+    'נספח משכנתא מיוחד?", "categories": ["mortgage"]}]], "needs_calculation": '
+    'false, "dependent": false, "difficulty": "medium"}'
+)
+
+#: Hebrew gershayim written as a bare ASCII quote inside the question string
+#: (בחו"ל), pretty-printed across several lines.
+STRAY_QUOTE = (
+    '{\n  "sub_questions": [\n    {\n      "question": "אם חלילה אמות בתאונה '
+    'בחו"ל ויש לי את הרחבת תאונות אישיות בדרכון פרימיום, כמה יקבלו היורשים '
+    'שלי?",\n      "categories": ["personal-accident"]\n    }\n  ],\n  '
+    '"needs_calculation": true,\n  "dependent": false,\n  "difficulty": "medium"\n}'
+)
+
+#: The same reply escapes one gershayim and not the other — the repair has to
+#: leave the already-correct one alone.
+HALF_ESCAPED_QUOTES = (
+    '{"sub_questions": [{"question": "האם ההוצאות הרפואיות שלי עקב ההיריון שזוהה '
+    'בחו"ל עד לשבוע 12 יכוסו בביטוח נסיעות לחו\\"ל?", "categories": ["travel"]}], '
+    '"needs_calculation": false, "dependent": false, "difficulty": "medium"}'
+)
+
+
+def test_repair_recovers_a_duplicated_closing_bracket(monkeypatch):
+    monkeypatch.setattr(classify_mod, "tf_chat", fake_chat(DUPLICATED_BRACKET))
+    result = QueryClassifier("m").classify("ש")
+    assert result.categories == ["mortgage"]
+    assert result.estimated_difficulty == "medium"
+
+
+def test_repair_recovers_an_unescaped_quote_inside_a_hebrew_string(monkeypatch):
+    monkeypatch.setattr(classify_mod, "tf_chat", fake_chat(STRAY_QUOTE))
+    result = QueryClassifier("m").classify("ש")
+    assert result.categories == ["personal-accident"]
+    assert result.needs_calculation is True
+    # The gershayim survives as a literal character rather than being deleted.
+    assert 'בחו"ל' in result.sub_questions[0].question
+
+
+def test_repair_leaves_an_already_escaped_quote_alone(monkeypatch):
+    monkeypatch.setattr(classify_mod, "tf_chat", fake_chat(HALF_ESCAPED_QUOTES))
+    question = QueryClassifier("m").classify("ש").sub_questions[0].question
+    assert question.count('"') == 2 and 'לחו"ל' in question and 'בחו"ל' in question
+
+
+@pytest.mark.parametrize(
+    "reply",
+    [
+        '{"sub_questions": [{"question": "ש", "categories": ["car"]}]}',
+        '{"a": [[1, 2], [3]], "sub_questions": [{"question": "ש", "categories": []}]}',
+        '{"sub_questions": [{"question": "ש", "categories": ["car", "travel"]}]}',
+    ],
+)
+def test_repair_is_a_noop_on_well_formed_json(reply):
+    """Valid replies must not go anywhere near the repair, and must survive it
+    byte-for-byte if they ever do."""
+    assert classify_mod._repair_json(reply) == reply
+    assert classify_mod._extract_json(reply) == json.loads(reply)
+
+
+def test_a_truncated_reply_is_not_repaired_into_an_invented_classification(monkeypatch):
+    """Closing a cut-off object would fabricate tags the model never finished
+    choosing — a truncation still falls back."""
+    truncated = ('{"sub_questions": [{"question": "ש", "categories": ["car"]},\n'
+                 '    {"question": "ש2", "categories": ["travel"]}')
+    monkeypatch.setattr(classify_mod, "tf_chat", fake_chat(truncated))
+    result = QueryClassifier("m").classify(QUESTION)
+    assert result.categories == [] and result.sub_questions[0].question == QUESTION
+
+
 def test_system_prompt_lists_all_corpus_categories():
     prompt = _system_prompt()
     assert len(CATEGORIES) == 12

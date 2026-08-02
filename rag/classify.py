@@ -15,7 +15,10 @@ the user turn.
 
 Failure policy: any LLM/parse failure degrades to a single-mode,
 no-category-filter classification of the original question (warning logged)
-— classification must never block answering.
+— classification must never block answering. That fallback is safe but not
+free (a lost filter is a worse retrieval pool), so a malformed reply is first
+run through :func:`_repair_json` for the two mechanical defects gpt-oss-120b
+actually emits; only an unrepairable reply falls back.
 """
 from __future__ import annotations
 
@@ -87,13 +90,121 @@ def _user_message(question: str, hint: str | None) -> str:
     )
 
 
+#: A closing quote inside a JSON string is only really a closing quote when
+#: JSON structure follows it. See :func:`_string_ends_at`.
+_STRUCTURE_AFTER_STRING = frozenset(":}]")
+
+#: Every character a JSON value may begin with.
+_VALUE_START = frozenset('"{[-0123456789tfn')
+
+_OPENER_OF = {"]": "[", "}": "{"}
+
+
+def _string_ends_at(text: str, pos: int) -> bool:
+    """Does the ``"`` just before ``pos`` terminate its string?
+
+    In well-formed JSON a string is always followed by ``:``, ``,``, ``}``,
+    ``]`` or the end of input, so anything else means the quote was written
+    *inside* the value. A comma is the ambiguous one — ``"travel", "difficulty"``
+    is structure, ``בחו"ל, ולכן`` is prose — so it only counts when a fresh
+    value starts after it."""
+    rest = text[pos:].lstrip()
+    if not rest:
+        return True
+    if rest[0] in _STRUCTURE_AFTER_STRING:
+        return True
+    return rest[0] == "," and rest[1:].lstrip()[:1] in _VALUE_START
+
+
+def _escape_stray_quotes(text: str) -> str:
+    """Escape ASCII double-quotes the model left unescaped inside a string.
+
+    Hebrew gershayim are typed as ``"`` (``בחו"ל``), and the model copies the
+    customer's spelling straight into the JSON."""
+    out: list[str] = []
+    in_string = False
+    i = 0
+    while i < len(text):
+        char = text[i]
+        if in_string and char == "\\":
+            out.append(text[i : i + 2])
+            i += 2
+            continue
+        if char == '"':
+            if not in_string:
+                in_string = True
+            elif _string_ends_at(text, i + 1):
+                in_string = False
+            else:
+                out.append("\\")
+        out.append(char)
+        i += 1
+    return "".join(out)
+
+
+def _drop_unmatched_closers(text: str) -> str:
+    """Drop closing brackets that close nothing.
+
+    gpt-oss-120b duplicates the ``]`` that ends ``sub_questions``, emitting
+    ``...}]], "needs_calculation": false``. Nested arrays are untouched because
+    their closers do match the open stack. Must run after
+    :func:`_escape_stray_quotes` so the string boundaries are trustworthy."""
+    out: list[str] = []
+    stack: list[str] = []
+    in_string = False
+    i = 0
+    while i < len(text):
+        char = text[i]
+        if in_string:
+            if char == "\\":
+                out.append(text[i : i + 2])
+                i += 2
+                continue
+            if char == '"':
+                in_string = False
+        elif char == '"':
+            in_string = True
+        elif char in "[{":
+            stack.append(char)
+        elif char in _OPENER_OF:
+            if not stack or stack[-1] != _OPENER_OF[char]:
+                i += 1
+                continue
+            stack.pop()
+        out.append(char)
+        i += 1
+    return "".join(out)
+
+
+def _repair_json(text: str) -> str:
+    """Best-effort repair of the two defects gpt-oss-120b actually emits.
+
+    Both are mechanical and lossless; neither invents content. Truncated
+    replies (finish_reason ``length``) are deliberately not repaired — closing
+    a cut-off object would fabricate a classification."""
+    return _drop_unmatched_closers(_escape_stray_quotes(text))
+
+
 def _extract_json(text: str) -> dict[str, Any]:
     """Tolerate code fences / prose around the JSON object: parse the
-    outermost ``{...}`` span."""
+    outermost ``{...}`` span, retrying once through :func:`_repair_json`.
+
+    The retry exists because 4-12% of gpt-oss-120b replies carry one of two
+    mechanical defects, and every one of them used to degrade a perfectly good
+    classification to the no-filter fallback."""
     start, end = text.find("{"), text.rfind("}")
     if start == -1 or end <= start:
         raise ValueError("no JSON object in classifier reply")
-    return json.loads(text[start : end + 1])
+    span = text[start : end + 1]
+    try:
+        return json.loads(span)
+    except json.JSONDecodeError:
+        repaired = _repair_json(span)
+        if repaired == span:
+            raise
+        data = json.loads(repaired)
+        logger.info("Repaired malformed JSON in the classifier reply")
+        return data
 
 
 def _fallback(question: str, cost: float) -> Classification:
