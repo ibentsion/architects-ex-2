@@ -38,7 +38,7 @@ from typing import Any
 from tf_client import chat as tf_chat
 
 from rag.agent.calculator import CalculationError, calculate
-from rag.classify import CATEGORIES, build_classifier
+from rag.classify import CATEGORIES, build_classifier, build_hint
 from rag.generate.generator import Generator, build_generator
 from rag.generate.prompts import FALLBACK_TEXT
 from rag.retrieve.retriever import Retriever, load_retriever
@@ -178,8 +178,25 @@ class AgentEngine:
         trace: list[dict[str, Any]] = []
         total_tokens = {"prompt": 0, "completion": 0}
 
+        # Retrieval evidence first: the classifier tags the query far better
+        # when it can see which corpus slices the raw question actually hits
+        # (260802-003 — correct filters 73% -> 81%). Fuse-only, so this costs
+        # an embedding + BM25 and no cross-encoder pass.
+        t_hint = time.monotonic()
+        hint, hint_summary = build_hint(self.retriever, question)
+        hint_ms = (time.monotonic() - t_hint) * 1000
+        trace.append(
+            {
+                "step": "hint",
+                "ms": round(hint_ms),
+                "top_category": hint_summary["top_category"],
+                "top_share": hint_summary["top_share"],
+                "n_hits": hint_summary["n_hits"],
+            }
+        )
+
         t0 = time.monotonic()
-        classification = self.classifier.classify(question)
+        classification = self.classifier.classify(question, hint=hint)
         classification_ms = (time.monotonic() - t0) * 1000
         trace.append(
             {

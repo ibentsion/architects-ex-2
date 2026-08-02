@@ -69,7 +69,16 @@ from dataclasses import asdict
 from pathlib import Path
 
 import rag.classify as classify_mod
-from rag.classify import CATEGORIES, QueryClassifier, _extract_json
+from rag.classify import (
+    HINT_SNIPPET_CHARS,
+    HINT_SNIPPETS,
+    HINT_TOP_K,
+    CATEGORIES,
+    QueryClassifier,
+    _extract_json,
+    hint_from_hits,
+    render_hint,
+)
 from rag.config import load_config
 
 from .classify_arms import ARMS, BASELINE_ARM, Arm, get_arm
@@ -84,9 +93,6 @@ NO_FILTER = "(none)"
 
 #: Hint pass: top-10 fused hits, no rerank. The cross-encoder is the expensive
 #: CPU stage and a category prior does not need its precision.
-HINT_TOP_K = 10
-HINT_SNIPPETS = 3
-HINT_SNIPPET_CHARS = 200
 
 #: Warnings rag.classify logs on the two paths that end in the fallback. Any
 #: other warning it emits (unknown category dropped) is not a parse failure.
@@ -270,44 +276,6 @@ class WarningCapture(logging.Handler):
 # --------------------------------------------------------------------------- #
 
 
-def render_hint(hint: dict | None) -> str:
-    """The evidence block a hint arm shows the classifier."""
-    if not hint or not hint.get("n_hits"):
-        return "החיפוש באינדקס לא החזיר תוצאות."
-    n_hits = hint["n_hits"]
-    lines = [f"התפלגות תחומים ב-{n_hits} התוצאות המובילות מהאינדקס:"]
-    for category, count in hint["histogram"].items():
-        lines.append(f"- {category}: {count} מתוך {n_hits} ({count / n_hits:.0%})")
-    if hint.get("snippets"):
-        lines.append("")
-        lines.append("הקטעים המדורגים ראשונים:")
-        for snippet in hint["snippets"]:
-            lines.append(f"{snippet['rank']}. [{snippet['category']}] {snippet['file']}")
-            lines.append(f"   {snippet['text']}")
-    return "\n".join(lines)
-
-
-def _hint_from_hits(hits) -> dict:
-    histogram = Counter(hit.chunk.category for hit in hits)
-    ordered = dict(histogram.most_common())
-    top_category, top_count = next(iter(ordered.items()), (None, 0))
-    return {
-        "n_hits": len(hits),
-        "histogram": ordered,
-        "top_category": top_category,
-        "top_share": round(top_count / len(hits), 4) if hits else 0.0,
-        "snippets": [
-            {
-                "rank": rank,
-                "file": hit.chunk.file,
-                "category": hit.chunk.category,
-                "text": " ".join(hit.chunk.text.split())[:HINT_SNIPPET_CHARS],
-            }
-            for rank, hit in enumerate(hits[:HINT_SNIPPETS], start=1)
-        ],
-    }
-
-
 def build_hints(retriever, questions: list[dict], workers: int = 4,
                 progress=None) -> dict:
     """Dense + sparse -> RRF fuse -> top 10, no rerank, once per question.
@@ -318,7 +286,7 @@ def build_hints(retriever, questions: list[dict], workers: int = 4,
 
     def one(question: dict) -> tuple[str, dict]:
         hits = retriever.fuse(question["question"])[:HINT_TOP_K]
-        return question["id"], _hint_from_hits(hits)
+        return question["id"], hint_from_hits(hits)
 
     hints: dict[str, dict] = {}
     with ThreadPoolExecutor(max_workers=workers) as pool:

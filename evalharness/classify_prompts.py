@@ -31,17 +31,11 @@ and never replace the classifier's own prompt.
 """
 from __future__ import annotations
 
-from rag.classify import CATEGORIES, _system_prompt
+from rag.classify import ABSTAIN_RULE, CATEGORIES, DECISION_RULES, _base_prompt, _system_prompt
 
 # --------------------------------------------------------------------------- #
 # abstain
 # --------------------------------------------------------------------------- #
-
-ABSTAIN_RULE = (
-    "- תג שגוי גרוע יותר מהיעדר תג: תג שגוי מפנה את החיפוש לתחום הלא נכון ומונע "
-    "מציאת התשובה, בעוד רשימה ריקה מחפשת בכל התחומים. אם תחום הביטוח אינו נקבע "
-    "באופן חד-משמעי מתוך נוסח השאלה, החזר רשימת categories ריקה."
-)
 
 # --------------------------------------------------------------------------- #
 # examples — invented, never taken from a reference set
@@ -192,21 +186,6 @@ DISAMBIGUATION = """הבחנות בין משפחות תחומים חופפות:
 - personal-accident מול loss-of-working-ability: personal-accident מתייחס לאירוע תאונתי נקודתי ולפיצוי שנגזר ממנו. loss-of-working-ability מתייחס ליכולת להמשיך להתפרנס לאורך זמן, ללא תלות בשאלה אם הסיבה היא תאונה או מחלה."""
 
 # --------------------------------------------------------------------------- #
-# decision-rules
-# --------------------------------------------------------------------------- #
-
-DECISION_RULES = """סדר ההכרעה בתיוג — עבור על הכללים לפי סדרם ועצור בכלל הראשון שמכריע:
-1. שם מוצר או שם פוליסה שמופיע במפורש בשאלה (למשל "ביטוח נסיעות", "פוליסת הרכב", "ביטוח השיניים", "הפוליסה הסיעודית") קובע את התחום, גם אם תוכן השאלה נשמע כללי.
-2. אין שם מוצר — הכרע לפי מצב המבוטח שהשאלה מתארת: מה קרה לו, מה הוא מבקש ומי משלם. בקשת החזר על הוצאה רפואית ← health. פיצוי בעקבות אבחון מחלה או קביעת נכות ← diseases-disabilities. תגמול חודשי שמחליף שכר עבודה ← loss-of-working-ability. גמלה למי שתלוי בעזרת הזולת בפעולות יומיום ← long-term-care. נזק לרכוש בבית ← apartment.
-3. שני תחומים עדיין מתאימים — הכרע לפי סדר הקדימויות הבא:
-   - הוזכרו משכנתא, בנק או הלוואת דיור ← mortgage גובר על life ועל apartment.
-   - האירוע קרה בחו"ל במהלך נסיעה ← travel גובר על health ועל apartment.
-   - הזכאות נובעת מאירוע תאונתי נקודתי ← personal-accident גובר על health.
-   - מדובר בתלות בעזרת הזולת בפעולות יומיום ← long-term-care גובר על health.
-   - מדובר בפיצוי חד-פעמי עם אבחון מחלה קשה מוגדרת ← diseases-disabilities גובר על health."""
-
-
-# --------------------------------------------------------------------------- #
 # Variant builders
 # --------------------------------------------------------------------------- #
 
@@ -217,11 +196,21 @@ def _category_lines() -> str:
 
 
 def _baseline() -> str:
+    """Whatever production sends today — since 260802-003 that is the winning
+    ``decision-rules-abstain`` composition, so a new arm is measured against the
+    shipped prompt rather than against history."""
     return _system_prompt()
 
 
+def _legacy() -> str:
+    """The pre-260802-003 production prompt: task definition only. Every
+    historical arm below is built on it, which is what keeps the committed
+    sweeps in eval_results/classify-{sweep,merge}-* reproducible."""
+    return _base_prompt()
+
+
 def _abstain() -> str:
-    return _baseline() + "\n" + ABSTAIN_RULE
+    return _legacy() + "\n" + ABSTAIN_RULE
 
 
 def _examples() -> str:
@@ -229,11 +218,11 @@ def _examples() -> str:
     for cid, examples in EXAMPLE_QUESTIONS.items():
         for example in examples:
             lines.append(f'- "{example}" ← {cid}')
-    return _baseline() + "\n\n" + "\n".join(lines)
+    return _legacy() + "\n\n" + "\n".join(lines)
 
 
 def _rich_desc() -> str:
-    base = _baseline()
+    base = _legacy()
     plain = _category_lines()
     if base.count(plain) != 1:
         raise RuntimeError(
@@ -245,19 +234,23 @@ def _rich_desc() -> str:
 
 
 def _decision_rules() -> str:
-    return _baseline() + "\n\n" + DECISION_RULES
+    return _legacy() + "\n\n" + DECISION_RULES
 
 
 def _decision_rules_abstain() -> str:
     """The merged prompt: both treatments composed, each rendered exactly as its
     isolated arm renders it — the abstain rule joins the כללים list, the decision
     rules follow as their own block. Nothing new is written here, so a merged-arm
-    win is attributable to the combination and not to fresh prompt text."""
+    win is attributable to the combination and not to fresh prompt text.
+
+    This arm won and is now production, so it must stay byte-identical to
+    :func:`_baseline` — ``tests/test_classify.py`` pins that."""
     return _abstain() + "\n\n" + DECISION_RULES
 
 
 PROMPT_VARIANTS = {
     "baseline": _baseline,
+    "legacy": _legacy,
     "abstain": _abstain,
     "examples": _examples,
     "rich-desc": _rich_desc,

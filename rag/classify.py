@@ -50,7 +50,36 @@ CATEGORIES: dict[str, str] = {
 }
 
 
-def _system_prompt() -> str:
+#: A wrong tag is not the mirror image of a missing one: it filters retrieval to
+#: the wrong corpus slice, while an empty list searches everything. Measured at
+#: 8 wrong filters removed for 1 right one lost (260802-003).
+ABSTAIN_RULE = (
+    "- תג שגוי גרוע יותר מהיעדר תג: תג שגוי מפנה את החיפוש לתחום הלא נכון ומונע "
+    "מציאת התשובה, בעוד רשימה ריקה מחפשת בכל התחומים. אם תחום הביטוח אינו נקבע "
+    "באופן חד-משמעי מתוך נוסח השאלה, החזר רשימת categories ריקה."
+)
+
+#: Ordered cues + a precedence order for the overlapping families. The corpus
+#: sells the same cover under several products (mortgage policies contain
+#: apartment structure cover, travel contains health), so "which document holds
+#: the answer" is not "which topic does this sound like".
+DECISION_RULES = """סדר ההכרעה בתיוג — עבור על הכללים לפי סדרם ועצור בכלל הראשון שמכריע:
+1. שם מוצר או שם פוליסה שמופיע במפורש בשאלה (למשל "ביטוח נסיעות", "פוליסת הרכב", "ביטוח השיניים", "הפוליסה הסיעודית") קובע את התחום, גם אם תוכן השאלה נשמע כללי.
+2. אין שם מוצר — הכרע לפי מצב המבוטח שהשאלה מתארת: מה קרה לו, מה הוא מבקש ומי משלם. בקשת החזר על הוצאה רפואית ← health. פיצוי בעקבות אבחון מחלה או קביעת נכות ← diseases-disabilities. תגמול חודשי שמחליף שכר עבודה ← loss-of-working-ability. גמלה למי שתלוי בעזרת הזולת בפעולות יומיום ← long-term-care. נזק לרכוש בבית ← apartment.
+3. שני תחומים עדיין מתאימים — הכרע לפי סדר הקדימויות הבא:
+   - הוזכרו משכנתא, בנק או הלוואת דיור ← mortgage גובר על life ועל apartment.
+   - האירוע קרה בחו"ל במהלך נסיעה ← travel גובר על health ועל apartment.
+   - הזכאות נובעת מאירוע תאונתי נקודתי ← personal-accident גובר על health.
+   - מדובר בתלות בעזרת הזולת בפעולות יומיום ← long-term-care גובר על health.
+   - מדובר בפיצוי חד-פעמי עם אבחון מחלה קשה מוגדרת ← diseases-disabilities גובר על health."""
+
+
+def _base_prompt() -> str:
+    """The task definition alone — no abstain rule, no decision rules.
+
+    Kept separable because the A/B harness composes the historical arms from
+    it (``evalharness/classify_prompts.py``); production always sends
+    :func:`_system_prompt`."""
     category_lines = "\n".join(f"- {cid}: {desc}" for cid, desc in CATEGORIES.items())
     return f"""אתה מסווג פניות עבור סוכן תמיכה של הראל ביטוח. בהינתן שאלת לקוח:
 1. פרק את השאלה לתת-שאלות עצמאיות שניתן לענות על כל אחת בנפרד. שאלה בנושא יחיד נשארת תת-שאלה אחת, כלשונה.
@@ -75,6 +104,14 @@ def _system_prompt() -> str:
 - אל תמציא תת-שאלות שהלקוח לא שאל."""
 
 
+def _system_prompt() -> str:
+    """Task definition + abstain rule + decision rules — the arm that won the
+    260802-003 sweep (``decision-rules-abstain``). Composed from the parts
+    rather than written out, so the harness can rebuild each historical arm
+    from the same text it was measured with."""
+    return _base_prompt() + "\n" + ABSTAIN_RULE + "\n\n" + DECISION_RULES
+
+
 def _user_message(question: str, hint: str | None) -> str:
     """The user turn: the question alone, or the question followed by a
     delimited retrieval-evidence block. The block is self-describing because
@@ -88,6 +125,77 @@ def _user_message(question: str, hint: str | None) -> str:
         f"{hint}\n"
         "--- סוף ראיות ---"
     )
+
+
+# --------------------------------------------------------------------------- #
+# Retrieval evidence (the "hint")
+# --------------------------------------------------------------------------- #
+
+#: Hits summarised into the evidence block. Fuse depth, not the reranked top-n:
+#: the histogram wants a population, not the six best chunks.
+HINT_TOP_K = 10
+#: Snippets shown in full-ish; enough to recognise a policy, not to answer from.
+HINT_SNIPPETS = 3
+HINT_SNIPPET_CHARS = 200
+
+
+def hint_from_hits(hits: list[Any]) -> dict[str, Any]:
+    """Summarise fused retrieval hits into the evidence dict.
+
+    Kept separate from :func:`render_hint` so the A/B harness can cache the
+    summary once per question and replay it across arms."""
+    histogram: dict[str, int] = {}
+    for hit in hits:
+        histogram[hit.chunk.category] = histogram.get(hit.chunk.category, 0) + 1
+    ordered = dict(sorted(histogram.items(), key=lambda kv: -kv[1]))
+    top_category, top_count = next(iter(ordered.items()), (None, 0))
+    return {
+        "n_hits": len(hits),
+        "histogram": ordered,
+        "top_category": top_category,
+        "top_share": round(top_count / len(hits), 4) if hits else 0.0,
+        "snippets": [
+            {
+                "rank": rank,
+                "file": hit.chunk.file,
+                "category": hit.chunk.category,
+                "text": " ".join(hit.chunk.text.split())[:HINT_SNIPPET_CHARS],
+            }
+            for rank, hit in enumerate(hits[:HINT_SNIPPETS], start=1)
+        ],
+    }
+
+
+def render_hint(hint: dict[str, Any] | None) -> str:
+    """The evidence block the classifier is shown.
+
+    Production and the A/B harness must render identically or the sweep stops
+    predicting production, so both call this — the harness imports it rather
+    than keeping its own copy."""
+    if not hint or not hint.get("n_hits"):
+        return "החיפוש באינדקס לא החזיר תוצאות."
+    n_hits = hint["n_hits"]
+    lines = [f"התפלגות תחומים ב-{n_hits} התוצאות המובילות מהאינדקס:"]
+    for category, count in hint["histogram"].items():
+        lines.append(f"- {category}: {count} מתוך {n_hits} ({count / n_hits:.0%})")
+    if hint.get("snippets"):
+        lines.append("")
+        lines.append("הקטעים המדורגים ראשונים:")
+        for snippet in hint["snippets"]:
+            lines.append(f"{snippet['rank']}. [{snippet['category']}] {snippet['file']}")
+            lines.append(f"   {snippet['text']}")
+    return "\n".join(lines)
+
+
+def build_hint(retriever: Any, question: str) -> tuple[str, dict[str, Any]]:
+    """Fuse-only retrieval of the *raw* question -> (rendered block, summary).
+
+    Deliberately no reranking: the cross-encoder is the expensive stage and a
+    category histogram does not need it. Returns the summary too so callers can
+    trace what the classifier was told."""
+    hits = retriever.fuse(question)[:HINT_TOP_K]
+    summary = hint_from_hits(hits)
+    return render_hint(summary), summary
 
 
 #: A closing quote inside a JSON string is only really a closing quote when

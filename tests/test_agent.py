@@ -75,10 +75,17 @@ def test_calculate_rejects_overlong_expression():
 
 
 class FakeStatsRetriever:
-    def __init__(self, results_by_question, empty_for_categories=()):
+    def __init__(self, results_by_question, empty_for_categories=(), fuse_hits=()):
         self.results_by_question = results_by_question
         self.empty_for_categories = set(empty_for_categories)
         self.calls = []
+        self.fuse_calls = []
+        self.fuse_hits = list(fuse_hits)
+
+    def fuse(self, question, **overrides):
+        """The classifier's evidence pass — fuse-only, never reranked."""
+        self.fuse_calls.append(question)
+        return self.fuse_hits
 
     def retrieve_with_stats(self, question, category=None, **overrides):
         self.calls.append((question, category))
@@ -110,7 +117,8 @@ class FakeClassifier:
     def __init__(self, classification):
         self.classification = classification
 
-    def classify(self, question):
+    def classify(self, question, hint=None):
+        self.hint = hint
         return self.classification
 
 
@@ -201,7 +209,35 @@ def test_fast_path_no_loop_pools_and_generates_once():
     assert answer.cost_estimate == pytest.approx(0.01 + 0.002)
     assert answer.retrieval_stats == {"gated": {"n_chunks": 4, "n_documents": 4}}
     assert tokens == {"prompt": 10, "completion": 5}
-    assert [t["step"] for t in answer.trace] == ["classify", "retrieve", "retrieve", "synthesize"]
+    assert [t["step"] for t in answer.trace] == ["hint", "classify", "retrieve", "retrieve", "synthesize"]
+
+
+def test_classifier_sees_the_raw_question_and_its_retrieval_evidence():
+    """The evidence pass runs on the *original* wording (not a rewritten
+    sub-question), fuse-only, before classification — that ordering is what the
+    260802-003 sweep measured."""
+    engine = make_engine(single_classification(), {"שאלת דירה": [make_candidate(APT1)]})
+    engine.retriever.fuse_hits = [make_candidate(APT1), make_candidate(APT2)]
+
+    answer, _tokens = engine._answer("שאלה מקורית")
+
+    assert engine.retriever.fuse_calls == ["שאלה מקורית"]
+    hint = engine.classifier.hint
+    assert "apartment: 2 מתוך 2" in hint
+    hint_step = answer.trace[0]
+    assert hint_step["step"] == "hint"
+    assert (hint_step["top_category"], hint_step["n_hits"]) == ("apartment", 2)
+
+
+def test_classification_survives_an_index_with_nothing_to_say():
+    engine = make_engine(single_classification(), {"שאלת דירה": [make_candidate(APT1)]})
+    engine.retriever.fuse_hits = []
+
+    answer, _tokens = engine._answer("שאלה מקורית")
+
+    assert engine.classifier.hint == "החיפוש באינדקס לא החזיר תוצאות."
+    assert answer.trace[0]["top_category"] is None
+    assert answer.text == "תשובה"
 
 
 def test_empty_pool_falls_back_without_generation():
@@ -239,7 +275,7 @@ def test_calculation_loop_executes_tool_and_appends_results(monkeypatch):
     # Orchestrator tokens accounted on top of synthesis tokens.
     assert tokens == {"prompt": 10 + 200, "completion": 5 + 40}
     steps = [t["step"] for t in answer.trace]
-    assert steps == ["classify", "retrieve", "retrieve", "orchestrator", "calculate", "orchestrator", "synthesize"]
+    assert steps == ["hint", "classify", "retrieve", "retrieve", "orchestrator", "calculate", "orchestrator", "synthesize"]
 
 
 def test_loop_retrieve_tool_merges_into_pool(monkeypatch):

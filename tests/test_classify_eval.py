@@ -727,7 +727,16 @@ def test_baseline_variant_is_the_production_prompt():
     assert build_prompt("baseline") == _system_prompt()
 
 
-@pytest.mark.parametrize("name", sorted(set(PROMPT_VARIANTS) - {"baseline"}))
+def test_the_winning_variant_is_what_production_ships():
+    """`decision-rules-abstain` won the 260802-003 sweep and was landed, so it
+    and `baseline` are now the same text. Every other variant must still differ
+    from it, or the arm is measuring nothing."""
+    assert build_prompt("decision-rules-abstain") == _system_prompt()
+
+
+@pytest.mark.parametrize(
+    "name", sorted(set(PROMPT_VARIANTS) - {"baseline", "decision-rules-abstain"})
+)
 def test_each_variant_differs_from_baseline_and_keeps_the_closed_list(name):
     prompt = build_prompt(name)
     assert prompt != _system_prompt()
@@ -742,9 +751,12 @@ def test_rich_desc_replaces_the_category_descriptions():
     assert "לא כולל" in prompt and "הבחנות בין משפחות תחומים חופפות" in prompt
 
 
-def test_additive_variants_contain_the_baseline_verbatim():
+def test_additive_variants_contain_the_legacy_prompt_verbatim():
+    """The historical arms are built on the prompt production shipped when they
+    were measured (`legacy`), not on whatever production ships now — otherwise
+    landing a winner silently rewrites the arms it was compared against."""
     for name in ("abstain", "examples", "decision-rules"):
-        assert _system_prompt() in build_prompt(name)
+        assert build_prompt("legacy") in build_prompt(name)
 
 
 def test_decision_rules_is_not_also_an_abstain_arm():

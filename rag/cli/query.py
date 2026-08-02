@@ -26,6 +26,8 @@ Retrieval-stage tools (no generation) — for wiring an external harness:
     python -m rag.cli.query retrieve "שאלה" --config C [fuse flags] \
         [--gate-threshold F] [--top-n N]
     python -m rag.cli.query classify "שאלה" --config C [--model M]
+        (loads the index: the classifier is shown a fuse-only retrieval of the
+         question first, exactly as the agent engine does)
 
 Tool commands are selected by the first positional argument; anything else is
 the classic answer flow. Every tool prints one JSON object to stdout
@@ -45,7 +47,7 @@ from pathlib import Path
 from typing import Any
 
 from rag.agent.engine import AgentEngine
-from rag.classify import build_classifier
+from rag.classify import build_classifier, build_hint
 from rag.config import ConfigError, RagConfig, load_config
 from rag.generate.generator import build_generator
 from rag.generate.prompts import FALLBACK_TEXT, SOURCES_HEADER
@@ -375,16 +377,21 @@ def tools_main(argv: list[str]) -> int:
         print(f"Error: {exc}", file=sys.stderr)
         return EXIT_CONFIG_ERROR
 
-    if args.command == "classify":  # config-only — no index/retriever needed
-        classification = build_classifier(config, args.model).classify(args.question)
-        print(json.dumps(classification.model_dump(mode="json"), ensure_ascii=False, indent=2))
-        return EXIT_OK
-
     try:
         retriever = load_retriever(config)
     except (ConfigError, ManifestError, ManifestMismatchError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return EXIT_CONFIG_ERROR
+
+    if args.command == "classify":
+        # The agent shows the classifier a fuse-only retrieval of the raw
+        # question before tagging it, so the tool loads the index too — a
+        # classify tool that skipped the evidence would not be reporting what
+        # production does.
+        hint, _summary = build_hint(retriever, args.question)
+        classification = build_classifier(config, args.model).classify(args.question, hint=hint)
+        print(json.dumps(classification.model_dump(mode="json"), ensure_ascii=False, indent=2))
+        return EXIT_OK
     try:
         result = _run_tool(retriever, args)
     finally:
