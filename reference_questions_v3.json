@@ -1,0 +1,699 @@
+[
+  {
+    "id": "v3-004-business-hard",
+    "domain": "business",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "התרחש לי נזק במשרד ב-15.1.2025, ובגללו נפגעו גם הנתונים במחשבים וגם הפעילות העסקית נעצרה לתקופה. אני רוצה לשחזר את הנתונים, אבל גם רוצה לדעת אם אני מוגבל בזמן לגבי תביעת הכנסה מאבדת. לפי הפוליסה שלי, לא צוין תקופת שחזור לנתונים, וגם לא צוין אורך תקופת הפיצוי להכנסה מאבדת. האם עדיין אפשר להגיש תביעה לשחזור נתונים, ומה האורך המרבי של תקופת הפיצוי להכנסה מאבדת?",
+    "ground_truth_answer": "כן, עדיין אפשר להגיש תביעה לשחזור נתונים – מכיוון שלא צוין תקופת שחזור בלוח, התקופה המרבית לשחזור היא 6 חודשים ממועד הנזק, כלומר עד 15.7.2025. אורך תקופת הפיצוי להכנסה מאבדת הוא עד 100 ימים מהיום שבו החלה העצירה, אלא אם כן צוין אחרת בלוח – ובמקרה זה לא צוין, ולכן היא לא תימשך יותר מ-100 ימים מהתחלה.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "business/files/תנאי-פוליסת-ביטוח-מכלול-למשרד-מהדורת-ינואר-2024-באנגלית.pdf",
+            "page": 30
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "business/files/תנאי-פוליסת-ביטוח-מכלול-לעסק-מהדורת-מרץ-2023-באנגלית.pdf",
+            "page": 31
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "nvidia/Nemotron-3-Ultra-550b-a55b"
+      ],
+      "attempts": 1,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-005-business-hard",
+    "domain": "business",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "יש לי אתר בנייה באזור B עם מנופים ופיגומים בחוץ. לפני שבוע היתה סערה עם רוחות 40 קשר וגשם חזק שנמשך 4 ימים ברצף. הנזק 800,000 ש\"ח, סכום הביטוח על הציוד 600,000 ש\"ח. זה נחשב 'נזק טבע' לפי הפוליסה? וכמה מקסימום ישלמו לי?",
+    "ground_truth_answer": "כן, סערה עם רוחות 40 קשר וגשם 4 ימים רצופים נחשבת נזק טבע, וכל התקופה הרציפה נחשבת אירוע ביטוח אחד. המקסימום שישלמו הוא 600,000 ש\"ח – הנמוך מבין סכום הביטוח (600,000 ש\"ח) והנזק בפועל (800,000 ש\"ח).",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "business/files/פוליסה-לביטוח-עבודות-קבלניות-הראל-ביט-מהדורת-ינואר-2023.pdf",
+            "page": 5
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "business/files/פוליסה-משולבת-לביטוח-אש-מורחב-ואובדן-תוצאתי-הראל-ביט-ינואר-2023.pdf",
+            "page": 4
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 1,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-007-car-hard",
+    "domain": "car",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "הטרקטור שלי מבוטח בפוליסת צמ\"ה והמשאית המסחרית בפוליסת רכב מסחרי. הבדיקה התקופתית של הטרקטור פגה תוקף לפני חודש ועדיין לא חידשתי אותה — אם יקרה נזק, הביטוח עדיין יכסה? וגם, אם אני מבטל היום את הביטוח של המשאית כשנשארו 120 יום עד סוף השנה והפרמיה השנתית 15,000 ₪, כמה אחזיר?",
+    "ground_truth_answer": "לגבי הטרקטור: הפוליסה דורשת לערוך בדיקה תקופתית במועד שנדרש על ידי היצרן או החוק (סעיף 9.2), ואי-נקיטת אמצעי הקלת סיכון מאפשרת למבטח להפחית משמעותית את התגמולים עד כדי דחיית כיסוי מלאה לפי סעיפים 18, 19, 21 לחוק חוזה ביטוח (סעיף 9 רישא). לכן הכיסוי עלול להידחות או להיפחת. לגבי המשאית: החלק היחסי שיחזור מחושב כמכפלת דמי הביטוח ביחס בין הימים שנותרו לימי התקופה המקורית (סעיף 46.1) — 15,000 × (120 ÷ 365) = 4,931.51 ₪, שיוחזרו בתוך 14 ימים.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "car/files/תנאי-פוליסת-ביטוח-ציוד-מכני-הנדסי-צמה.pdf",
+            "page": 16
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "car/files/פוליסה-לביטוח-רכב-פרטי-ורכב-מסחרי-עד-35-טון-מבית-שירביט-מהדורת-יוני-2023.pdf",
+            "page": 33
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 3,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-008-car-hard",
+    "domain": "car",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "יש לי ביטוח מקיף עם הרחבת שירותי דרך, ואני נוסע עם הרכב לחופשה ביהודה ושומרון. אם הרכב יתקלקל לי שם, ואני אזמין גרר, האם אני אצטרך לשלם משהו מכיסי, ואם כן, כמה? אני יודע שיש לי שירותי דרך גם לרכב חשמלי וגם לרכב רגיל, אבל לא זוכר מה ההבדל.",
+    "ground_truth_answer": "אם יש לך הרחבת 'חבילת שירותי דרך מורחבת לרכב חשמלי', נותן השירות ישלם לך ישירות 300 ₪ או את עלות התיקון בפועל, הנמוך מביניהם, בניכוי השתתפות עצמית. אם יש לך הרחבת 'שירותי דרך וגרירה לרכב שאינו חשמלי', גרירת הרכב תהיה כפופה לתנאים המפורטים בפוליסה, וייתכן שתצטרך לשלם עבור חילוץ שאינו קל (מעל 20 מטר מהדרך או מעל 20 דקות).",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "car/files/מהדורת-יוני-2023-upgrade-פוליסת-הראל.pdf",
+            "page": 54
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "car/files/פוליסה-לביטוח-רכב-פרטי-ורכב-מסחרי-עד-35-טון-מבית-שירביט-מהדורת-יוני-2023.pdf",
+            "page": 36
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "google/gemma-3-27b-it",
+      "verifier_models": [
+        "Qwen/Qwen3-235B-A22B-Instruct-2507",
+        "nvidia/Nemotron-3-Ultra-550b-a55b"
+      ],
+      "attempts": 2,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-014-diseases-disabilities-hard",
+    "domain": "diseases-disabilities",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "נולדתי ב-15 במרץ 1955 ורוצה לדעת מתי בדיוק ייפסק הכיסוי שלי בפוליסת מענקית סרטן. הבנתי שיש גיל מקסימלי אבל לא ברור לי איך מחשבים את הגיל הביטוחי.",
+    "ground_truth_answer": "הכיסוי ייפסק ב-1 במרץ 2030. לפי הפוליסה הכיסוי מסתיים בתאריך הלידה בו המבוטח מגיע לגיל 75, ולפי שיטת החישוב של הראל הגיל הביטוחי נקבע כאילו יום ההולדת חל ביום הראשון של חודש הלידה – כלומר 1 במרץ 1955, ולכן גיל 75 מושג ב-1 במרץ 2030.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "diseases-disabilities/files/062025-הצעה-לביטוח-מענקית-סרטן.pdf",
+            "page": 3
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "diseases-disabilities/files/תנאי_פוליסת_ביטוח_מחלות_קשות_-_מענקית_סרטן.pdf",
+            "page": 5
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 1,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-016-health-hard",
+    "domain": "health",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "אני עומד לעבור ניתוח בחו״ל בחודש הבא וצריך להגיש תביעה — לאן בדיוק אני שולח את הטפסים והמסמכים? ועל הדרך, אני מסתכל על טופס ההצעה שהסוכן השאיר לי לכיסוי ניתוחים בארץ, ורשום שם שיש אופציה עם השתתפות עצמית — כמה זה יוצא והאם זה צמוד למדד?",
+    "ground_truth_answer": "להגשת תביעה לניתוח בחו״ל אפשר לשלוח במייל tvbriut@harel-ins.co.il, בפקס 03-7348166, במסרון 052-3235121, בדואר לרחוב אבא הלל 3 ת״ד 10951 רמת גן מיקוד 5252202, או דרך סוכן הביטוח. בכיסוי ״אפגרייד משלים שב״ן״ לניתוחים בארץ (זה שכולל השתתפות עצמית) ההשתתפות העצמית היא 5,000 ₪ צמוד מדד.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "health/pages/surgery-abroad.txt",
+            "page": null
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "health/files/62025-טופס-הצעה-לביטוח-רפואי-ביטוח-בריאות.pdf",
+            "page": 6
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 13,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-017-health-hard",
+    "domain": "health",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "עשיתי ניתוח לפני חודשיים, והיום קיבלתי מכתב מהביטוח שמסרבים חלק מהתשלום. הפוליסה שלי התחילה ב-1.1.2022. אם אני רוצה להגיש תביעה בבית משפט, כמה זמן נשאר לי לעשות את זה, בהנחה שזה המכתב הראשון שקיבלתי בנושא הדחייה?",
+    "ground_truth_answer": "יש לך 5 שנים מיום קרות מקרה הביטוח, כלומר מיום הניתוח, להגיש תביעה. אבל, מכיוון שהפוליסה שלך התחילה ב-1.1.2022, תקופת ההתיישנות היא 5 שנים, ולא 3 שנים. אם הניתוח היה לפני חודשיים, נשארו לך 4 שנים ו-10 חודשים להגיש תביעה (5 שנים מיום הניתוח פחות חודשיים). בנוסף, מכיוון שזה המכתב הראשון, הראל הסכימה לכך שתקופת הזמן שבין המועד הראשון שבו היה עליה למסור הודעה הכוללת את פסקת ההתיישנות לבין המועד שבו ניתנה בפועל הודעה ובה פסקת התיישנות - לא תובא במניין תקופת ההתיישנות (סעיף 3 בעמוד 9).",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "health/files/הודעה-על-תקופת-התיישנות-ביטוח-בריאות.pdf",
+            "page": 1
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "health/files/טופס-בקשה-לאישור-ותיאום-ניתוח.pdf",
+            "page": 9
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "google/gemma-3-27b-it",
+      "verifier_models": [
+        "Qwen/Qwen3-235B-A22B-Instruct-2507",
+        "nvidia/Nemotron-3-Ultra-550b-a55b"
+      ],
+      "attempts": 1,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-018-health-hard",
+    "domain": "health",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "ילד שלי בן 8 צריך ריפוי בעיסוק בגלל קשיים בהתקדמות ההתפתחותית, ואני רוצה להבין אם ביטוח הבריאות הפרטי שלי יכסה את זה, ובנוסף — אם הוא יידבק בבית הספר, האם אצטרך למלא טופס מיוחד כדי לקבל פיצוי על אשפוז?",
+    "ground_truth_answer": "כן, ביטוח הבריאות הפרטי יכול לכסות ריפוי בעיסוק לילדים שמתמודדים עם אתגרים בהתפתחות, דרך הרחבה לפוליסה. בנוסף, במקרה של אשפוז עקב מחלה, יש למלא טופס תביעת בריאות הכולל את פרטי המבוטח, מילוי רופא מטפל, סיכום אשפוז, ובהקשר של ילדים בגיל 0-12 — יש לצרף גם מכתב תולדות מחלה מרופא הילדים המטפל.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "health/pages/information.txt",
+            "page": null
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "health/files/טופס-בקשה-לפיצוי-כספי-בגין-ניתוח-אשפוז-מחלה-או-תאונה.pdf",
+            "page": 1
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "nvidia/Nemotron-3-Ultra-550b-a55b"
+      ],
+      "attempts": 5,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-019-life-hard",
+    "domain": "life",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "אני מבוטח בפוליסה שלכם כבר שנתיים, ואני רוצה להגדיל את סכום הביטוח שלי ב-50,000 ש\"ח. אם אני מגדיל את הסכום, האם החברה יכולה לבטל את הפוליסה שלי בגלל מצב בריאותי שהשתנה, ואם כן, כמה זמן אחרי ההגדלה הם יכולים לעשות את זה?",
+    "ground_truth_answer": "לא, החברה לא יכולה לבטל את הפוליסה בגלל מצב בריאותי שהשתנה לאחר שעברו שלוש שנים מכריתת הפוליסה או מיום חידושה. מכיוון שאתה מבוטח כבר שנתיים, נותרו עוד שנה עד שהחברה לא תוכל לבטל את הפוליסה אלא אם תפעל בכוונת מירמה.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "life/files/נספח-מוות-מתאונה.pdf",
+            "page": 3
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "life/files/תנאי-פוליסת-ביטוח-מגן-חודשי.pdf",
+            "page": 7
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "google/gemma-3-27b-it",
+      "verifier_models": [
+        "Qwen/Qwen3-235B-A22B-Instruct-2507",
+        "nvidia/Nemotron-3-Ultra-550b-a55b"
+      ],
+      "attempts": 3,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-020-life-hard",
+    "domain": "life",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "אני רוצה לקנות את ביטוח החיים הזה, וסכום הביטוח שאני חושב עליו הוא 70 מיליון ש\"ח. האם בכלל אפשר לקנות ביטוח על סכום כזה, והאם יהיה לי ערך פדיון אם ארצה לסיים את הפוליסה אחרי כמה שנים?",
+    "ground_truth_answer": "לא ניתן לקנות ביטוח על סכום של 70 מיליון ש\"ח, כי לפי ההנחיות עד לגובה 60 מיליון ש\"ח. בנוסף, לפוליסה אין ערכי פדיון, גם אם היה ניתן לרכוש על סכום כזה.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "life/files/טופס-הצטרפות-לביטוח-חיים-17-שאלות-בהצהרת-הבריאות.pdf",
+            "page": 1
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "life/files/הראל-מגן-משלים-לילד-144.pdf",
+            "page": 10
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "nvidia/Nemotron-3-Ultra-550b-a55b"
+      ],
+      "attempts": 3,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-021-life-hard",
+    "domain": "life",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "קרה לי מקרה ביטוח לפני 4 שנים ו-3 חודשים ואני רוצה להגיש תביעה עכשיו. כמה זמן עוד נשאר לי לפי ההתיישנות, והאם כתב הוויתור על סודיות רפואית שחתמתי עליו כשהצטרפתי מאפשר לחברה לקבל את התיק הרפואי שלי לצורך התביעה הזו?",
+    "ground_truth_answer": "נשארו לך 9 חודשים — תקופת ההתיישנות היא 5 שנים מיום קרות מקרה הביטוח, ו-5 שנים פחות 4.25 שנים = 0.75 שנה = 9 חודשים. וכן, כתב הוויתור שחתמת עליו בהצהרת המועמדים חל במפורש גם על 'בירור ויישוב תביעות על פי הפוליסה', ולכן החברה רשאית לקבל את המידע הרפואי שלך לצורך התביעה.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "life/files/תנאי-הכנסה-למשפחה.pdf",
+            "page": 12
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "life/files/טופס-הצטרפות-לביטוח-חיים-7-שאלות-בהצהרת-הבריאות.pdf",
+            "page": 7
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 5,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-022-long-term-care-hard",
+    "domain": "long-term-care",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "שלום, אני מבוטח שלכם ועברתי בדיקה רפואית לפני 4 חודשים, אז קבעו לי שאף על פי שיש לי קשיים, עדיין לא זכאי לסיוע. מאז התרחשה החמרה במצב שלי, ואני כבר לא מצליח לעשות דברים בסיסיים כמו אכילה או היגיינה. אני רוצה להגיש בקשה לסיוע שוב – האם אני יכול לעשות את זה עכשיו, או שאני חייב לחכות לשנה שלמה ממועד הבדיקה הקודמת?",
+    "ground_truth_answer": "כן, אתה יכול להגיש בקשה שוב עכשיו – טופס 'הודעה על החמרה במצב סיעודי' מיועד בדיוק למקרה שלך: מבוטח whose תביעת סיעוד נדחתה ב-12 החודשים האחרונים ועכשיו יש החמרה במצב. לפי ההנחיות, אין צורך לחכות לשנה –只要你 מתמודד עם החמרה, ניתן להגיש את הטופס מיד.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "long-term-care/files/כללים-לבדיקה-מחודשת-של-זכאות-ביטוח-סיעודי.pdf",
+            "page": 1
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "long-term-care/files/טופס-הודעה-על-החמרה-במצב-סיעודי.pdf",
+            "page": 1
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "nvidia/Nemotron-3-Ultra-550b-a55b"
+      ],
+      "attempts": 14,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-025-loss-of-working-ability-hard",
+    "domain": "loss-of-working-ability",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "אני בן 55, עובד במפעל עם חומרים מסוכנים, ורוצה לרכוש כיסוי נכות מתאונה בסכום המקסימלי. האם אני יכול להסתפק בהצהרת הבריאות המקוצרת, ומה הסכום הכי גבוה שאפשר לקבל דרכה?",
+    "ground_truth_answer": "לא, ההצהרה המקוצרת מיועדת למועמדים עד גיל 60 אך אינה כוללת שאלה על חומרים מסוכנים בעיסוק — והטופס המלא דורש הצהרה מפורשת על כך. הסכום המרבי לנכות מתאונה במסגרת ההצהרה המקוצרת הוא 1,500,000 ₪.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "loss-of-working-ability/files/הצהרת-בריאות-מלאה.pdf",
+            "page": 1
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "loss-of-working-ability/files/טופס-הצטרפות-לביטוח-חיים-7-שאלות-בהצהרת-הבריאות.pdf",
+            "page": 1
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 9,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-030-mortgage-hard",
+    "domain": "mortgage",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "אני לוקח משכנתא והבנק דורש ביטוח. בטופס ההצעה יש שדה 'סכום ביטוח למבנה הדירה' - אם אכתוב 1,500,000 ש״ח ואבחר להוסיף ביטוח סכום נוסף לרעידת אדמה, מה יהיה סך הכיסוי המקסימלי למבנה? וגם - הבנתי שצריך גם ביטוח חיים וגם ביטוח מבנה, זה נכון ששניהם חובה ואי אפשר לוותר על אחד מהם?",
+    "ground_truth_answer": "סך הכיסוי המקסימלי למבנה יהיה 3,000,000 ש״ח: 1,500,000 ש״ח סכום ביטוח בסיסי למבנה ועוד 1,500,000 ש״ח ביטוח סכום נוסף לרעידת אדמה (הסכום הנוסף זהה לסכום הביטוח של המבנה). וכן, ביטוח חיים למשכנתא וביטוח מבנה למשכנתא שניהם חובה - הם חלק מה'שילוש הקדוש' עם המשכנתא עצמה, והאחד לא יכול להתקיים ללא השני.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "mortgage/pages/what-is-mortgage-insurance.txt",
+            "page": null
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "mortgage/files/טופס-הצעה-לביטוח-חיים-ומבנה-למשכנתה.pdf",
+            "page": 6
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 1,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-031-personal-accident-hard",
+    "domain": "personal-accident",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "נפצעתי בתאונה וסבלתי מפצע חמור באמה של היד הימנית, ולא אוכל להשתמש בה. הרופא קבע שיש לי 60% נכות חלקית. סכום הביטוח שלי הוא 50,000 ש\"ח. כמה אקבל מהביטוח?",
+    "ground_truth_answer": "תקבל 24,000 ש\"ח. אחוז הנכות המוחלטת לאמה ביד ימין הוא 8% לפי הטבלה, והנכות החלפתית שנקבעה היא 60%. לכן התגמולים הם 60% מ-8% של סכום הביטוח: 0.6 × 0.08 × 50,000 = 24,000 ש\"ח.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "personal-accident/files/ביטוח-צלילה-ספורטיבית-14-יום.pdf",
+            "page": 8
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "personal-accident/files/תנאי-פוליסת-ביטוח-צלילה-ספורטיבית.pdf",
+            "page": 7
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "nvidia/Nemotron-3-Ultra-550b-a55b"
+      ],
+      "attempts": 12,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-032-personal-accident-hard",
+    "domain": "personal-accident",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "קניתי 4 מנות של הראל תאונות אישיות. בפרטי הפוליסה כתוב מדד יסודי 100. אם אני תובע על מוות או נכות מתאונה כשהמדד עומד על 120, כמה כסף אני מקבל מקסימום?",
+    "ground_truth_answer": "המקסימום הוא 240,000 ₪: הכיסוי למוות/נכות מתאונה עומד על 50,000 ₪ למנה, אז 4 מנות נותנות 200,000 ₪ בסיס; תנאי ההצמדה קובעים שהסכום מוצמד לעליית המדד מהמדד היסודי (100) למדד במועד התשלום (120) – עלייה של 20%, ולכן 200,000 × 1.2 = 240,000 ₪.",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "personal-accident/files/תנאי-פוליסת-ביטוח-צלילה-ספורטיבית.pdf",
+            "page": 11
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "personal-accident/files/הצעה-לתאונות-אישיות-62025.pdf",
+            "page": 2
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 7,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  },
+  {
+    "id": "v3-034-travel-hard",
+    "domain": "travel",
+    "difficulty": "hard",
+    "kind": "multi_source",
+    "answerable": true,
+    "question": "בחופשה בחו״ל עברתי אירוע לבבי והוטסתי במסוק לבית חולים שם אושפזתי ארבעה ימים. סך ההוצאות הרפואיות והפינוי האווירי שלי הגיע ל־95,000 דולר. במהלך הפינוי פגעתי בטעות בתייר אחר ששבר את הרגל והוא תובע אותי 60,000 דולר. מה הסכום המקסימלי שהפוליסה תשלם עבור ההוצאות שלי ומה עבור התביעה נגדי, ואילו תנאים חלים על כל אחד?",
+    "ground_truth_answer": "עבור ההוצאות שלך: כיסוי אשפוז ופינוי יבשתי עד 5,000,000$; 95,000$ נמוך מהתקרה ולכן מכוסות. פינוי אווירי דורש אישור מראש של המבטח (סעיף 2.2.2) — אם לא התקבל אישור, המבטח רשאי להקטין את התשלום לסכום שהיה משלם אילו ביקשת אישור. עבור חבות צד שלישי: תקרה כוללת של 150,000$ (פרק S); 60,000$ נמוך מהתקרה ומכוסה, בתנאי שהודעת למבטח בכתב מיד כשנודע לך על התביעה, ואין חריג שחל (למשל לא מדובר בספורט אתגרי ללא הרחבה, בכלי רכב/טיס/שיט, או במעשה מכוון).",
+    "ground_truth_sources": [
+      {
+        "any_of": [
+          {
+            "file": "travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-אנגלית-first-class.pdf",
+            "page": 11
+          }
+        ]
+      },
+      {
+        "any_of": [
+          {
+            "file": "travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-first-class.pdf",
+            "page": 16
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "generator_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "verifier_models": [
+        "google/gemma-3-27b-it",
+        "Qwen/Qwen3-235B-A22B-Instruct-2507"
+      ],
+      "attempts": 5,
+      "gates": {
+        "form": "pass",
+        "derivable": "fully",
+        "difficulty": "hard",
+        "needs_both": "neither page suffices alone"
+      }
+    }
+  }
+]

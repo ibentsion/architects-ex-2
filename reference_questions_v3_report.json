@@ -1,0 +1,2518 @@
+{
+  "generated_at": "2026-08-02T04:35:17.440876+00:00",
+  "seed": 20260731,
+  "n_items": 17,
+  "by_kind": {
+    "multi_source": 17
+  },
+  "by_generator": {
+    "Qwen/Qwen3-235B-A22B-Instruct-2507": 5,
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 9,
+    "google/gemma-3-27b-it": 3
+  },
+  "by_difficulty": {
+    "hard": 17
+  },
+  "rejections_by_gate": {
+    "needs_both": 171,
+    "derivable": 58,
+    "skip": 63,
+    "judge_error": 2,
+    "form": 2,
+    "generation": 5
+  },
+  "rejections": [
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/טופס-הצעה-לפוליסת-ביטוח-דירה-אדירה-זהב.pdf p4) answers the question on its own — the question must need both pages",
+      "question": "דירה שלי עברה שיפוץ לפני שנתיים, והוספתי לה מרפסת מקורה. אני רוצה לעשות ביטוח דירה בהראל, ואני יודע שיש לי ביטוח דירה קודם בחברת ביטוח אחרת. האם העובדה שהייתה לי פוליסה קודמת אצל חברה אחרת משפיעה על ההחלטה אם לבטח את המרפסת המקורית החדשה, ואם כן, איך?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "דירה שלי משקיפה על הים, ואני שוקל לעשות ביטוח גם נגד רעידות אדמה. אם תהיה רעידת אדמה ותיגרם נזק לדירה, האם המדינה תכסה לי את כל הנזק, ואם לא, מה אחוז ההשתתפות העצמית שלי בתיקון?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/מידע-מהותי-לפוליסת-ביטוח-אדירה-ארד.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "יש לי דירה שאני מבטח בהראל, וסכום הביטוח למבנה הוא 800,000 ש״ח. אני רוצה להרחיב את הביטוח גם לסכום נוסף בבית המשותף בגלל רעידות אדמה, אבל אני לא בטוח כמה זה יעלה לי. בנוסף, אני רוצה לדעת אם יש לי כיסוי לנזקי מים, ואם כן, האם אני יכול לבחור בעצמי את השרברב שיטפל בנזק?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/מידע-מהותי-לפוליסת-ביטוח-אדירה-ארד.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "יש לי דירה שאני רוצה לבטח, ושווה בערך 800,000 ש״ח. אני רוצה גם לבטח את הבית המשותף שלי מפני רעידת אדמה, אבל אני לא בטוח כמה זה יעלה לי. בנוסף, יש לי תכשיטים בשווי 50,000 ש״ח בדירה - האם הם מכוסים באופן מלא?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "יש לי דירה בבית משותף, ואני רוצה לבטח אותה מפני נזקי מים. אני יודע שיש לי אפשרות לבחור בעצמי את האינסטלטור, אבל אני גם רואה שיש אפשרות שהחברה תבחר לי אינסטלטור. אם אני בוחר שהחברה תבחר לי אינסטלטור, האם אני עדיין יכול לבחור אינסטלטור אחר בעתיד, או שאני חייב להשתמש רק באינסטלטורים שהחברה ממליצה עליהם? בנוסף, סכום הביטוח שלי הוא 500,000 ש״ח."
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "יש לי דירה בבית משותף, ואני שוקל לעשות ביטוח גם על השמשות שלה. אם אני בוחר לבטח את השמשות, כמה כסף אני צריך לציין כסכום הביטוח? ומה אחוז ההשתתפות העצמית אם אני רוצה להפחית אותה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/תנאי-הפוליסה-לביטוח-אדירה-ארד-מהדורת-ספטמבר-2017.pdf p12) answers the question on its own — the question must need both pages",
+      "question": "שמעתי שיש לי ביטוח אחריות כלפי צד שלישי, וזה טוב. אבל מה קורה אם מישהו נפצע בדירה שלי, נגיד, מעד על שטיח? אני יודע שהביטוח שלי מכסה נזקים בדירה עצמה, אבל אם אני אצטרך לשלם למישהו פיצויים בגלל פציעה, האם הביטוח יכסה את זה? ומה קורה אם אותו אדם הוא עובד משק בית שלי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "יש לי עובדת משק בית שעובדת אצלי כבר כמה שנים. אם היא נפצעת בדירה שלי כשהיא עובדת, והיא תתבע אותי לפי פקודת הנזיקין, האם הביטוח שלי מכסה את הנזק? ומה קורה אם הנזק הזה קורה כתוצאה מרעידת אדמה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (apartment/files/פוליסה-לביטוח-דירה-ותכולתה-ש-מהדורת-אוגוסט-2020.pdf p31) answers the question on its own — the question must need both pages",
+      "question": "תשמע, לפני חודש בדיוק פרצה לי נזילה מהגג בדירה, ואני רוצה לתבוע. יש לי ביטוח דירה אצלכם, וסכום הביטוח שרשום בפוליסה הוא 800,000 ש״ח. עכשיו, אני יודע שהמחירים עלו, אז רציתי לדעת כמה כסף אני יכול לקבל על התיקון, בהנחה שהנזילה הזו בדיוק קרה היום?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (apartment/files/פוליסה-לביטוח-דירה-ותכולתה-ש-מהדורת-אוגוסט-2020.pdf p31) answers the question on its own — the question must need both pages",
+      "question": "יש לי דירה שאני רוצה לבטח, ושווה בערך 1,500,000 ש״ח. אני מבין שהביטוח מתאים את סכום הביטוח למדד המחירים לצרכן, אבל מה קורה אם אני רוצה להגדיל את סכום הביטוח במהלך השנה? האם תהיה לי תוספת תשלום, ואיך מחשבים אותה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/pages/plumbers-find.aspx.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "יש לי דירה שאני שוכר, ואני רוצה לעשות ביטוח דירה. אם תהיה נזילה מהשכנים שמעליי ותגרום נזק לדירה שלי, האם הביטוח שלי יכסה את התיקון? אני יודע שהשכנים שלי עשו ביטוח, אבל אני רוצה לדעת מה הכיסוי שלי במקרה כזה, ומה ההשתתפות העצמית שלי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "skip",
+      "reason": "non-answer ground truth: כן, האמור לעיל כפוף לתשלום השתתפות עצמית ולתנאי וסייגי הכיסוי בפוליסה. גובה ההשת",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (apartment/files/תנאי-פוליסת-ביטוח-דירה-אדירה-כסף-מהדורת-פברואר-2025.pdf p18) answers the question on its own — the question must need both pages",
+      "question": "תשמע, לפני חודש פרצה לי צינור במטבח והציפה את כל הבית. יש לי ביטוח דירה, ואני יודע שיש לי גם ביטוח תכולה. אני רוצה להחליף את המטבח כולו, כולל השיש. הביטוח מכסה את זה? ומה, אם בכלל, הביטוח ישלם לי על זה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "יש לי דירה שאני משכיר לאחרים לתקופות קצרות דרך אתר בוקינג. אם הדירה לא תהיה תפוסה במשך חודש שלם, ואני מבטח את התכולה שלה בסכום של 80,000 ש״ח, האם הביטוח יכסה נזק שנגרם לתכולה בזמן שהיא לא תפוסה, ואם כן, עד איזה סכום?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/תנאי-פוליסת-ביטוח-דירה-אדירה-כסף-מהדורת-פברואר-2025.pdf p25) answers the question on its own — the question must need both pages",
+      "question": "תשמע, עשיתי שיפוצים בדירה שלי, והעבודה לקחה יותר משבועיים. בנוסף, אני נוסע לחו\"ל לחופשה בשבוע הבא, ואני קצת מודאג לגבי אחריות אם מישהו ייפגע. האם הביטוח שלי מכסה נזקים שנגרמו בזמן השיפוץ, וגם אם תהיה תביעה נגדי בזמן שאני בחו\"ל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/תנאי-פוליסת-ביטוח-דירה-אדירה-כסף-מהדורת-פברואר-2025.pdf p25) answers the question on its own — the question must need both pages",
+      "question": "יש לי ביטוח דירה אצלכם, ואני מתכנן לעשות שיפוץ קטן בדירה - החלפת ריצוף בחדר אחד. השיפוץ אמור לקחת בערך שלושה שבועות. בנוסף, אני נוסע לחופשה בחו״ל לשבועיים, ואני רוצה לדעת אם הביטוח שלי יכסה נזק שייגרם לדירה בזמן שאני בחו״ל, ומה קורה אם השיפוץ יימשך יותר משבועיים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/פוליסת-אדירה-זהב-מהדורת-נובמבר-2019-באנגלית.pdf p17) answers the question on its own — the question must need both pages",
+      "question": "אני מתכנן לקחת את האופניים שלי לחופש בארץ, אבל שמעתי שיש הגבלות. אם האופניים ייגנבו כשאני לא רוכב עליהם, והם לא נעולים לעצם, האם הביטוח יכסה את זה? והסכום המקסימלי לכיסוי אופניים מחוץ לדירה הוא 5000 ש\"ח או יותר?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (apartment/files/adira-silver-2025-apartment-plus-contents-אדירה-כסף-פברואר-25-באנגלית.pdf p31) answers the question on its own — the question must need both pages",
+      "question": "הברנש שלי אוחזר אחרי ששבתו לי, אבל עכשיו מתברר שהסירה ניזוקה במהלך השיפוץ שנעשה בה לפני חודש. אני זוכר שקראתי שזה יכול להיות מכסה אם השיפוץ לא עלה על שבוע, אבל זה לקח 10 ימים. האם הביטוח יכסה את הנזק שנגרם לסירה, שהיא רכוש של השוכר?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/תנאי-פוליסת-ביטוח-עד-הגג-לביטוח-בית-משותף.pdf p23) answers the question on its own — the question must need both pages",
+      "question": "קרה תאונה בחדר הכושר של המבנה, וילד בן 12 נפצע במהלך אימון כושר. אני יודע שהביטוח של הבית המשותף supposed לכסות תאונות בחדר הכושר, אבל האם יכסו במקרה של ילד מתחת לגיל 14, גם אם זה דייר קבוע?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "הוועד שלי בחר גבול אחריות של 5,000,000 ש\"ח כלפי צד שלישי, ואני רוצה להוסיף כיסוי לחבות בגין חניון רובוטי. אם מישהו ייפצע בגלל תקלה בחניון, האם הסכום הזה יכסה את התביעה, או שיש הגבלה נמוכה יותר שתקבע את הגבול האפקטיבי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/פוליסת-אדירה-זהב-מהדורת-נובמבר-2019-באנגלית.pdf p23) answers the question on its own — the question must need both pages",
+      "question": "קרה לי נזק בדירה בגלל פיגוע, והפניתי למכס יישובים ופיצויים וקיבלתי 120,000 ש\"ח. אני רוצה לדעת אם הביטוח הפרטי שלי מכסה עוד על-top של סכום כזה, והאם יש מינימום מובטח שהוא ישלם לי גם אם המכס יישובים היה משלם פחות או בכלל לא היה משלם?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "קרה נזק לדירה שלי מפיגוע, והגישתי בקשה לפיצוי לפי חוק מס הרכוש, אבל קיבלתי רק 120,000 ש\"ח. הסכום הזה נמוך מהנזק האמיתי. האם הביטוח שלי מכסה את ההפרש, ובנוסף – האם גם נזקי רעידת אדמה מפיגוע כזה מוגנים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/חוברת-הכללים-לגבי-פוליסות-שנרכשו-לאחר-ה-030917.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "שלחו לי הודעה על תשלום תביעה, אבל לא הסבירו איך חישבו את הסכום. אני רוצה לדעת אם הם בכלל חייבים לפרט לי את החישוב, וגם אם הם חייבים להגיד לי מתי היו להם כל המסמכים הדרושים לביור התביעה."
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages provided do not contain complementary information that requires both to answer a single, concrete customer question. Page 1 covers procedures for using experts in claims and subrogation ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages provide only introductory and definitional content without specific coverage rules, limits, or conditions that can be combined to form a hard question requiring both pages. Neither page ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/פוליסת-אדירה-זהב-מהדורת-נובמבר-2019-באנגלית.pdf p31) answers the question on its own — the question must need both pages",
+      "question": "קרה לי נזק בדירה לפני חודש, ואני רוצה להתחיל לתקן את ה thiệt. הביטוח מכסה את הערך של החידוש, אבל שמעתי שיש מועד אחרון להשלים את התיקונים. עד מתי אני צריך לסיים את התיקונים בשביל לשמור על כיסוי לפי ערך החידוש, ובנוגע לרהיטים - האם יש הגבלה על הסכום שיקבלו גם אם הם עלו לי יותר מהסכום המצוין בתנאי הפוליסה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "קרה נזק בדירה שלי לפני חודש, ואני רוצה להתחיל את השיפוץ. הסכום המבוטח בפוליסה שלי על התכולה הוא 600,000 ש\"ח. אם אתחיל את השיפוץ עוד שבוע, האם אקבל את הפיצוי לפי ערך ההחלפה, גם אם ייקח לי יותר מחודש להשלים את כל הקניות והעבודות?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/פוליסת-אדירה-זהב-מהדורת-נובמבר-2019-באנגלית.pdf p9) answers the question on its own — the question must need both pages",
+      "question": "קרה לי נזק מברז שספג במים את הרצפה והחדרים, והאינסטלטור אמר שצריך להחליף את הרצפה ולתקן את הסלילה. כמה יכסה לי הביטוח לכל היותר עבור התיקון של הרצפה והסלילה, אם יתברר שזה נכלל בכלל הכיסוי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/פוליסת-אדירה-זהב-מהדורת-נובמבר-2019-באנגלית.pdf p9) answers the question on its own — the question must need both pages",
+      "question": "קרה נזק בדירה שלי לפני חודש מבעבע במטבח שגרם לנזקי מים באסלה ובאריחים. אני צריך לשפץ גם את האריחים וגם להחליף את האסלה. כמה לכל היותר יכסה לי הביטוח לשיפוץ הזה, אם ידוע שסכום הביטוח על התכולה בדירה הוא 800,000 ש\"ח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "קרה נזק בדירה שלי לפני חודש מדליפת מים ממתקני ההסקה, גם למבנה וגם לתכולה. סכום הביטוח לתכולה בדירה שלי הוא 300,000 ש\"ח, וסכום הביטוח למבנה הוא 1,200,000 ש\"ח. מה הסכום המרבי שתקבל החברה שלי עבור הנזק המשותף למבנה ולתכולה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not provide sufficient combined information to form a hard question requiring both pages where the answer is fully supported by the content. Page 1 is a general policy statement witho",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The two pages are from different insurance products (Adira Gold 2019 vs Adira Silver 2025) and contain non-overlapping proposal form sections — Page 1 has property details and coverage questions inclu",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The two pages describe different insurance products (Adira Gold vs. Adira Arad) — one is a general marketing summary with no specific limits, rates, or figures, the other is a proposal form for a diff",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "non-answer ground truth: בפוליסה הנוכחית (מהדורת 2020) הכיסוי הגיאוגרפי מוגדר במפורש כ'שטח מדינת ישראל או",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (apartment/files/נספח-לחידוש-פוליסת-ביטוח-דירה-ארד-עבור-נזקי-מים.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "יש לי נזילת מים בדירה בבניין משותף ואני רוצה להזמין את השרברב הפרטי שלי. האם אני צריך להודיע לחברת הביטוח ולחכות שהיא תבדוק לפני שהוא מתחיל לעבוד, והאם אני משלם לשרברב מראש ואז מקבל החזר?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "judge_error",
+      "reason": "JSONDecodeError: Expecting ',' delimiter: line 4 column 359 (char 447)",
+      "question": "יש לי נזילת מים בדירה בבניין משותף. מהן שתי האפשרויות שלי לתיקון ומה אני משלם בכל אחת – אם הנזק מהצנרת הפרטית שלי ואם הוא מהצנרת המשותפת של הבניין?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/תנאי-פוליסת-ביטוח-דירה-אדירה-כסף-מהדורת-פברואר-2025.pdf p25) answers the question on its own — the question must need both pages",
+      "question": "אני גר בדירת קרקע בבית משותף ויש לי בריכה פרטית בחצר, וגם אופניים חשמליים. לוועד הבית יש ביטוח לבית המשותף, ולי יש פוליסת 'אדירה כסף' משלי. אם אורח נפצע בבריכה שלי, או אם אני פוגע במישהו עם האופניים החשמליים – איזו פוליסה מכסה אותי ומה התנאים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/תנאי-פוליסת-ביטוח-דירה-אדירה-כסף-מהדורת-פברואר-2025.pdf p25) answers the question on its own — the question must need both pages",
+      "question": "אני גר בבית משותף ויש לי גם פוליסת ביטוח לדירה שלי (אדירה כסף) וגם הבית המשותף רכש פוליסה לבית המשותף. יש לי בריכה פרטית בחצר עם מערכת סינון. אם מישהו נפגע בבריכה שלי, איזו פוליסה מכסה את זה ומה התנאים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/טופס-הצעה-לפוליסת-ביטוח-דירה-אדירה-ארד.pdf p4) answers the question on its own — the question must need both pages",
+      "question": "אני לא רוצה שהמידע שלי ישמש לשום דבר מעבר לביטוח עצמו. ראיתי שיש שני סוגי שיתוף מידע - אחד במאגר הפנימי של הראל ואחד לאתר של רשות שוק ההון. איך אני מבטל את שניהם, והאם ביטול של אחד מבטל אוטומטית גם את השני?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/טופס-הצעה-לפוליסת-ביטוח-דירה-אדירה-ארד.pdf p4) answers the question on its own — the question must need both pages",
+      "question": "יש לי גם פוליסת ביטוח לאוסף אמנות וגם ביטוח דירה בהראל. אני רוצה לבטל את הסכמתי לשני סוגי העברת המידע: גם העיבוד הפנימי במאגר המרכזי של הקבוצה וגם העברת הנתונים לאתר רשות שוק ההון. איך אני עושה את שני הביטולים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/פוליסה-לביטוח-דירה-ותכולתה-ש-מהדורת-אוגוסט-2020.pdf p19) answers the question on its own — the question must need both pages",
+      "question": "אני חבר בוועד הבית בבניין משותף, ואנחנו מתכננים להתקין מכפיל חנייה פרטי בחניית הבניין בכתובת הדירה שלי. אם יקרה נזק למישהו מהמכפיל, האם אני מוגן אישית כחבר ועד? ובנפרד - יש לי בדירה מעלון כיסא, מה הסכום המקסימלי שהביטוח ישלם אם מישהו ייפגע ממנו?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/פוליסה-לביטוח-דירה-ותכולתה-ש-מהדורת-אוגוסט-2020.pdf p19) answers the question on its own — the question must need both pages",
+      "question": "אני חבר בוועד הבית בבניין שמבוטח בביטוח 'עד הגג', וגבול האחריות הכללי לצד שלישי בפוליסה של הבניין עומד על 1,000,000 ₪. יש לי בדירה מעלון כיסא (כיסא מדרגות). אם אורח נפגע מהמעלון בזמן שאני מטפל בענייני הוועד, מה הסכום המקסימלי שהביטוח ישלם?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (apartment/files/תנאי-פוליסת-ביטוח-עד-הגג-לביטוח-בית-משותף.pdf p36) answers the question on its own — the question must need both pages",
+      "question": "הייתה לי תביעת שריפה לפני חודש, שילמו לי והחזירו את הכיסוי לקדמותו אבל דורשים פרמיה נוספת ל-8 החודשים שנשארו עד סוף הפוליסה. איך בדיוק מחשבים את התוספת הזו? וגם - אני רוצה להתקין מערכת אבטחה חדשה ולסגור את המרפסת בזכוכית, זה נחשב שינוי מהותי שאני חייב לדווח עליו מיד בכתב?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (apartment/files/פוליסה-לביטוח-דירה-ותכולתה-ש-מהדורת-אוגוסט-2020.pdf p33) answers the question on its own — the question must need both pages",
+      "question": "הוספתי מרפסת לדירה בלי לעדכן את הביטוח, ועכשיו הייתה שריפה שפגעה גם במבנה וגם בתכולה. האם חברת הביטוח תשלם, וכמה השתתפות עצמית אצטרך לשלם על תביעה שמכסה גם את פרק א' וגם את פרק ב'?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (business/files/פוליסה-לביטוח-סחורה-בהעברה-הראל-ביט-ינואר-2023.pdf p11) answers the question on its own — the question must need both pages",
+      "question": "תשמע, אני בעל עסק קטן, וחתמתי על פוליסה להרבה סחורה. עכשיו, אם אני רוצה לבטל את הפוליסה לפני הזמן, מה אחוז ההחזר שאקבל אם אני עושה את זה אחרי 10 ימים, ומה יקרה אם אני צריך לבטל בגלל שהבנק דרש ממני אישור ביטוח ושיעבוד, ואני צריך לתת להם הודעה מראש?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "form",
+      "reason": "The answer contains a miscalculation and is overly verbose, exceeding three sentences without clear justification, making it ramble.",
+      "question": "יש לי פוליסת ביטוח סחורה בהעברה, ואני חושב שיש לי עילה לבטל אותה. אם אני מבטל אותה אחרי 10 ימים אבל לפני 30 יום מתחילת הפוליסה, כמה אחוזים מדמי הביטוח השנתיים יוחזרו לי? ואם אני מגיש למבטח אישור ביטוח ושיעבוד שדורש ממנו להודיע לגורם שלישי לפני הביטול, האם הביטול יתבצע מיד כשהודעתי למבטח שאני רוצה לבטל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "יש לי מפעל קטן לייצור רהיטים, ואני מבוטח אצלכם. קניתי מכונה חדשה לייצור, שעלתה לי 80,000 ש\"ח. אם המכונה הזו תישרף בגלל קצר חשמלי, האם הביטוח יכסה את הנזק? ואם יש לי יצירות אומנות ששוויה הכולל הוא 5,000 ש\"ח, האם הן מכוסות?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (business/files/תנאי-פוליסה-ביטוח-מכלול-לעסק-מהדורת-מרץ-2023.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "יש לי מפעל קטן לייצור רהיטים, ואני מבוטח אצלכם. אם בגלל קצר חשמלי במכונה אחת במפעל פרצה שריפה, ונגרם נזק למכונות אחרות - האם הביטוח מכסה את הנזק לכל המכונות, או רק למכונה שבה התחיל הקצר? בנוסף, יש לי אוסף של פריטי אומנות ששווים 15,000 ש\"ח, והמלאי שלי מוערך ב-1,000,000 ש\"ח - האם הנזק לפריטי האומנות מכוסה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (business/files/22307_pnimhaim_22308c_sofi_mail.pdf p11) answers the question on its own — the question must need both pages",
+      "question": "יש לי מרפאה פרטית, ואני מבוטח בפוליסה הזו. קיבלתי היום מכתב התראה לפני תביעה ממשפחה שטוענת שטיפלתי בבן שלהם ברשלנות רפואית. אני חייב להודיע על זה לחברת הביטוח, נכון? ואם אני צריך להעביר להם את המכתב הזה, מה בדיוק הם מצפים שאני אציין בהודעה שאני שולח להם יחד עם המכתב – האם הם רוצים שאפרט גם את השם של הבן שנפגע, או שזה לא הכרחי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (business/files/22307_pnimhaim_22308c_sofi_mail.pdf p11) answers the question on its own — the question must need both pages",
+      "question": "יש לי מרפאה פרטית, ואחד המטופלים שלי הגיש נגדי תביעה בבית משפט בטענה לרשלנות רפואית. אני חייב להודיע על זה לחברת הביטוח שלי, נכון? ואם כן, מה בדיוק אני צריך לפרט בהודעה הזאת, מעבר לזהות של המטפל והתאריך של התביעה - האם אני צריך לפרט גם את הנזק שהוא טוען שנגרם לו, או את שמות העדים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "יש לי עסק קטן, ואני מבוטח על תכולה בסכום של 80,000 ש\"ח. נכנס גנב לחנות שלי וגנב לי מצלמת אבטחה יקרה. בפוליסה כתוב שיש כיסוי לכל הסיכונים, אבל מצד שני יש חריג לגבי גניבה מרכב חונה. המצלמה הייתה מחוברת לחשמל ברכב חונה בזמן הגניבה - האם הביטוח יכסה את הנזק, ואם כן, עד איזה סכום?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (business/files/פוליסת-מכלול-לחבר-מושב-מהדורת-ינואר-2023.pdf p51) answers the question on its own — the question must need both pages",
+      "question": "יש לי עסק קטן, ואני שומר תכשיטים יקרי ערך בחנות. אם חלילה יגנבו לי אותם, ואני לא הצלחתי להעריך את השווי שלהם לפני הגניבה, האם הביטוח יכסה את הנזק, ובאיזה סכום מקסימלי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "הייתה סערה חזקה מאוד, והיא גרמה לנזק קל למפרשים ולכיסויים של היאכטה שלי. אני רוצה לתבוע את הנזק, אבל סכום הביטוח ליאכטה הוא 500,000 ש\"ח. מה הסכום המקסימלי שהביטוח יכסה עבור התיקון של המפרשים והכיסויים, ומה אני צריך לעשות לפני שאני מתחיל לתקן את הנזק?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "הייתה סערה חזקה מאוד אתמול, והיא גרמה לנזק קל למפרשים ולכיסויים של היאכטה שלי. אני רוצה להגיש תביעה, אבל אני לא בטוח כמה כסף אקבל. מה הניכוי המקסימלי שהחברה יכולה לעשות בגלל שהנזק הוא למפרשים ולכיסויים, ומה הסכום המקסימלי שהם יחזירו לי על הנזק הזה, אם סכום הביטוח של היאכטה שלי הוא 500,000 ש\"ח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "יש לי עסק קטן עם ציוד אלקטרוני שרכשתי לפני שנתיים. לפני חודש נפל גשם חזק דרך הגג וגרם נזק למחשב שלי. סכום הביטוח שרשום לי על הציוד האלקטרוני הוא 15,000 ש״ח. אם המחשב שלי שווה היום 8,000 ש״ח, כמה כסף אני יכול לקבל על התיקון או החלפה של המחשב?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (business/files/פוליסת-מכלול-לחבר-מושב-מהדורת-ינואר-2023.pdf p67) answers the question on its own — the question must need both pages",
+      "question": "יש לי עסק קטן עם כמה מכונות. קניתי מכונה חדשה לפני חצי שנה ב-80,000 ש״ח, והיא מופיעה ברשימת הרכוש המבוטח. עכשיו המכונה התקלקלה, ואני צריך לתקן אותה. אם עלות התיקון תהיה 10,000 ש״ח, האם הביטוח יכסה את כל הסכום, או שיש פה איזה ניכוי בגלל שהמכונה לא חדשה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (business/files/תנאי-פוליסת-ביטוח-מכלול-למשרד-מהדורת-ינואר-2024-באנגלית.pdf p50) answers the question on its own — the question must need both pages",
+      "question": "יש לי חברת תוכנה, ואני מבוטח בפוליסה הזו. אם עובד שלי גרם לנזק לרכוש של לקוח תוך כדי נסיעה ברכב של החברה, וסכום הנזק הוא 600,000 ש\"ח, האם הפוליסה מכסה את הנזק הזה? ואם יש לי כמה שותפים בחברה, האם כל אחד מהם מבוטח בנפרד כאילו הפוליסה הוצאה רק על שמו?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (business/files/תנאי-פוליסת-ביטוח-מכלול-למשרד-מהדורת-ינואר-2024-באנגלית.pdf p50) answers the question on its own — the question must need both pages",
+      "question": "יש לי חברת תוכנה, ואני רוצה לעשות שיפוץ קטן במשרד שלי - החלפת ריצוף בחדר ישיבות. השיפוץ ייקח בערך שבוע. אם במהלך השיפוץ, בגלל רשלנות של הקבלן, ניזוק ציוד של לקוח שבא לביקור, האם הביטוח שלי מכסה את הנזק? ומה גובה ההשתתפות העצמית שלי במקרה כזה, אם סכום הנזק הכולל הוא 600,000 ש״ח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (business/files/פוליסת-מכלול-לחבר-מושב-מהדורת-ינואר-2023.pdf p34) answers the question on its own — the question must need both pages",
+      "question": "יש לי מוסך שאני עובד בו לבד, ואני מבוטח בפוליסה הזו. אחד העובדים של הקבלן שמתקין אצלי מצנפת נפצע קשה תוך כדי העבודה. בפוליסה כתוב שיש כיסוי לנזקי עובדים, אבל גם סייג לגבי קבלנים. אם גבול האחריות המקסימלי שרשום לי בפוליסה הוא 500,000 ש\"ח, וגבול האחריות המרבי של המבטח על כל תקופת הביטוח הוא 250,000 ש\"ח - כמה כסף אוכל לתבוע מהביטוח בגין הפציעה של העובד?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "יש לי עסק של גידול חממות, ואחד העובדים שלי חלה במחלה מקצועית בגלל עבודה עם חומרים מסוכנים. בפוליסה כתוב שיש החזר חלקי אם החשיפה הייתה גם לפני תקופת הביטוח הנוכחית – מה אחוז ההחזר, ואם סך ההוצאות שלי בגין העובד הזה הן 15,000 ש\"ח, כמה כסף אני יכול לקבל מהביטוח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (car/files/מהדורת-יוני-2023-upgrade-פוליסת-הראל.pdf p44) answers the question on its own — the question must need both pages",
+      "question": "הייתה לי תאונה לפני שבוע, השמאי קבע שצריך 10 ימי עבודה לתיקון במוסך. כמה ימי רכב חלופי מגיעים לי, והאם הימים האלה נספרים במגבלת ה-30 יום הכוללת לתקופת הביטוח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (car/files/פוליסה-לביטוח-רכב-פרטי-ומסחרי-עד-35-טון-מהדורת-יוני-2023.pdf p45) answers the question on its own — the question must need both pages",
+      "question": "גנבו לי את הרכב לפני 10 ימים, דיווחתי למשטרה ולחברת הביטוח באותו יום. מתי אוכל לקבל רכב חלופי, וכמה ימי השכרה מקסימום מגיעים לי על הגניבה הזו בלי לפגוע בזכאות לתאונה עתידית השנה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "skip",
+      "reason": "non-answer ground truth: הפוליסה מכסה נזקים שנגרמו לרכוש של צד שלישי, אבל דף המידע המהותי אינו מציין את ג",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages describe different insurance products (one for car insurance and one for electric vehicle charging station insurance) with no overlapping or combinable terms, figures, or conditions that",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "מכרתי את הרכב שלי לפני שבוע, ולא רוצה להמשיך לשלם על הביטוח. אם אבטל את הפוליסה היום, האם יחזירו לי את הכסף ששלמתי מראש, וכמה יחזירו לי אם תקופת הביטוח הייתה לשנה שלמה ומשלמתי 3000 ש\"ח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "Both pages contain nearly identical policy clauses with no differing terms, numerical values, or unique conditions that would allow a question requiring information from both. There is no basis for a ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages are nearly identical in content and structure, with no meaningful differences in rules, figures, or conditions that could support a two-part question requiring both. Neither page introdu",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages contain nearly identical content regarding the claims process, timeframes for submitting documents, and rights of elderly claimants, but neither introduces distinct information that can ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (car/files/תנאי-פוליסת-ביטוח-לרכב-פרטי-ומסחרי-עד-35-טון-יוני-2023-באנגלית.pdf p21) answers the question on its own — the question must need both pages",
+      "question": "רכב שלי היה מעורב בתאונה כשנהג מומחה לנהיגה impart עליי שיעור נהיגה, וה손איבים של הנפגע דורשים פיצוי. אני רוצה לדעת אם החברת ביטוח חייבת להגן עליי במשפט AND גם מה קורה אם בסופו של דבר יידונו לי הוצאות משפטיות – האם הם יכסו את כל הסכום או יש תקרה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (car/files/תנאי-פוליסת-ביטוח-לרכב-פרטי-ומסחרי-עד-35-טון-יוני-2023-באנגלית.pdf p21) answers the question on its own — the question must need both pages",
+      "question": "רכב שלי היה מעורב בתאונת דרכים, ועכשיו הגישו עלי תביעה משפטית. אני רוצה לדעת אם הביטוח יכסה את ההוצאות המשפטיות אם אבחר להגן על עצמי מול התביעה, וגם אם יש הגבלה על הסכום שיקבלו במקרה של נזק לרכוש של צד שלישי."
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (car/files/מהדורת-יוני-2023-upgrade-פוליסת-הראל.pdf p25) answers the question on its own — the question must need both pages",
+      "question": "רכב שלי נגנב לפני חודש, ואני רוצה לדעת אם אני זכאי לקבל פיצוי של עד 10% יותר ממה שווה היום, כמו שיש לי כתוב במפרט. בנוסף, אני צריך לדעת אם יכסו לי את ההוצאות להחלפת המפתחות, כי לא הצלחתי למצוא אותם מאז הגניבה."
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "judge_error",
+      "reason": "JSONDecodeError: Invalid control character at: line 4 column 105 (char 193)",
+      "question": "רכב שלי נגנב לפני חודש, וה страховка אמרה שהם ישלמו רק אם לא נמצא במשך 30 יום. אני רוצה להבין אם יש לי זכות לקבל פיצוי גם על הוצאות של מפתחות חדשים, כי הייתי צריך להחליף אותם אחרי שהרכב לא התגלה. כמה ישלמו לי בכלל במקרה של אבדן גמור, אם הערך במפרט הוא 80,000 ש\"ח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "רכב שלי היה בהלם ונזקק לתקון, ובזמן התיקון הורשו נהג ממוסך ומאפייה לנהוג בו. אם הם יגרמו לתאונה, האם הביטוח שלי יכסה את הנזק, ובהנחה שכן — מה גובה התקרה של הכיסוי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not provide sufficient combined information to form a hard question requiring both pages where the answer is fully established by the content. Page 1 discusses lien holder rights and ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that requires both to answer a single, concrete customer question. Page 1 discusses 'Pazam Bituhi' (insurance driving experience) for new drivers",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (diseases-disabilities/files/תנאי-פוליסת-ביטוח-מחלות-קשות-מענקית-סרטן-1.pdf p4) answers the question on its own — the question must need both pages",
+      "question": "אני בן 68, והצטרפתי לביטוח מחלות קשות לפני חצי שנה. בשבוע שעבר אובחנו אצלי סימפטומים של מחלת סרטן, אבל לפני ההצטרפות, לפני חצי שנה, הייתי בה relevancia רפואית של כאבי בטן שטופלו אצל רופא. אני רוצה לדעת אם הביטוח יכסה אותי במקרה של מאה מחלות קשות, והאם יש הגבלה בגלל המצב הרפואי הקודם שלי."
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages provided do not contain complementary information that requires both to answer a single, concrete customer question. Page 1 lists exclusions and conditions for claims (e.g., pre-existing",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (diseases-disabilities/files/תנאי_פוליסת_ביטוח_מחלות_קשות_-_מענקית_סרטן.pdf p4) answers the question on its own — the question must need both pages",
+      "question": "אני בן 68, והופעלו אצלי תסמינים של אי ספיקת כבד פולמיננטית לפני חודשיים. רופא מאושר אבחן את המחלה, והיא אושרה גם ע\"פ בדיקת US דופלר. אני רוצה לדעת אם אני זכאי לתגמול לפי הפוליסה, והאם יש הגבלה因为我 היה לי מצב רפואי קודם לפני שהצטרפתי לביטוח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages cover unrelated aspects: one defines covered severe diseases (Page 1), the other lists exclusions and policy conditions (Page 2). No single question requiring both pages can be construct",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two provided pages do not contain complementary information that requires both to answer a single, non-trivial question. Page 1 is a general informational text about life changes and financial pla",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (diseases-disabilities/files/תנאי-פוליסת-ביטוח-מחלות-קשות-מענקית-זהב-1.pdf p3) answers the question on its own — the question must need both pages",
+      "question": "אני בן 67 ורוצה להצטרף לביטוח מחלות קשות מענקית זהב, עם סכום ביטוח של 300,000 ש\"ח. כמה ירד לי הסכום הביטוחי בגלל הגיל, ואיך זה ישפיע על הסכום שאני אקבל אם יקרה מקרה ביטוח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not support a hard multi-source question requiring both pages. Page 1 contains administrative and consent-related information (e.g., data sharing, agent declaration, policy conversion",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not provide complementary information that requires both to answer a single, concrete customer question. Page 1 is a marketing page with no policy terms, and Page 2 contains general p",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "קרה לי משהו ואני צריך להבין אם אני מוגבל. אובחנו אצלי סוכרת לפני שנתיים, וזה היה לפני שכתבתי את הפוליסה, אבל לא סיפרתי על זה בהצטרפות. אני עכשיו בן 63, והשבוע הודיעו לי שאני חולה במחלת סרטן. אני רוצה להבין אם החברה תשלם לי על המקרה הזה, והאם יש הגבלה בזמן של כמה זמן הם ישלמו בגלל שהמחלה החמורה אירעה לא מזמן אחרי תחילת הפוליסה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that together support a single hard question requiring both. Page 1 is a signature and agent declaration form with no policy terms, and Page 2 co",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (diseases-disabilities/files/תנאי-פוליסת-ביטוח-מחלות-קשות-מענקית-סרטן-1.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "קרה לי אבחון של סרטן לפני חודש, ואני רוצה להבין אם עוד אפשר לקבל את התגמולים מהפוליסה. אני כבר בן 74, והרופא אמר לי שהמחלה הופיעה שוב אחרי שחליתי בה לפני שנתיים. האם אני עדיין זכאי לתגמולים, והאם יש הגבלה בגלל גיל או החזרה של המחלה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that requires both to answer a single, non-redundant question. Page 1 is promotional and general, listing topics without specific policy terms, w",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two provided pages do not contain complementary information that requires both to answer a single, non-trivial question. Page 1 is a table of contents for an FAQ about critical illness insurance, ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "skip",
+      "reason": "non-answer ground truth: הפוליסה דורשת תוספת רפואית לדמי הביטוח בשיעור שנקבע על ידי החיתום, אך לא מצוין ש",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (diseases-disabilities/files/062025-הצעה-לביטוח-מענקית-סרטן.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "תשמע, אני מבוטח אצלכם בביטוח מחלות קשות, ואני קצת מודאג. אמא שלי בת ה-85, והיא מתחילה לשכוח דברים ולתפקד פחות טוב. אם אני אצטרך לשלם עבור הטיפול שלה, האם אני יכול להוסיף אותה לפוליסה שלי עכשיו, ומה אני צריך למלא כדי לעשות את זה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (diseases-disabilities/files/062025-הצעה-לביטוח-מענקית-סרטן.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "תשמע, אני רוצה להוסיף את הילד שלי לפוליסה שלי. אני משלם את הביטוח בכרטיס אשראי, ואני רוצה להמשיך לשלם ככה גם על הילד. אם אני גם רוצה לתת לאמא של הילד שלי, שהיא לא ההורה השנייה שלו, לשלם חלק מהביטוח, זה אפשרי? ומה אני צריך לדעת לגבי ההחזרים אם משהו יקרה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (diseases-disabilities/files/062025-הצעה-לביטוח-מענקית-סרטן.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "תשמע, אני מבוטח אצלכם כבר כמה שנים, ואני רוצה להוסיף את הילד שלי לפוליסה. אני רוצה לדעת, אם אני בוחר לשלם את ההפרמיה באותה צורה שאני משלם היום, האם אני צריך את החתימה של מישהו נוסף, ומה הקשר שלי לילד שלי מבחינת הפוליסה הזו?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (diseases-disabilities/files/תנאי-פוליסת-ביטוח-מחלות-קשות-מענקית-זהב-1.pdf p13) answers the question on its own — the question must need both pages",
+      "question": "תשמע, אני רוצה להוסיף את הילד שלי לפוליסה שלי. אני משלם את הביטוח בכרטיס אשראי, ואני רוצה להמשיך לשלם באותו כרטיס גם אחרי שאני מוסיף אותו. אם הילד שלי יצטרך עזרה בשלוש לפחות מהפעולות הבסיסיות - לקום ולשכב, להתלבש, להתרחץ, לאכול, לשלוט על סוגרים או ניידות - בגלל דלקת קרום המוח, כמה זמן הוא צריך להיות במצב הזה כדי שהביטוח יכסה את זה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (diseases-disabilities/files/062025-הצעה-לביטוח-מענקית-סרטן.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "תשמע, אני רוצה להוסיף את הילד שלי לפוליסה שלי, אבל אני לא בטוח איך זה עובד עם התשלומים. אם אני בוחר לשלם באותה דרך כמו הפוליסה הקיימת שלי, האם אני צריך למלא טופס חדש, ואם כן, האם יש מגבלה על כמה זמן לוקח לתשלום להיכנס לתוקף אחרי שאני שולח את הטופס?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "תשמע, אני רוצה להוסיף את הילד שלי לפוליסה שלי, ואני רוצה לשלם את ההפרמיה באותה צורה כמו שאני משלם עכשיו. אם אני לא המבוטח הראשי, אלא ההורה שלו, מה הקשר המשפחתי שאני צריך לציין בטופס, ומה קורה אם בגלל איזה בעיה טכנית החברה תחליט להחזיר את הכסף לאבא של הילד במקום לי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (diseases-disabilities/files/הצעה-לביטוח-מענקית-זהב-ומענקית-סרטן-062025.pdf p7) answers the question on its own — the question must need both pages",
+      "question": "תשמע, אני רוצה להוסיף את הילד שלי לפוליסה שלי, אבל אני לא בטוח איך זה עובד עם התשלומים. אם אני בוחר לשלם באותה דרך שאני משלם עכשיו, האם אני צריך למלא טופס חדש, ואם כן, האם התשלום יחזור אלי או לילד שלי אם נקבל החזר כספי כלשהו?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "תשמע, אני רוצה להוסיף את הילד שלי לפוליסה שלי, אבל אני לא בטוח כמה זה יעלה לי. אם הפוליסה שלי היום עולה 500 ש\"ח בחודש, וביטוח למבוטח נוסף עולה 1% מהסכום המבוטח, וסכום הביטוח שלי הוא 200,000 ש\"ח - כמה תהיה התוספת החודשית שלי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (diseases-disabilities/files/062025-הצעה-לביטוח-מענקית-סרטן.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "תשמע, אני רוצה להוסיף את הבת שלי לפוליסה שלי, היא סטודנטית. אני רוצה לדעת, אם אני בוחר לשלם את הפרמיה באותה דרך שאני משלם עכשיו, אני צריך גם את החתימה שלה, או רק שלי? ומה אני צריך לכתוב לגבי הקשר ביני לבין הבת שלי בטופס?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (diseases-disabilities/files/062025-הצעה-לביטוח-מענקית-סרטן.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "תשמע, אני רוצה להוסיף את הילד שלי לפוליסה שלי. אני משלם את הביטוח בכרטיס אשראי, ואני רוצה להמשיך לשלם באותו כרטיס גם אחרי שאני מוסיף אותו. אם הילד שלי הוא בן שלי, ואני רוצה לדעת מה הקשר שלי אליו, אני צריך למלא טופס או משהו? ומה קורה אם אני רוצה לשלם בשיטה אחרת בעתיד?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (diseases-disabilities/files/062025-הצעה-לביטוח-מענקית-סרטן.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "תשמע, אני רוצה להוסיף את הילד שלי לפוליסה שלי, אבל אני לא בטוח איך זה עובד עם התשלומים. אם אני בוחר לשלם באותה דרך כמו תמיד, האם אני צריך למלא טופס חדש בכל פעם שאני מוסיף מישהו לפוליסה, ומה קורה אם אני רוצה שהתשלום ימשיך לחשבון שלי, אבל השם של מי שמשלם בפועל הוא לא שלי - אמא שלי, למשל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "תשמע, אני רוצה להוסיף את הילד שלי לביטוח הסרטן שלי. אני משלם את הביטוח בכרטיס אשראי, ואני רוצה להמשיך לשלם באותו כרטיס גם אחרי שאוסיף אותו. אם אני רוצה להוסיף את הילד שלי, וסכום הביטוח המקסימלי עבור כל מקרה ביטוח הוא 500,000 ש\"ח, כמה כסף יכנס לי אם חלילה יאבחנו אצלו סרטן?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (diseases-disabilities/files/הצעה-לביטוח-מענקית-זהב-ומענקית-סרטן-062025.pdf p7) answers the question on its own — the question must need both pages",
+      "question": "תשמע, אני רוצה להוסיף את הבת שלי לפוליסה שלי, היא סטודנטית. אם אני בוחר לשלם את ההפרמיה באותה דרך שאני משלם עכשיו, אני צריך למלא טופס או משהו? ומה קורה אם אני רוצה לשלם בדרך אחרת, נגיד בכרטיס אשראי חדש?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (diseases-disabilities/files/הצעה-לביטוח-מענקית-זהב-ומענקית-סרטן-062025.pdf p7) answers the question on its own — the question must need both pages",
+      "question": "תשמע, אני רוצה להוסיף את הבת שלי לפוליסה שלי. אני משלם את הפרמיה בכרטיס אשראי, ואני רוצה להמשיך לשלם באותו כרטיס גם אחרי שהיא תצטרף. אם הבת שלי היא סטודנטית, האם אני צריך למלא טופס מיוחד או להצהיר על הקשר בינינו כדי שהיא תוכל לקבל את הכיסוי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (health/files/טופס-בקשה-לפיצוי-כספי-בגין-ניתוח-אשפוז-מחלה-או-תאונה.pdf p3) answers the question on its own — the question must need both pages",
+      "question": "הגשנו הצעה לביטוח בריאות לכל המשפחה ב-20 בנובמבר 2020, אבל הבן הבכור שלנו נדרש להשלים בדיקות והפוליסה נכנסה לתוקף רק ב-10 בדצמבר 2020. הבן הצעיר עבר ניתוח בינואר 2023. כמה שנים יש לנו מיום הניתוח להגיש תביעה לפיצוי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "generation",
+      "reason": "ValueError: ground_truth_answer too short: ''",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (health/files/טופס-תביעה-השתלות-טיפולים-מיוחדים-בחול-ניתוחים-בחול.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "קיבלתי מהראל הודעה על בדיקה מחודשת לזכאות שלי לתשלומים החודשיים בתאריך 15.3 — מה התאריך הכי מוקדם והכי מאוחר שהם יכולים להקטין או להפסיק את התשלומים? ועוד משהו: יש לי בפוליסה כיסוי ניתוחים UPGRADE, יום ההולדת שלי יוצא ב-22 לחודש — באיזה תאריך בדיוק משתנה הפרמיה לפי הגיל הביטוחי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "Only one page of document content (page 8 of the PDF) is provided in the context. The rejection message indicates the question must require two pages from the provided set, but only a single continuou",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (health/files/טופס-בקשה-לאישור-ותיאום-ניתוח.pdf p7) answers the question on its own — the question must need both pages",
+      "question": "קיבלתי הודעת תשלום חלקי על התביעה שלי ואין בה שום מילה על התיישנות. אילו מסמכים והנחיות הייתי אמור לקבל כבר כשפניתי לראשונה להגיש את התביעה, ומה בדיוק חייבת לכלול פסקת ההתיישנות בהודעת תשלום חלקי לפי הכללים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (health/files/מערכת-כללים-לבירור-וליישוב-תביעות-ביטוח-בריאות.pdf p3) answers the question on its own — the question must need both pages",
+      "question": "According to the surgical approval request form (page 7 of טופס-בקשה-לאישור-ותיאום-ניתוח.pdf) and the insurance claims handling regulations (page 7 of the regulatory document), when a surgical procedure documented in the approval form leads to a claim for periodic disability payments that undergoes re-examination under section יב.2, and an expert is appointed under section יג.1 to examine the claimant, what specific notification must the claimant receive regarding the expert's role and their right to representation under section יג.1, and what documentation from the surgical approval form would be included in the list of documents provided to the claimant under section יד.3 when the insurer relies on an expert opinion?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (health/files/טופס-בקשה-לפיצוי-כספי-בגין-ניתוח-אשפוז-מחלה-או-תאונה.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "עברתי ניתוח פרטי בשבוע שעבר. יש לי פוליסת ניתוחים בהראל וגם שב״ן של מכבי. מכבי כבר אישרו לי החזר של 18,000 ₪. הפוליסה שלי בהראל מכסה עד 40,000 ₪ לניתוח הזה. כמה אני אמור לקבל מהראל, ואיך זה מחושב בדיוק?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (health/pages/faq.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "עברתי ניתוח בבית חולים ציבורי בארץ ויש לי גם ביטוח משלים בקופת חולים. איזה טופס תביעה בדיוק אני צריך למלא, וכמה הראל תשלם לי אם קופת החולים כבר החזירה לי 15,000 ₪ והפוליסה שלי מכסה את הניתוח עד 25,000 ₪?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (health/files/טופס-בקשה-לאישור-ותיאום-ניתוח.pdf p3) answers the question on its own — the question must need both pages",
+      "question": "אני משלם את הפרמיות שלי בכרטיס אשראי כבר שנתיים. עכשיו אני צריך להגיש תביעה על ניתוח שעברתי, והסכום יוצא בערך 18,000 ₪. איך אקבל את הכסף — יחזירו לי לכרטיס האשראי? ואיזה מסמכים אני צריך לצרף?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (health/files/טופס-בקשה-לאישור-ותיאום-ניתוח.pdf p3) answers the question on its own — the question must need both pages",
+      "question": "הטופס לאישור ותיאום ניתוח בעמוד 2 מלווה בשני סעיפים המסומנים באותיות העבריות ז ו־ח בעמוד 3. מהם הנושאים שבהם עוסקים שני סעיפים אלה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "Page 1 is a marketing article about organ transplants abroad with no specific coverage rules, limits, or figures. Page 2 is a list of FAQ questions (not answers) covering many topics. Neither page con",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The two pages cover completely unrelated services: Page 1 defines terms and describes an online video-consultation service ('רפואה אישית און ליין פלוס'), while Page 2 is a claim form for transplants/s",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (health/files/תנאי_נספח_הרחבה_-_ניתוחים_פרטיים_וטיפולים_מחליפי_ניתוח_בחו_ל.pdf p7) answers the question on its own — the question must need both pages",
+      "question": "אני בן 45 ורוצה להצטרף לפוליסת בריאות בסיסית שכוללת גם השתלות וגם ניתוחים בחו\"ל. אני כבר מחובר לביטוח משלים של קופת החולים. אם אשלם 71.67 ש\"ח לחודש, האם זה יכסה גם את ההשתלות וגם את הניתוחים, או שאצטרך לשלם יותר?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (health/files/תנאי_נספח_הרחבה_-_ניתוחים_פרטיים_וטיפולים_מחליפי_ניתוח_בחו_ל.pdf p7) answers the question on its own — the question must need both pages",
+      "question": "אני בן 45 ורוצה להצטרף לתוכנית הביטוח הבסיסית עם כל ההרחבות – השתלות, תרופות מחוץ לסל וניתוחים בחו\"ל. בכמה ישתנה הפרמיה החודשית אם אוסיף גם את ההרחבה לניתוחים וטיפולים מחליפי ניתוח בחו\"ל, בהשוואה לתוכנית הבסיסית ללא הרחבה זו?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary or combinable information that requires both to answer a single, concrete customer question. Page 1 discusses hyperbaric oxygen chambers and their medical us",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (health/files/טופס-בקשה-לפיצוי-כספי-בגין-ניתוח-אשפוז-מחלה-או-תאונה.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "הבת שלי בת 8, והיא עברה ניתוח ריפוי בעיסוק בשבוע שעבר בבית חולים פרטי. אני רוצה לבקש פיצוי, אבל לא בטוח מה צריך לצרף. האם צריך גם מכתב תולדות מחלה וגם סיכום ניתוח, או רק אחד מהם?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (life/files/טופס-הצטרפות-לביטוח-חיים-7-שאלות-בהצהרת-הבריאות.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "אני רוצה להקים ביטוח חיים לילד שלי, ואני מתכנן לשלם בהוראת קבע. אם אני רוצה להגביל את הסכום החודשי שיחויב בכרטיס האשראי שלי ל-500 ש\"ח, וגם להגביל את התקופה של ההרשאה לחצי שנה, איך אני עושה את זה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (life/files/טופס-הצטרפות-לביטוח-חיים-7-שאלות-בהצהרת-הבריאות.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "אני רוצה להקים הוראת קבע לביטוח הזה, ואני יודע שאם ההרשאה לא תעבוד, החברה תחייב אותי שוב. אבל, אם אני רוצה לבטל חיוב מסוים, כמה זמן מראש אני צריך להודיע לבנק כדי שהביטול ייכנס לתוקף, ומה קורה אם אני מפספס את החלון הזה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (life/files/תנאי-פוליסת-ביטוח-למקרה-מוות-מגן-1.pdf p10) answers the question on its own — the question must need both pages",
+      "question": "ה страхов שלי ביטל את הפוליסה לפני חודש בגלל שלא שילמתי את הפרמיה, אבל עכשיו אני רוצה להחזיר אותה. האם אני יכול להחידש את הפוליסה ללא בדיקת בריאות, וכמה פרמיות אני צריך לשלם כדי להחזיר אותה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (life/files/תנאי-פוליסת-ביטוח-למקרה-מוות-מגן-1.pdf p10) answers the question on its own — the question must need both pages",
+      "question": "ה страховка שלי בוטלה בגלל שלא שילמתי את הפרמיה בזמן, וזה היה לפני חודש בדיוק. אני רוצה להחזיר את הפוליסה כמו שהיא הייתה, בלי בדיקות בריאות. האם אני יכול לעשות את זה, והאם אני צריך להוסיף ריבית על התשלומים שפספסתי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (life/files/טופס-הצטרפות-לביטוח-חיים-7-שאלות-בהצהרת-הבריאות.pdf p3) answers the question on its own — the question must need both pages",
+      "question": "אני ובת זוגי רכשנו מגן חודשי זוגי עם פיצוי של 6,000 ש\"ח בחודש ל-15 שנה, ויש לנו ילד בן שנתיים. בכמה נוכל להגדיל את סכום הביטוח עכשיו בזכות הטבת הולדת הילד, והאם התוספת הזו גם צמודה למדד?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "generation",
+      "reason": "ValueError: ground_truth_answer too short: ''",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (life/files/תנאי-פוליסת-ביטוח-למקרה-מוות-מגן-1.pdf p10) answers the question on its own — the question must need both pages",
+      "question": "ביטלתי את ביטוח החיים שלי לפני 45 יום כדי לעבור לחברה אחרת, ואז ביטלתי גם את הפוליסה החדשה. במקביל, עברתי תאונה על קורקינט חשמלי בשבוע שעבר (אני בן 25) ונשארתי נכה. האם אני יכול לחדש את הפוליסה המקורית, והאם נספח הנכות מתאונה יכסה את התאונה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (life/files/תנאי-פוליסת-ביטוח-למקרה-מוות-מגן-1.pdf p10) answers the question on its own — the question must need both pages",
+      "question": "ביטלתי את ביטוח החיים שלי כי עברתי לחברה אחרת, ועכשיו אני רוצה לחזור לפוליסה המקורית - כמה זמן יש לי לדרוש חידוש? וגם - אני רוכב על קורקינט חשמלי פעמיים בחודש, זה נחשב ספורט אתגרי בנספח נכות מתאונה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/иск-о-пособии-по-уходу.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "קרה לי נזק בדירה לפני חודש, ואני רוצה לדעת אם אני עדיין יכול להגיש תביעה על סכום שמשלמים לי על טיפולים בבית. אני מבטיח עם 'סיודי מושלם פלוס' דרך כללית, ועברתי על הסימנים - יש לי זכאות. אבל לא הבנתי מתי בדיוק פספסתי את הסף, והאם יש הבדל אם זה קשור למוסד או לבית?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/иск-о-пособии-по-уходу.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "קרה אצלי משהו לפני חצי שנה — נפצעתי קשה ומאז אני מקבל טיפול יום-יום בבית. אני רוצה להגיש תביעה但现在 אני לא בטוח עד מתי בכלל אפשר להגיש אותה, ובמקביל — איך אני בכלל מוכיח שאני מקבל טיפול ביתי? צריך איזה טופס מיוחד?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/طلب-تريض.pdf p19) answers the question on its own — the question must need both pages",
+      "question": "שלחה לי הראל טופס ויתור על סודיות רפואית כדי לבדוק את בקשת התשלום לנשיאה, אבל עדין לא שלחו לי הודעה על הסטטוס של הבקשה. לפי מה שהבנתי, יש להם זמן מוגבל לשלוח את ההודעה, אבל אני לא יודע אם זה מתחיל מרגע ששלחתי את הטופס או מרגע ששלחו לי אותו. כמה זמן יש להם לשלוח את התגובה, והאם הזמן הזה מתחיל מרגע שהשלמתי את הטופס?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/طلب-تريض.pdf p19) answers the question on its own — the question must need both pages",
+      "question": "אני בת 58 ופונה לבקשת תשלום לנשיאה בבית אבות. הגשתי את כל המסמכים הדרושים, כולל הצהרת בריאות וטופס אישור רפואי. לפני כמה ימים התקשרו אלי מהתמיכות והודיעו שעוד ידרשו מידע, אבל לא הסבירו מה בדיוק. לפי מה שהבנתי, יש להם 30 יום לבדוק את הבקשה, אבל כבר עברו 25 ימים. האם חייבים להודיע לי על דחיית הבקשה אם לא מסיימים בזמן, או שיכולים פשוט למשוך את הזמן?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/nursing-care-claim-serving-form-clalit-members.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "אני רוצה לבקש פיצוי על טיפול באישה שמכינה לי אוכל ומרחצת אותי בבית כבר חודש, כי אני לא יכול לעשות את זה בעצמי אחרי הניתוח. אני חבר של קופה קלית, והפיננסים שלי קצת דלילים – כמה זמן ייקח להם להחליט על הבקשה שלי, ובנוסף, האם אני בכלל יכול להגיש את הבקשה בלי שיעבירו אותי לבדיקה רפואית תחילה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that requires both to answer a single, concrete customer question. Page 1 details claim handling procedures and timelines, while page 2 is a clai",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not provide complementary information that requires both to answer a single, non-trivial question. Page 1 is a functional assessment questionnaire for long-term care, listing activiti",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אמא שלי начала להיראות ממש מבולבלת בתקופה האחרונה, וגם לא מצליחה יותר לעשות דברים בסיסיים כמו להתקלח או להתלבש בלי עזרה. לפני חודש הגענו לרופא שבדק אותה בבית, והוא אמר שזו דמנציה מתקדמת. אני רוצה להגיש תביעה לכסוי סיעודי, אבל אני לא יודע אם זה יחשב מקרה ביטוח לפי הפוליסה. האם המצב שלה מכסה לפי התנאים, ומאיזה תאריך יתחילו לשלם אם זה כן מכסה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages provided are administrative claim forms and do not contain policy terms, coverage rules, limits, or conditions necessary to construct a hard question requiring two distinct pieces of inf",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/מערכת-כללים-לבירור-וליישוב-תביעות-ולטיפול-בפניות-הציבור-ביטוח-סיעודי.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "אני בת 68 והגישתי תביעה לכסוי סיעודי לתקופה של 4 חודשים, והיא אושרה. עכשיו接近 לסיום התקופה, והרופא שלי אומר שאני עדיין צריכה את כל התמיכה. כמה זמן לפני סוף התקופה אני חייבת לשלוח תיעוד רפואי חדש, ואיזה מידע הראל חייבת לשלוח לי כשאני מגישה את הבקשה הזו?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that requires both to answer a single, non-redundant question. Page 1 details the medical and procedural conditions for re-evaluation of long-ter",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "שלום, אני מנסה להבין איך להתחיל את התהליך של הגשת בקשה לסיוע סיעודי מהראל. אני יודע שצריך לעבור הערכה, אבל גם ראיתי שחייבים למלא טופס ויתור על סודיות. האם אני צריך לעשות את שני הדברים האלה, או שמספיק רק אחד מהם כדי להגיש את הבקשה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages provided are administrative forms related to long-term care insurance: one is a functional assessment form for medical evaluation, and the other is a consent form for disclosure of medic",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/כללים-ומבחנים-לקביעת-זכאות-לקבלת-גמלת-סיעוד.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "אישרו לי תביעה סיעודית לשלושה חודשים של קצבה חודשית. תוך כמה זמן הראל צריכה לשלוח לי עדכון ראשון על התביעה, וכל כמה זמן אחר כך עדכונים נוספים? ומה אני צריך להכין לקראת סוף השלושה חודשים כדי שיבדקו אם להמשיך לשלם?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (long-term-care/files/מערכת-כללים-לבירור-וליישוב-תביעות-ולטיפול-בפניות-הציבור-ביטוח-סיעודי.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "תביעה נדחתה חלקית ונשלחה הודעת דחייה לפי סעיף ט. כעבור 60 יום המבטח מבקש זמן נוסף לבירור ושולח הודעת המשך בירור לפי סעיף ח.1. כעבור 30 יום נוספים הצדדים מגיעים לפשרה ונחתם הסדר פשרה. אילו הודעות בדיוק חייב המבטח לשלוח מעתה ואילך, ולאיזה סעיפים הן כפופות?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/כללים-ומבחנים-לקביעת-זכאות-לקבלת-גמלת-סיעוד.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "יש לי פוליסת 'סיעודי מושלם' דרך שירותי בריאות כללית, ומקרה הביטוח קרה אחרי ה-01/01/2025. אני מתקשה להיכנס ולצאת מהאמבטיה וגם ללבוש בגדים רגילים - אבל אני מסתדר עם בגדים מותאמים. איך יבדקו את הזכאות שלי לרחצה ולהלבשה במצב כזה? ועד מתי אני יכול בכלל להגיש את התביעה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (long-term-care/files/טופס-הגשת-תביעה-ביטוח-סיעודי.pdf p19) answers the question on its own — the question must need both pages",
+      "question": "אם מבטחת לא כללה פסקת התיישנות בהודעת התשלום הראשונה שנשלחה במהלך השנה שקדמה למועד הצפוי להתיישנות, ולאחר מכן הקטינה תשלומים עיתיים בעקבות בדיקה מחודשת שהסתמכה על חוות דעת מומחה — מהי ההארכה המרבית של תקופת ההתיישנות לפי סעיף 3, ומהן הדרישות המינימליות להודעה מוקדמת ולגילוי חוות דעת המומחה לפי סעיפים יב(5)–(7) ו-יד(3)?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/כללים-ומבחנים-לקביעת-זכאות-לקבלת-גמלת-סיעוד.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "אבא שלי עבר אירוע מוחי לפני חודשיים והוא מתקשה בפעולות יומיומיות. הוא מצליח להתרחץ לבד רק 40% מהפעולה (צריך עזרה פיזית בשאר), להתלבש 60% לבד, ולאכול 70% לבד. הבנתי שהמבחן הוא 50% — בכמה מהפעולות האלה הוא ייחשב 'לא מסוגל לבצע חלק מהותי'? ואם אני מגיש תביעה בשבילו ביום ראשון הקרוב, תוך כמה ימי עסקים הראל חייבים לפנות אליי לבקש מסמכים נוספים אם חסרים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (long-term-care/files/מערכת-כללים-לבירור-וליישוב-תביעות-ולטיפול-בפניות-הציבור-ביטוח-סיעודי.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "A policyholder submits a claim for nursing care allowance (גמלת סיעוד) to Harel insurance company. According to Harel's claims settlement rules, list the six specific documents and information items the company must provide to the claimant upon receipt of the claim. Separately, according to the nursing care eligibility rules, list the six Activities of Daily Living (ADL) functions assessed to determine the claimant's level of dependency."
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (long-term-care/files/טופס-הגשת-תביעה-ביטוח-סיעודי.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "הביטוח הסיעודי הקבוצתי שלי הסתיים ב-31.12.2017 והצטרפתי מיד לביטוח סיעוד פרטי. נקלעתי למצב סיעודי ב-1.1.2024. עד איזה תאריך אוכל להגיש תביעה על היום הראשון של המצב הסיעודי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (long-term-care/files/טופס-הגשת-תביעה-ביטוח-סיעודי.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "הייתי מבוטח בביטוח סיעודי קבוצתי דרך מקום העבודה שנגמר בסוף 2017, ומיד אחרי זה עברתי לביטוח סיעודי פרטי. עכשיו אמא שלי הפכה לסיעודית ב-1.1.2024 ואני רוצה להגיש תביעה בשמה. כמה זמן יש לי להגיש את התביעה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "generation",
+      "reason": "ValueError: ground_truth_answer too short: ''",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (long-term-care/files/מערכת-כללים-לבירור-וליישוב-תביעות-ולטיפול-בפניות-הציבור-ביטוח-סיעודי.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "לפי סעיפים ו' עד ט' בתקנות, מהן הדרישות המפורטות שיש לכלול בהודעת תשלום חלקי (תשלום חלקי תוך דחיית חלק מהתביעה), ומהן החובות החלות על המבטח לגבי הודעות המשך בירור – לרבות התדירות המינימלית, החריגים לחובת המשלוח, והתנאים שבהם נפסקת החובה לשלוח הודעות המשך בירור?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/כללים-ומבחנים-לקביעת-זכאות-לקבלת-גמלת-סיעוד.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "יש לי פוליסת 'סיעודי מושלם' של כללית, ומקרה הביטוח קרה אחרי ה-1 בינואר 2025. אני גר בבית. רציתי לדעת אם בודקים לי עזרה בכניסה וביציאה מהאמבטיה כחלק מבדיקת הרחצה, ואיזה נספח אני צריך לצרף לטופס התביעה בגלל שאני בבית?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (long-term-care/files/טופס-הגשת-תביעה-ביטוח-סיעודי.pdf p3) answers the question on its own — the question must need both pages",
+      "question": "לפי טופס התביעה (מסמך 1, סעיף ה) ועמוד 2 של מסמך הכללים-ומבחנים, איזה מסמך נספח ספציפי נדרש ממבוטח השוהה בביתו כדי להוכיח זכאות לגמלת סיעוד לפי קריטריון 'קבלת שירותי סיעוד בבית'?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/pages/faq.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "בביטוח הסיעודי של כללית יש שתי שאלות נפוצות: 'מהו מבחן ה-ADL?' ו-'מהי תשישות נפש וכיצד בודקים אותה'. אם אני עומד בשניהם, אני מקבל פיצוי כפול? ואיזה רופא בדיוק בודק את התשישות נפש?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (long-term-care/files/טופס-הגשת-תביעה-ביטוח-סיעודי.pdf p11) answers the question on its own — the question must need both pages",
+      "question": "מהן תקופות ההמתנה הרפואיות החלות לפני שניתן לאשר תביעה בגין תשישות נפש, ואילו רופאים מומחים נדרשים לאשר את מצב התשישות הנפשית לצורך אישור תביעה שאושרה לתקופה העולה על שלושה חודשים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "generation",
+      "reason": "ValueError: ground_truth_answer too short: ''",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (long-term-care/files/טופס-הגשת-תביעה-ביטוח-סיעודי.pdf p3) answers the question on its own — the question must need both pages",
+      "question": "מהם כל המסמכים הנלווים וההצהרות הנדרשות ממבוטח השוהה בביתו לעומת מבוטח השוהה במוסד סיעודי/גריאטרי או בדיור מוגן/בית אבות, ומהן הדרישות המדויקות למילוי פרטי איש הקשר כולל מעמדו המשפטי ואפשרויות קבלת ההודעות?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/כללים-ומבחנים-לקביעת-זכאות-לקבלת-גמלת-סיעוד.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "אמא שלי בת 85, והיא מתחילה לשכוח דברים קטנים, כמו איפה היא שמה את המפתחות. היא גם צריכה עזרה בקניות ובבישול. אני מנסה להבין אם היא זכאית לגמלת סיעוד. מה אומרים לגבי היכולת של אדם בגילה לקום ולשכב, ומה אומרים לגבי מה שצריך כדי להגדיר מישהו כמי שאינו מסוגל לבצע חלק מהותי מפעולה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/כללים-ומבחנים-לקביעת-זכאות-לקבלת-גמלת-סיעוד.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "אמא שלי בת 85, והיא מתחילה לשכוח דברים קטנים, כמו איפה השלט או מה היא אכלה. היא גם מתקשה לקום מהכיסא לבד לפעמים. אני מנסה להבין אם היא זכאית לגמלת סיעוד. מה יקרה אם נגיש תביעה, והיא תאושר רק ל-3 חודשים? האם אוכל להוסיף מסמכים רפואיים חדשים כדי להאריך את התקופה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "הביטוח הסיעודי הקבוצתי שלי הסתיים בסוף 2017. אני שוקל להצטרף לביטוח סיעודי פרטי, אבל יש לי גם ביטוח סיעודי דרך קופת החולים. אם אני מצטרף לביטוח פרטי עכשיו, האם אני עדיין צריך לעשות בדיקות בריאותיות, ואם כן, כמה זמן יש לי מרגע סיום הביטוח הקבוצתי כדי להצטרף לביטוח פרטי בלי בדיקות?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני בת 70, ואני מנסה להגיש תביעה לפי פוליסת הביטוח סיעודי שלי. הבנתי שיש הבדל בטיפול בתביעות בין לקוחות צעירים למבוגרים. כמה זמן לוקח להראל לענות לי על התביעה שלי, בהתחשב בגיל שלי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "יש לי ביטוח סיעודי קבוצתי דרך קופת החולים, והוא עומד להסתיים בעוד חודשיים. אני שוקל לרכוש ביטוח סיעודי פרטי. אם ארכוש ביטוח פרטי מיד כשהביטוח הקבוצתי יסתיים, האם תהיה לי תקופת המתנה כלשהי לפני שאוכל לתבוע, ואם כן, כמה זמן היא תהיה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "אני מבוטח בביטוח סיעודי קבוצתי דרך קופת החולים שלי, ואני שוקל לעבור לקופת חולים אחרת. אם אעשה את זה, כמה זמן יש לי כדי לרכוש ביטוח סיעודי פרטי בלי שידרשו ממני בדיקות בריאות מחדש?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/כללים-ומבחנים-לקביעת-זכאות-לקבלת-גמלת-סיעוד.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "אמא שלי בת 85, והיא מתקשה לקום ולשכב לבד. היא גם מתקשה לשלוט בסוגרים בגלל בעיות ניידות. האם היא תעמוד בתנאים לקבלת גמלת סיעוד, ואם כן, באיזה אופן יקבע גובה הגמלה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/כללים-ומבחנים-לקביעת-זכאות-לקבלת-גמלת-סיעוד.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "אמא שלי בת 85, לא מצליחה לקום ולשכב לבד, וגם מתקשה מאוד בניידות בבית בגלל חוסר יציבות ונפילות. היא מבוטחת בפוליסת 'סיעודי מושלם' שלכם. האם היא זכאית לגמלת סיעוד, ואם כן, האם העובדה שהיא חברה בכללית משפיעה על מועד תחילת הבחינה של התביעה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/כללים-ומבחנים-לקביעת-זכאות-לקבלת-גמלת-סיעוד.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "אמא שלי בת 85, והיא לא יכולה לקום ולשכב לבד, וגם מתקשה מאוד להתלבש. היא גרה בבית עם מטפל, אבל אני רוצה לדעת אם אני יכול לקבל גמלת סיעוד מהביטוח שלה. בפוליסה שלה כתוב סכום ביטוח של 1,500,000 ש\"ח. מה יקרה אם היא לא תוכל לבצע לפחות חצי מהפעולות שצריך כדי לקבל את הגמלה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אמא שלי בת 85, והיא מתחילה להיות תלויה באחרים בהרבה דברים. היא מסוגלת לאכול ולשתות לבד, אבל ממש מתקשה לקום ולשכב, וגם להתלבש. היא מקבלת קצבה חודשית של 4,000 ש״ח מהביטוח הלאומי. האם היא בכלל זכאית לגמלת סיעוד, ואם כן, מה רמת התלות שלה לפי הקריטריונים שלכם?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני בן 75, ואחרי ניתוח בירך אני לא יכול לקום ולשכב לבד, וגם לא להתלבש בלי עזרה. אני גם צריך עזרה בשליטה על הסוגרים. האם אני זכאי לקבל גמלת סיעוד, ואם כן, האם העובדה שאני צריך עזרה גם בשליטה על הסוגרים משפיעה על גובה התגמול?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/כללים-ומבחנים-לקביעת-זכאות-לקבלת-גמלת-סיעוד.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "אני בן 78, ואחרי ניתוח קשה אני לא מצליח לקום ולשכב לבד, ואני צריך עזרה גם באכילה ושתייה. יש לי ביטוח 'סיעודי מושלם' של כללית. האם אני עומד בתנאים לקבלת גמלת סיעוד, ואם כן, האם העובדה שאני צריך עזרה גם באכילה ושתייה משפיעה על ההחלטה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/כללים-ומבחנים-לקביעת-זכאות-לקבלת-גמלת-סיעוד.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "אמא שלי בת 85, והיא מתחילה לשכוח דברים קטנים, כמו איפה היא שמה את המפתחות או מה היא אכלה אתמול. היא עדיין גרה לבד, אבל אני קצת דואג. היא גם מתקשה לקום מהכיסא לבד לפעמים. מה הסיכוי שהיא תאושר לגמלת סיעוד, אם היא לא שולטת בסוגרים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/כללים-ומבחנים-לקביעת-זכאות-לקבלת-גמלת-סיעוד.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "אמא שלי בת 85, והיא מתחילה לשכוח דברים קטנים, כמו איפה היא שמה את המפתחות או מה היא אכלה אתמול. היא עדיין גרה לבד, אבל אני קצת דואג. היא גם מתקשה לקום מהכיסא לבד לפעמים, ואני שוקל להגיש תביעה לביטוח סיעודי. אם נניח שהיא מקבלת גמלה, האם תצטרך לעבור בדיקה מחודשת של הזכאות שלה אחרי שלושה חודשים, או רק אחרי תקופה ארוכה יותר?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני בן 75, ואחרי ניתוח בירך אני לא יכול לקום ולשכב לבד, וגם קשה לי להתלבש. אני גם צריך עזרה בשליטה על הסוגרים. האם אני עומד בתנאים לקבלת גמלת סיעוד, ואם כן, האם העובדה שאני צריך עזרה גם בשליטה על הסוגרים משפיעה על רמת הגמלה שאקבל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (long-term-care/files/כללים-ומבחנים-לקביעת-זכאות-לקבלת-גמלת-סיעוד.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "אני בן 75, ואחרי ניתוח בירך אני לא יכול לקום ולשכב לבד, אני צריך עזרה. אני גם מתקשה להתלבש בלי עזרה. האם אני עומד בתנאים לקבלת גמלת סיעוד, בהנחה שבפוליסה שלי כתוב שאני צריך להיות מוגבל לפחות בשתי פעולות יומיומיות?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני מעשן ורוצה לקנות ביטוח אובדן כושר עבודה וגם את ה'הראל מגן משלים לילד' לבן שלי — איך אני קובע מוטב למוצר של הילד, וכמה זמן אני צריך להיות בלי עישון כדי שהחברה תבדוק אם אפשר להוריד לי את התעריף?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "form",
+      "reason": "The question points at the source material ('According to section 8 of the document') as if the customer could see it.",
+      "question": "According to section 8 of the document, what is the legal definition of a person with disabilities under the Equal Rights for Persons with Disabilities Law, and what action must such a person take to ensure their insurance application is examined in accordance with the law?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "הילד שלי בן 8 וחצי, ואני רוצה לעשות לו 'הראל מגן משלים לילד' עם הסכום המינימלי החודשי, תקופת השהיה של 10 שנים ותקופת תשלום של 15 שנה. בן כמה הוא יהיה כשתתחיל הקצבה, ומה הסכום הכולל המינימלי שישולם לאורך כל תקופת התשלום?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (loss-of-working-ability/files/טופס-הצטרפות-לביטוח-חיים-7-שאלות-בהצהרת-הבריאות.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "אני רוצה להצטרף ל'הראל מגן משלים לילד' שמכסה אובדן כושר עבודה. אילו תקופות השהיה ותקופות תשלום אני יכול לבחור בטופס, ואיך מחשבים את סכום ההפקדות המבוטחות שישוחרר לי אם חס וחלילה אגיע לאובדן כושר עבודה מוחלט — נניח שהשכר המבוטח שלי הוא 15,000 ₪ ושיעור ההפקדות לפנסיה הוא 18.5%?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The two pages are from completely different insurance products: Page 1 covers benefit indexation rules for a loss-of-working-ability policy (אובדן כושר עבודה), while Page 2 is a payment-authorization ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The two pages cover completely different topics: page 1 is a detailed health declaration questionnaire for underwriting (smoking, medical conditions, etc.), while page 2 is a payment authorization for",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (loss-of-working-ability/pages/premium-release.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "אני בן 62 ויש לי ביטוח חיים עם נספח 'שחרור בלבד' הישן לאובדן כושר עבודה. האם אני עדיין יכול להצטרף אליו בגילי, ואם אעבור לפוליסת המטריה החדשה - מתי בדיוק הכיסוי החדש נכנס לתוקף?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (loss-of-working-ability/pages/premium-release.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "אני בן 52 ויש לי ביטוח חיים בהראל. אני רוצה להוסיף את הנספח שמשחרר מתשלום פרמיות במקרה של אובדן כושר עבודה. ראיתי גם שיש פוליסת מטריה לאובדן כושר עבודה עם טופס הצטרפות. מה הגיל המקסימלי להצטרפות לנספח השחרור, ומהם התנאים לכניסת הכיסוי לתוקף בפוליסת המטריה לפי הטופס?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "תשמע, אני עובד כמאבטח, ואני קצת מודאג. אם אני אהיה בטיסה לצורך עבודה, ופתאום תהיה תאונה, האם הביטוח מכסה אובדן כושר עבודה? ואם אני אצטרך פינוי במסוק בגלל התאונה הזאת, האם הביטוח מכסה גם את זה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (loss-of-working-ability/files/תנאי-פוליסת-ביטוח-אובדן-כושר-עבודה-הראל-חוסן-למחר-בהגדרה-עיסוקית-253.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "אני בן 60, ואני רוצה לעשות ביטוח אובדן כושר עבודה. אם אני אובחן עם בעיה רפואית חדשה בשנה הראשונה לביטוח, האם הביטוח יכסה אותה? ואם אני אובחן עם אותה בעיה רפואית אחרי חצי שנה, האם זה משנה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (loss-of-working-ability/files/תנאי-פוליסת-ביטוח-אובדן-כושר-עבודה-שחרור-בלבד.pdf p12) answers the question on its own — the question must need both pages",
+      "question": "תשמע, אני עובד כבנאי, ואני מבוטח אצלכם באובדן כושר עבודה. עכשיו, לפני חודש נפצעתי בעבודה, ואני לא יכול לעבוד. אני גם מבוטח בפוליסה נוספת בחברת ביטוח אחרת, שמכסה בדיוק את אותו הדבר. אם אני אגיש תביעה לפי שתי הפוליסות, האם אני צריך להחזיר להראל את דמי השחרור שקיבלתי, ואם כן, כמה? אני שילמתי 1,500 ש\"ח דמי ביטוח בחודש."
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (loss-of-working-ability/files/תנאי-פוליסת-ביטוח-אובדן-כושר-עבודה-שחרור-בלבד.pdf p12) answers the question on its own — the question must need both pages",
+      "question": "אני עובד כבנאי, ואני מבוטח אצלכם בביטוח אובדן כושר עבודה. אם אני נפצע ואני לא יכול לעבוד, ואחרי תקופה מסוימת אני חוזר לעבוד, אבל לא באותה רמת שעות כמו קודם - האם אני צריך להתחיל לשלם שוב את דמי הביטוח במלואם, ואם כן, כמה זמן אחרי שהתחלתם לשלם לי את התגמולים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (loss-of-working-ability/files/תנאי-פוליסת-ביטוח-אובדן-כושר-עבודה-הראל-מטריה-ביטוחית.pdf p15) answers the question on its own — the question must need both pages",
+      "question": "אני עובד כבנאי, ושברתי את הרגל לפני חצי שנה והפסקתי לקבל תגמולים. עכשיו אני מרגיש שיפור, ואני מתכוון לחזור לעבודה בעוד חודש. אם אתפטר מהעבודה החדשה שלי ואחזור לעבודה הקודמת, האם אני צריך לשלם שוב את הפרמיה במלואה, ואם כן, כמה זמן אחרי שהתחילו לשלם לי שוב תגמולים אני צריך לעשות את זה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (loss-of-working-ability/files/תנאי-פוליסת-ביטוח-אובדן-כושר-עבודה-הראל-מטריה-ביטוחית.pdf p15) answers the question on its own — the question must need both pages",
+      "question": "אני עובד כנגר, נפצעתי לפני חצי שנה והפסקתי לעבוד. עכשיו, אחרי חודש, אני מרגיש שאני יכול לחזור לעבודה חלקית, אבל אז שוב התחילו לי כאבים ואני לא בטוח אם אני יכול לעבוד במשרה מלאה. אם אני אחזור לעבודה ואחרי פחות משנה שוב אצטרך להפסיק בגלל אותה פציעה, האם אוכל לקבל תגמולים בלי תקופת המתנה נוספת? ומה קורה אם אני צריך להחזיר כסף לחברה בגלל שהם שילמו לי תגמולים אחרי שהודיעו לי שאני יכול לחזור לעבודה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (loss-of-working-ability/files/טופס-הצטרפות-לפוליסת-מטריה-ביטוחית-ביטוח-אובדן-כושר-עבודה.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "תשמע, אני עובד כפועל בניין, ואני רוצה לעשות ביטוח אובדן כושר עבודה. אני מבין שיש לי אפשרות לשלם בהוראת קבע, אבל אני קצת חושש שלא תמיד יהיה מספיק כסף בחשבון. אם ההוראה לא תכובד, כמה עמלות גבייה אני אצטרך לשלם, ומה יקרה אם אני רוצה לבטל את ההרשאה הזו?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (loss-of-working-ability/files/טופס-הצטרפות-לפוליסת-מטריה-ביטוחית-ביטוח-אובדן-כושר-עבודה.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "אני מנסה להגדיר הוראת קבע לביטוח אובדן כושר עבודה שלי דרך הבנק. הבנק שואל אם אני רוצה להגדיר תקרת סכום חיוב, ואני לא בטוח כמה להגדיר. מצד אחד, אני רוצה שהחיובים לא יעברו את הסכום שאני חייב, ומצד שני, אני לא רוצה שהבנק יחזיר חיובים בגלל תקרת סכום נמוכה מדי. מה הסכום המקסימלי שאני יכול להגדיר כתקרת סכום חיוב, בהתחשב בכך שאני רוצה להבטיח שהחיובים שלי יתבצעו באופן תקין?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (loss-of-working-ability/pages/cancellation.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "תשמע, אני שוקל לבטל את הפוליסה שלי, אבל אני מפחד שאם אחזור בעתיד, זה יהיה יותר יקר. אם אני מבטל עכשיו, ואחרי שנתיים אנסה להצטרף מחדש, מה הסיכוי שיסכימו לי בכלל, ומה בערך התעריף שאני יכול לצפות לו?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (loss-of-working-ability/files/טופס-הצטרפות-לפוליסת-מטריה-ביטוחית-ביטוח-אובדן-כושר-עבודה.pdf p4) answers the question on its own — the question must need both pages",
+      "question": "אני שוקל לעשות ביטוח אובדן כושר עבודה בהראל, אבל אני מקבל הרבה מיילים וסמסים מחברות אחרות. אם אני מסמן שאני לא רוצה לקבל פרסומות מהראל, זה ימנע רק פרסומות מהראל עצמה, או גם מחברות אחרות בקבוצת הראל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "אני עובד כנהג משאית, ואני מנסה להבין אם הביטוח שלי מכסה מצב של אובדן כושר עבודה. אם אני נפצע בתאונת דרכים בזמן העבודה, והרופאים קובעים שאני לא יכול לחזור לעבוד כנהג, אבל אני יכול לעבוד בעבודה אחרת, האם אני זכאי לפיצוי? ומה קורה אם אני מנסה לחזור לעבודה כנהג אחרי תקופה מסוימת, אבל אני לא מצליח לעמוד בדרישות הפיזיות של התפקיד?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "אני עובד כנהג משאית, ואני מודאג לגבי ביטוח אובדן כושר עבודה. אם בגלל העבודה שלי אבדתי את היכולת לעבוד, האם יש תקופה מסוימת שאני צריך להיות מבוטח לפני שאני יכול לקבל פיצוי? ואם כן, כמה זמן?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (loss-of-working-ability/files/תנאי-פוליסת-ביטוח-אובדן-כושר-עבודה-הראל-מטריה-ביטוחית.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "אני עובד כרגע, אבל אני חושב לפרוש לגמלאות בעוד כמה חודשים. אם אבטל את הפוליסה הזו אחרי הפרישה שלי, אבל לפני שחלפו שישה חודשים מאז שהפסקתי להיות מבוטח בקרן הפנסיה שלי, האם אחזיר את כל הפרמיות ששילמתי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (loss-of-working-ability/files/תנאי-פוליסת-ביטוח-אובדן-כושר-עבודה-הראל-מטריה-ביטוחית.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "אני עובד כמעט שנה באותה עבודה, ואני שוקל לעבור לעבודה אחרת. אם אבטל את הביטוח אובדן כושר עבודה שלי אחרי 6 חודשים בדיוק, האם אחזיר את כל הפרמיות ששילמתי? ומה יקרה אם ביטלתי את הביטוח שלי אחרי שקרתה לי תאונה שמונעת ממני לעבוד?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (loss-of-working-ability/files/תנאי-פוליסת-ביטוח-אובדן-כושר-עבודה-הראל-לעתיד-חדש.pdf p11) answers the question on its own — the question must need both pages",
+      "question": "אני עובד בתור נהג משאית, ואני רוצה לעשות ביטוח אובדן כושר עבודה בהראל. רק עכשיו מילאתי את הטופס, ואני מחכה לאישור שלהם. אם הם יאשרו אותי עם תוספת לפרמיה, כמה זמן יש לי לחשוב על זה לפני שההצעה שלהם פוקעת?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (loss-of-working-ability/files/תנאי-פוליסת-ביטוח-אובדן-כושר-עבודה-הראל-לעתיד-חדש.pdf p11) answers the question on its own — the question must need both pages",
+      "question": "אני עובד בתור נהג משאית, ואני רוצה לעשות ביטוח אובדן כושר עבודה בהראל. אם אני ממלא את הטופס עכשיו, אבל רק אחרי חודש וחצי אשלם את הפרמיה הראשונה, האם הביטוח יתחיל לפעול באותו יום שאני ממלא את הטופס, או רק אחרי שאשלם את הפרמיה? ומה קורה אם בינתיים, לפני התשלום, קרה לי משהו?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני מבטח חדש בהראל, גילאי 48, ואני רוצה להצטרף לכיסוי אובדן כושר עבודה עם פיצוי חודשי של 25,000 ש\"ח. אני גם רוצה להוסיף כיסוי נוסף של מגן חודשי. האם אני יכול לקנות את שני הכיסויים יחד, והאם הסכום החודשי שאני רוצה מכסה את המגבלה של הפוליסה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that together support a single hard question requiring both. Page 1 outlines maximum insurance amounts and product terms for loss-of-working-abil",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (loss-of-working-ability/pages/insurance-umbrella.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "אני מבטח דרך קרן הפנסיה שלי, ועכשיו רוצה להרחיב את הכיסוי לאובדן כושר עבודה עם הראל. אם אני כבר משולם על ביטוח חיים של הראל עם שחרור מהפרמיה במקרה של אובדן כושר עבודה, האם אקבל גם שחרור מההפקדות לקרן הפנסיה, או שזה רק למי שקנה את מטריה ביטוחית?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (loss-of-working-ability/pages/insurance-umbrella.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "אני מבטח דרך קרן הפנסיה שלי, וקיבלתי פיצוי של 5,000 ש\"ח לחודש ממקרה של אובדן כושר עבודה חלקי. אני רוצה להצטרף לביטוח ההשלמה של הראל מטריה ביטוחית – האם אני אקבל שחרור מהפרמיה, ובנוסף, האם אני יכול גם להצטרף לתוכנית שחרור בלבד של הראל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages provided do not contain complementary information necessary to form a hard question requiring both. Page 1 is a personal details update form for an insured person, containing administrat",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני רוצה לשנות את הפוליסה שלי לאובדן כושר עבודה - גם להגדיל את סכום הכיסוי וגם לבטל את הכיסוי הישן שלי. אני מבין שצריך טפסים שונים לשני הדברים האלה. אם אני רוצה לעשות את שני השינויים בו זמנית, כמה טפסים אני צריך למלא, ואיזה טפסים בדיוק?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "Neither page contains specific figures, rates, or numeric conditions (such as coverage amounts, percentages, waiting periods, or formulas) that can be combined with a customer-provided value to create",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that requires both to answer a single, non-trivial question. Page 1 is a list of general FAQ topics with no substantive content, and Page 2 discu",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (loss-of-working-ability/files/תנאי-פוליסת-ביטוח-אובדן-כושר-עבודה-הראל-חוסן-למחר-בהגדרה-מקצועית-252.pdf p3) answers the question on its own — the question must need both pages",
+      "question": "קרה לי תאונה לפני חצי שנה, מאז אני לא מסוגל לעבוד בכלל — הרופאים אומרים שזה לצמיתות. אני משוכנע שזה נחשב כאובדן מוחלט של כושר העבודה, אבל לפני שנה וחצי לפני התאונה עברתי ניתוח בברך, לא הייתי מוטבל אז. הסכום המבוטח שלי הוא 800,000 ש\"ח. האם אני זכאי לקבל את הסכום, והאם יש הגבלה בגלל הניתוח שעברתי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (loss-of-working-ability/files/תנאי-פוליסת-ביטוח-אובדן-כושר-עבודה-הראל-חוסן-למחר-בהגדרה-עיסוקית-253.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "קרה לי תאונה במהלך קפיצה בספורט אתגרי, וכתוצאה מכך איבדתי את הראיה בשתי העיניים. אני כבר לא יכול לעבוד בכלל. האם אקבל את סכום הביטוח על אובדן כושר עבודה, גם though השתתפתי בספורט אתגרי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (loss-of-working-ability/files/תנאי-פוליסת-ביטוח-אובדן-כושר-עבודה-הראל-מטריה-ביטוחית.pdf p15) answers the question on its own — the question must need both pages",
+      "question": "קרה לי נזק גופני בעבודה לפני חצי שנה, הוכרז אובדן כושר עבודה מוחלט ותמידי, ומאז אני מקבל תגמולי ביטוח. עכשיו התאוששתי למשך חודש, אבל שוב הידרדרתי בריאותית באותה המחלה ומאושפז שוב. אני רוצה לדעת אם במקרה שהמקרה הנוכחי ייחשב חוזר, האם אצטרך לעבור תקופת המתנה נוספת לפני שהחזרה של התגמולים תתחיל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (loss-of-working-ability/files/תנאי-פוליסת-ביטוח-אובדן-כושר-עבודה-הראל-מטריה-ביטוחית.pdf p15) answers the question on its own — the question must need both pages",
+      "question": "קרה לי תאונה בעבודה לפני חצי שנה ואני לא יכול לעבוד בכלל מאז. אני רוצה להבין אם אני זכאי לקבל את סכום הביטוח המלא, והאם במקרה שאחזור לעבודה ואחר כך אאבד שוב את היכולת לעבוד בגלל אותה תאונה, האם אצטרך לעבור תקופה של המתנה נוספת לפני שיתחילו לשלם לי שוב?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (loss-of-working-ability/files/תנאי-פוליסת-ביטוח-אובדן-כושר-עבודה-הראל-חוסן-למחר-בהגדרה-מקצועית-252.pdf p3) answers the question on its own — the question must need both pages",
+      "question": "אני בן 42, עובד בחברת תוכנה, והכנסתי השנתית מהעבודה שלי היא 300,000 ש\"ח. לפני שלושה חודשים לקחתי פוליסה של הראל חוסן למחר פלוס לאובדן כושר עבודה, ועכשיו נפגעתי בתאונה שגרמה לאיבוד קבוע של 80% מכושר העבודה שלי בעבודה הנוכחית וגם בעיסוק סביר אחר. אני רוצה לדעת אם אני זכאי לתשלום חד-פעמי, וכמה בדיוק יקבלו מהביטוח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני בן 42 ועובד פנסיוני, והכנסותי החודשיות מהעבודה הם 28,000 ש\"ח. במקרה של אבדן כושר עבודה מוחלט, האם אקבל פיצוי מהביטוח שלי, ותוך כמה זמן יתחילו לשלם לי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "skip",
+      "reason": "non-answer ground truth: אם קיים ביטוח חיים בהראל מסוג 'משכנתא בטוחה', הדבר עשוי להשפיע על גובה התשלום הח",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "הדירה שלי הוצפה לפני חודש, ואני צריך לשפץ אותה. הביטוח מכסה לי את שכר הדירה החלופי, אבל אני לא יודע לכמה זמן. בנוסף, אני רוצה להגדיל את סכום הביטוח שלי ב-10% עכשיו, כדי שיהיה לי כיסוי יותר טוב בעתיד. כמה זמן אוכל לקבל כיסוי לשכר דירה, ומה יהיה סכום הביטוח החדש שלי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (mortgage/files/תנאי-פוליסת-משכנתה-בטוחה-ב.pdf p7) answers the question on its own — the question must need both pages",
+      "question": "יש לי דירה שערכה 1,500,000 ש״ח, ורציתי לדעת, אם תתרחש נזילה מהשכן מלמעלה, כמה זמן יש לי להתחיל לתקן את הנזילה כדי שהביטוח יכסה את התיקון לפי ערך כינון, ומה יקרה אם לא אצליח לתקן תוך הזמן הזה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "אני לקוח שלכם כבר כמה שנים ויש לי ביטוח משכנתא. עכשיו אני עושה מחזור למשכנתא, ואני רוצה לדעת, אם אני לוקח הלוואה חדשה של 800,000 ש\"ח, מה יהיה סכום הביטוח המקסימלי שאני יכול לקבל על הדירה, בהתחשב בעובדה שכרגע יש לי פוליסה קיימת?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'not_at_all' — the answer must be fully established by the page(s) shown",
+      "question": "אני עומד לקחת משכנתא חדשה, ויש לי כבר ביטוח חיים על המשכנתא הקודמת בהראל. אם אני רוצה להמיר את הפוליסה הישנה לפוליסה חדשה, מה יקרה לסכום הביטוח אם יתברר שההלוואה החדשה שלי קטנה יותר מההלוואה הקודמת, ומה יקרה אם תהיה תאונה ב-30 יום הראשונים של הפוליסה החדשה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "skip",
+      "reason": "non-answer ground truth: הסכום המקסימלי שניתן לבטח הוא 2,000,000 ש״ח, אך טופס זה מתאים לביטוח עד גיל 60. ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (mortgage/files/טופס-הצעה-לביטוח-משכנתה-בטוחה-ב.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "יש לי משכנתא של 800,000 ש\"ח, ואני רוצה לבטח אותה. אם אני מבוטח כבר בפוליסה אחרת, האם אני יכול לבטל אותה דרך הראל, ואם כן, מה אחוז הכיסוי המקסימלי שאני יכול לקבל על הנזק אם תהיה לי בעיה עם עמדת הטעינה לרכב שלי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני רוצה לעשות ביטוח למשכנתה שלי, ויש לי כבר ביטוח דירה. אם בשלוש השנים האחרונות חברת ביטוח סירבה לחדש לי ביטוח דירה, מה הגיל המינימלי שאני יכול להיות בו כדי שהפוליסה הזו בכלל תיכנס לתוקף?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני עשיתי משכנתא חדשה ואני רוצה לבטח את הדירה שלי בהראל. הסוכן אמר לי שהוא השווה בין הפוליסה הקיימת שלי לפוליסה החדשה, ואמר שהפרמיה בפוליסה החדשה היא או נמוכה יותר או בלי הבדל מהותי. אם סכום הביטוח בפוליסה החדשה גבוה יותר ב-150,000 ש\"ח מהפוליסה הקיימת, האם אני אשלם יותר פרמיה, או שלא יהיה שינוי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (mortgage/files/טופס-הצעה-לביטוח-חיים-ומבנה-למשכנתה.pdf p10) answers the question on its own — the question must need both pages",
+      "question": "אני לקוח חדש בהראל, ואני רוצה להקים הוראת קבע לחיוב החשבון שלי. אם לא אבצע אף חיוב במשך תקופה מסוימת, כמה זמן ההרשאה הזו תהיה בתוקף לפני שהיא בטלה אוטומטית?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (mortgage/files/תנאי-פוליסת-ביטוח-מבנה-דירה-משכנתא-בטוחה-מהדורה-חדשה-בתוקף-החל-מ-2-12-2019.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "יש לי דירה שכרגע לא מאוכלסת, ואני מתכנן להשכיר אותה בעוד חודש. אם תהיה נזילה מהגג, האם הביטוח יכסה את הנזק, ומה אני צריך לעשות כדי שהביטוח יתקיים גם כשהדירה ריקה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (mortgage/files/תנאי-פוליסת-ביטוח-מבנה-דירה-משכנתא-בטוחה-מהדורה-חדשה-בתוקף-החל-מ-2-12-2019.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "יש לי דירה שאיני גר בה באופן קבוע, ואני משכיר אותה לתקופות קצרות. אם אני רוצה לבטח את הדירה גם כשהיא לא מאוכלסת, מה אני צריך לעשות כדי שהביטוח יכסה נזקי מים, ומה גבול האחריות המקסימלי לנזק כזה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (mortgage/files/תנאי-פוליסת-ביטוח-חיים-להבטחת-המשכנתה.pdf p10) answers the question on its own — the question must need both pages",
+      "question": "יש לי משכנתא של 800,000 ש\"ח. אם חלילה אני ואשתי נפטרים יחד בתאונה, מה יקרה לסכום הביטוח, ומה הסכום המקסימלי שיוחזר למבטח אם לא שילמתי את דמי הביטוח בזמן?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "לקחתי משכנתא של 800,000 ש\"ח, ואני מבוטח על סכום הביטוח המלא. אם אמות בתוך השנה הראשונה של הפוליסה, מה יקרה לסכום הביטוח, ואם יש לי השתתפות עצמית, כמה היא תהיה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (mortgage/files/טופס-הצעה-לביטוח-חיים-ומבנה-למשכנתה.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "אני ואשתי מבוטחים יחד בפוליסת משכנתה, סכום הביטוח לכל אחד מאיתנו הוא 1.8 מיליון ש\"ח, וההלוואה שלנו היא מסוג שפיצר. לפני חודש מת אבא שלי, ואני רוצה לדעת אם במקרה של מותי ומוות של אשתי בתאונה היום – נגיד שניפגע יחד בכביש – כמה יקבלו המוטבים? הבנק יקבל את כל ההלוואה, אבל האם הם יקבלו עוד משהו מעבר לזה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (mortgage/files/טופס-הצעה-לביטוח-חיים-ומבנה-למשכנתה.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "אני ואשתי מבוטחים יחד בפוליסת משכנתה, סכום הביטוח לכל אחד מאיתנו הוא 1.8 מיליון ש\"ח, וההלוואה שלנו היא מסוג שפיצר. במקרה של מוות של שנינו בתאונה אחת, האם המוטבים יקבלו את כל הסכום שמיושאר אחרי שיקלטו את ההלוואה, גם אם הסכום העודף יהיה מעל 2 מיליון ש\"ח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "Page 2 is a health declaration form that contains no policy terms, numerical limits, or conditions that can be combined with page 1 to form a two-part, hard question. The reinstatement rules on page 1",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (mortgage/files/תנאי-פוליסת-ביטוח-חיים-להבטחת-המשכנתה.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "אני ובעלי הגשנו בקשה לביטוח חיים להבטחת משכנתה לפני חודש, עוד לא קיבלו את תוצאות הבדיקה הרפואית, אבל היום נפגעתי בתאונת דרכים שגרמה לנכות קבועה. אם בהrale היו מקבלים אותי לביטוח ללא תוספת פרמיה, האם ישלמו את סכום הביטוח למרות שהבדיקה הרפואית עדיין לא הסתיימה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that requires both to answer a single, non-redundant question. Page 1 covers policy validity, underwriting outcomes, and cancellation terms, whil",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "קיבלתי הלוואה למשכנתא בסך 1.2 מיליון ש\"ח, וה страховון על החיים שהוסכם כדי להבטיח את החזרתה מחובר לדירה שלי. אני מתגורר שם עם בני הזוג והילדים, וגם עובד משק בית שעובד אצלי כבר חמש שנים. במקרה של מוות, האם העובד משק בית גם יקבל את שארית ההלוואה כמו בני משפחה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages provided do not contain sufficient overlapping or combinable information to form a hard question that requires both pages and where the answer is fully supported by the content of both. ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (mortgage/files/טופס-הצעה-לביטוח-חיים-ומבנה-למשכנתה.pdf p8) answers the question on its own — the question must need both pages",
+      "question": "לקחתי הלוואה של 1.2 מיליון ש\"ח למשכנתא, והסכום הזה גם מופיע בפוליסה שלי. לפני שלושה חודשים פרעתי 200,000 ₪ מההלוואה. האם אני חייב להודיע לביטוח על זה, ואם כן — מתי סכום הביטוח יתעדכן בהתאם?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that requires both to answer a single, non-redundant question. Page 1 is a general disclosure about the insurance policy's nature and directs to ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not provide complementary information that requires both to answer a single, non-trivial question. Page 1 is a general FAQ list with no specific policy terms, and Page 2 is a form for",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (mortgage/files/תנאי-פוליסת-משכנתה-בטוחה-ב.pdf p10) answers the question on its own — the question must need both pages",
+      "question": "עברתי לדירה חדשה לפני חודש, והערך שלה גבוה מהדירה הישנה. רציתי לדעת כמה אצטרך לשלם בפרשי דמי ביטוח, אם ערך הדירה הישנה היה 1.2 מיליון וערך החדשה הוא 1.5 מיליון, והפלייסה שלי החלה לפני שנה בדיוק?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (mortgage/files/תנאי-פוליסת-משכנתה-בטוחה-ב.pdf p10) answers the question on its own — the question must need both pages",
+      "question": "עברתי לדירה חדשה לפני חודש, והסכום המבוטח עלה ב-20%. רציתי לדעת כמה יעלה לי להגדיל את סכום הביטוח, ובהזדמנות — האם יש לי זכות לבטל את הפוליסה הישנה שלי אצל חברה אחרת דרך הראל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages provided do not contain complementary information that requires both to answer a single, non-trivial question. Page 1 is a form for requesting information about a canceled life insurance",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that requires both to answer a single, concrete customer question. Page 1 is a general promotional text about personal accident insurance for ama",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that requires both to answer a single, two-part customer question. Page 1 contains general insurance terms, policy start dates, marketing consent",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "קרה לי תאונה במהלך פעילות ספורטיבית, ואני לא יכול לעבוד כבר 5 חודשים. רופא מומחה אישר שאיבדתי את היכולת לעבוד בעיסוק שלי. כמה זמן עוד ימשכו התגמולים, והאם אני עדיין מחויב לשלם דמי ביטוח在这 הזמן?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that together support a single, non-redundant, verifiable answer requiring both. Page 1 is a general description of personal accident insurance f",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "generation",
+      "reason": "JSONDecodeError: Expecting value: line 3 column 26 (char 292)",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "קניתי ביטוח תאונות אישיות עם כיסוי גם לנהיגה באופנוע וגם לצלילה ספורטיבית. שילמתי 500 ש\"ח פרמיה לתקופת ביטוח של שנה. ביטלתי את הפוליסה אחרי חודש. כמה יחזירו לי, ובנוסף – האם הכיסוי לצלילה עדיין בתוקף גם ביום ה-15 אחרי תחילת הביטוח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (personal-accident/pages/scuba-diving.txt pNone) answers the question on its own — the question must need both pages",
+      "question": "אני צולל עם תעודת צולל תקנית, ותרחיש של תאונה בים גרמה לי להפוגה רפואית של 30 יום. כמה ישלמו לי לפי הפוליסה שלי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (personal-accident/files/תנאי-פוליסת-ביטוח-צלילה-ספורטיבית.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "אני מתכנן לעשות 14 יום של צלילות מחוץ לישראל, ורציתי להבין אם אני מוגן: במקרה של תאונה בצלילה שגורמת לנכות, האם יכסו לי את הוצאות הפינוי והטיסה הרפואית? והאם יש הגבלה על הסכום שיקבלו?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 2 (personal-accident/files/תנאי-פוליסת-ביטוח-צלילה-ספורטיבית.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "קרה לי תאונת צלילה ספורטיבית מחוץ לישראל – הייתי עם מדריך מוסמך, מלאו לי 18 שנים, וצללתי באזור מורשה. נזקקתי להospitalization בבית חולים זר ולבסוף הוטסתי לישראל לצורך המשך טיפול. בנוסף, כל הציוד האישי שלי נהרס בתאונה. הסכום הכולל של הוצאות הרפואה וההטסה הגיע ל-550,000 ש\"ח, והציוד עלה 8,000 ש\"ח. האם יכסו לי את כל ההוצאות, כולל הציוד?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages cover unrelated policy extensions—one for riding two-wheeled vehicles and the other for sports diving—without overlapping variables, limits, or conditions that can be combined into a sin",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not provide sufficient combined information to create a hard question requiring both. Page 1 describes scuba diving coverage duration (14 days), but does not specify pricing, refund r",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The two pages cover unrelated topics: Page 1 is a generic payment authorization form (standing order/credit card collection dates, privacy, failed-payment fees) for Har'el insurance products, while Pa",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The two pages are from completely different insurance products: Page 1 is an administrative form for adding insured persons to a general personal-accident policy (payment methods, payer declarations),",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (personal-accident/files/תנאי-פוליסת-ביטוח-צלילה-ספורטיבית.pdf p10) answers the question on its own — the question must need both pages",
+      "question": "אני רוצה לבטל את ביטוח הצלילה שלי. הבנתי שאני צריך לשלוח הודעה בכתב — האם אפשר לשלוח במייל או בפקס, או שחייב להגיע פיזית למשרדים? וכמה כסף אקבל בחזרה אם אני מבטל עכשיו, נגיד ששילמתי 2,400 ₪ לשנה ונשארו 8 חודשים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (personal-accident/files/תנאי-פוליסת-ביטוח-צלילה-ספורטיבית.pdf p10) answers the question on its own — the question must need both pages",
+      "question": "נפצעתי בתאונת צלילה לפני חודשיים ונותרה לי נכות חלקית. תוך כמה ימים החברה חייבת לשלם את התגמולים אחרי שיהיו בידיה כל המסמכים, ומתי בדיוק מתחילה להיספר תקופת ההתיישנות של שלוש השנים להגשת התביעה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (personal-accident/files/תנאי-פוליסת-ביטוח-צלילה-ספורטיבית.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "לפני שנתיים עברתי תאונת צלילה בחו\"ל ואיבדתי את השימוש ברגל אחת. כמה פיצוי חד-פעמי מגיע לי על הנכות, וכמה זמן יש לי להגיש את התביעה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 1 (personal-accident/files/תנאי-פוליסת-ביטוח-צלילה-ספורטיבית.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "עברתי תאונת צלילה בחו\"ל לפני חצי שנה ואיבדתי את השימוש המלא ביד ימין. כמה פיצוי חד-פעמי אקבל על הנכות הזו, ותוך כמה זמן אני חייב להגיש את התביעה כדי לא לפספס את ההתיישנות?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "נסעתי לצלילה בירדן, וקיבלתי מכה בראש במהלך הצלילה. אני צריך פינוי לבית חולים בישראל, והבנתי שיש לי גם ביטוח הטסת גופה. אם אצטרך פינוי רפואי והטסת גופה, מה הסכום המקסימלי שהביטוח יכסה לי בסך הכל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (personal-accident/files/ביטוח-צלילה-ספורטיבית-14-יום.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "אני מצלילן מוסמך, ואני נוסע לצלול בירדן בשבוע הבא. אם אצטרך פינוי רפואי דחוף בגלל תאונת צלילה, וגם הטסה חזרה לישראל, כמה כסף החברה תכסה לי בסך הכל, בהנחה שאני עומד בכל התנאים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני צולל ספורט, ואני מתכנן לצלול במצרים בשבוע הבא. אני בן 16, ואני רוצה לדעת מה העומק המקסימלי שאני יכול לצלול אליו, ומה הסכום המקסימלי שהביטוח יכסה לי אם אצטרך פינוי רפואי דחוף?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (personal-accident/files/ביטוח-צלילה-ספורטיבית-14-יום.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "אני צולל ספורט, ואני מתכנן לצלול במצרים בשבוע הבא. מה העומק המקסימלי שאני יכול לצלול אליו, ואם אחליט שאני צריך פינוי רפואי בגלל תאונה, כמה כסף החברה תכסה על ההטסה חזרה לישראל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (personal-accident/files/ביטוח-צלילה-ספורטיבית-14-יום.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "אני צולל ספורט, ואני רוצה לדעת מה יקרה אם אצטרך פינוי רפואי דחוף אחרי צלילה בישראל. מה הסכום המקסימלי שהביטוח יכסה לי על פינוי והטסה רפואית, ומה התנאי שאני חייב לעמוד בו כדי שהביטוח בכלל יכסה את ההוצאות האלה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (personal-accident/files/ביטוח-צלילה-ספורטיבית-14-יום.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "אני צוללן מוסמך, ואני מתכנן לצלול בישראל בשבוע הבא. יש לי ביטוח צלילה אצלכם, ואני רוצה לדעת: מה העומק המקסימלי שאני יכול לצלול אליו, ואם אחליט לצלול במצרים, האם הביטוח שלי יכסה אותי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "נסעתי לצלול בירדן, וקיבלתי התקף חרדה במהלך הצלילה. הייתי צריך פינוי רפואי דחוף לישראל, וזה עלה 200,000 ש\"ח. הפוליסה שלי מכסה פינוי רפואי, אבל יש לי גם מצב רפואי קודם של חרדות. אם אני בן 50, כמה מהפינוי יכוסה על ידי הביטוח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (personal-accident/files/ביטוח-צלילה-ספורטיבית-14-יום.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "אני צוללן ספורט, ואני מתכנן לצלול במצרים בשבוע הבא. אם אצטרך פינוי רפואי דחוף בגלל תאונת צלילה, וגם אשפוז בבית חולים פרטי בישראל, כמה כסף החברה תכסה לי בסך הכל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (personal-accident/files/תנאי-פוליסת-ביטוח-צלילה-ספורטיבית.pdf p4) answers the question on its own — the question must need both pages",
+      "question": "אני צולל ספורטיבי, ויש לי ביטוח צלילה אצלכם. עשיתי תאונה בצלילה לפני שבוע, אבל עכשיו נזכרתי שלא מילאתי את כל השאלות לגבי מצב הבריאות שלי לפני שהתחלתי את הפוליסה. מה יקרה לתביעה שלי, ואם הביטוח יבוטל, כמה כסף יוחזר לי אם שילמתי 1,200 ש\"ח עבור הפוליסה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (personal-accident/files/תנאי-פוליסת-ביטוח-צלילה-ספורטיבית.pdf p4) answers the question on its own — the question must need both pages",
+      "question": "אני צולל ספורטיבי, ויש לי פוליסה אצלכם. עשיתי בדיקת רפואית לפני חודש והרופא פסל אותי לצלילה בגלל בעיה רפואית קלה. עכשיו, אחרי חודש, קיבלתי אישור מהרופא שאני יכול לחזור לצלול. אם אני צולל היום וקורה לי משהו, האם הביטוח שלי יכסה את הנזק, ואם כן, האם יכסה את מלוא הסכום או רק חלק ממנו?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (personal-accident/files/ביטוח-צלילה-ספורטיבית-14-יום.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "אני צולל ספורט, ואני רוצה לדעת מה הכיסוי שלי אם אצטרך פינוי רפואי בירדן. אני מבוטח בסכום של 250,000 ש\"ח. מה הסכום המקסימלי שהביטוח יכסה עבור פינוי רפואי והטסה רפואית ביחד, ומה הסכום המקסימלי הכולל לכל ההוצאות שקשורות לאירוע הצלילה, כולל חדר מיון, אשפוז והצלה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (personal-accident/files/ביטוח-צלילה-ספורטיבית-14-יום.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "אני צולל חובב, ואני מתכנן לצלול בירדן בשבוע הבא. יש לי פוליסה עם הראל, ואני רוצה לדעת מה גבול האחריות המקסימלי שלי להוצאות חילוץ והטסה רפואית אם אצטרך אותן, ומה התנאי שאני חייב לעמוד בו כדי לקבל את הכיסוי הזה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (personal-accident/files/תנאי-פוליסת-ביטוח-צלילה-ספורטיבית.pdf p6) answers the question on its own — the question must need both pages",
+      "question": "נסעתי לצלילה בסיני, וקיבלתי התקף חרדה במים שדרש פינוי לבית חולים באילת ואשפוז של יומיים. בנוסף, בגלל שהייתי צריך לחזור מוקדם, איבדתי את הטיסה שלי וקניתי כרטיס חדש. הפוליסה שלי מכסה הוצאות הטסה רפואית עד 340,000 ש״ח, והוצאתי 15,000 ש״ח על הטיסה החלופית ו-3,000 ש״ח על אשפוז. כמה כסף יחזיר לי הביטוח בסך הכל?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (personal-accident/files/ביטוח-צלילה-ספורטיבית-14-יום.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "אני מצלילן מוסמך, ואני נוסע לצלול בירדן בשבוע הבא. אם אצטרך פינוי רפואי דחוף בגלל תאונת צלילה, וגם הטסה חזרה לישראל, כמה כסף החברה תכסה לי בסך הכל, בהנחה שאני עומד בכל התנאים הרפואיים והבטיחותיים?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "נסעתי לצלול במצרים, וקיבלתי מכה בראש במהלך הצלילה. אני צריך פינוי לבית חולים בישראל, והבנתי שיש לי גם כרטיס טיסה חלופי הביתה. כמה כסף תקבלו על הפינוי והטיסה ביחד, אם סכום הביטוח המקסימלי שלי הוא 500,000 ש\"ח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (personal-accident/files/ביטוח-צלילה-ספורטיבית-14-יום.pdf p5) answers the question on its own — the question must need both pages",
+      "question": "נסעתי לצלילה בירדן, וקיבלתי מכה בראש במהלך הצלילה ונאלצתי לקבל טיפול בחדר מיון. בנוסף, בגלל הפציעה, אני צריך לחזור לישראל מוקדם יותר מהמתוכנן, ואני טס עם מלווה. כמה כסף יחזירו לי על הוצאות הטיפול בחדר מיון והטיסה חזרה, אם סכום הביטוח שלי הוא 300,000 ש\"ח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The two pages cover unrelated topics: page 1 references a policy clause (section 24) about self-participation for rented caravan/trailer accidents abroad, but does not state the actual deductible amou",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "skip",
+      "reason": "The two pages cover completely unrelated topics: Page 1 contains Russian-language policy definitions (close relative, accompanying person, liability limits table, personal participation/co-pay, Israel",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-דרכון-פרימיום.pdf p39) answers the question on its own — the question must need both pages",
+      "question": "אמא שלי אושפזה ליומיים בשבוע שלפני הטיסה ואני נאלצתי לבטל את הנסיעה. שילמתי 4,000$ על החבילה (לינה ורכב שכור) ו-1,800$ על כרטיס הטיסה. כמה פיצוי אקבל בדיוק, ואיזה מסמכים אני צריך לשלוח לכם כדי לקבל את הכסף?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "gate": "needs_both",
+      "reason": "page 2 (travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-דרכון-פרימיום.pdf p39) answers the question on its own — the question must need both pages",
+      "question": "אמא שלי אושפזה לשלושה ימים שבוע לפני הטיסה והיינו חייבים לבטל את הנסיעה המשפחתית. שילמנו מראש 3,000 $ על כרטיסי טיסה (שניים למבוגרים, אחד לילד) ועוד 2,500 $ על מלון ורכב שכור – סך הכול 5,500 $ שלא הוחזרו. כמה כסף נקבל חזרה מהביטוח, ואילו מסמכים בדיוק צריך להגיש כדי לקבל את ההחזר?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "skip",
+      "reason": "non-answer ground truth: צוות הראל חילוץ והצלה מבצע פעולות איתור וחילוץ למבוטחי הראל בביטוח נסיעות לחו\"ל ",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני צריך לבטל את הטיסה שלי לחו\"ל בגלל שבר ברגל, שקרה לפני יומיים. קניתי ביטוח עם הרחבה לביטול נסיעה. כמה כסף יחזירו לי על הטיסה, אם מחיר הטיסה היה 5,000 ש\"ח?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-first-class.pdf p35) answers the question on its own — the question must need both pages",
+      "question": "אני צריך לבטל את הטיסה שלי בגלל שבר ברגל, ורכשתי ביטוח עם הרחבה לביטול נסיעה. מתי השבר צריך היה להתרחש כדי שאוכל לקבל החזר, ומה הסכום המקסימלי שאוכל לקבל עבור כרטיס הטיסה שלי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-דרכון-פרימיום.pdf p17) answers the question on its own — the question must need both pages",
+      "question": "נסעתי לתאילנד לפני שבוע, ופתאום נתקעתי בלי קשר עם המשפחה שלי בגלל שהטלפון שלי נרטב. אני ממש מודאג, ואני רוצה שיחפשו אותי. כמה זמן הראל יחכו לפני שהם מתחילים לחפש, ואם הם יצטרכו להטיס מישהו מהמשפחה שלי, כמה זה יעלה לי?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-דרכון-פרימיום.pdf p17) answers the question on its own — the question must need both pages",
+      "question": "נסעתי לחופשה, ואחרי שבוע התברר שהמזוודה שלי לא הגיעה. אני רוצה להגיש תביעה, אבל אני קצת חושש - כמה זמן יש להראל לחפש את המזוודה שלי, ואם הם לא מוצאים אותה, כמה כסף יחזירו לי על הדברים שאבדו?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (travel/files/טופס-בקשה-להחזר-בנושא-מטען-בביטוח-נסיעות-לחול.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "נסעתי לחו\"ל לפני שבוע, וגנבו לי את המצלמה. יש לי ביטוח נסיעות שלכם, ואני גם מבוטח בדירת מגורים עם הרחבת 'כל הסיכונים'. האם אני יכול לקבל החזר על המצלמה גם מחברת הביטוח של הדירה, ומה יקרה אם כן?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (travel/files/טופס-בקשה-להחזר-בנושא-מטען-בביטוח-נסיעות-לחול.pdf p2) answers the question on its own — the question must need both pages",
+      "question": "נסעתי לחו״ל לפני שבוע, וגנבו לי את המצלמה. יש לי ביטוח נסיעות שלכם, ואני גם מבוטח בדירת מגורים עם הרחבת 'כל הסיכונים'. האם אני יכול לקבל החזר כפול - גם מהביטוח נסיעות וגם מביטוח הדירה, או שאחד מבטל את השני?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-דרכון-פרימיום.pdf p55) answers the question on its own — the question must need both pages",
+      "question": "נסעתי לחו\"ל עם האופניים שלי, ושילמתי על ביטוח הרחבה לספורט אתגרי חובבני. האופניים שלי נגנבו לי כשהם היו על מנשא ברכב, ואני צריך להוכיח למשטרה שהם נגנבו. אם אצטרך לתבוע את חברת הביטוח, האם תהיה לי השתתפות עצמית, ובאיזה סכום?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 1 (travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-דרכון-פרימיום.pdf p55) answers the question on its own — the question must need both pages",
+      "question": "אני נוסע לחו\"ל עם האופניים שלי, ואני חושב להשתתף בתחרות רכיבת שטח. אם האופניים שלי ייגנבו לי במהלך התחרות, האם הביטוח יכסה את הנזק, ואם כן, עד איזה סכום?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-דרכון-פרימיום.pdf p57) answers the question on its own — the question must need both pages",
+      "question": "אני טס לאיטליה בעוד שבועיים ואני מתכנן לשכור רכב. אני בן 30, ואני שוקל לקחת את ההרחבה לביטול השתתפות עצמית. אם אשכור רכב ואגרום לנזק תאונתי, מה הסכום המקסימלי שהביטוח יכסה, ואילו תנאים חייבים להתקיים כדי לקבל את הכיסוי הזה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-דרכון-פרימיום.pdf p57) answers the question on its own — the question must need both pages",
+      "question": "אני טס לארצות הברית לשלושה שבועות, ואני מתכנן לשכור רכב. הפוליסה שלי היא 'דרכון פרימיום'. אם אשכור רכב ואגרום נזק, מה הסכום המקסימלי שאקבל מהביטוח עבור ההשתתפות העצמית, ואילו סוגי רכבים כלולים בכיסוי הזה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-first-class.pdf p44) answers the question on its own — the question must need both pages",
+      "question": "נסעתי לחופשת סקי באוסטריה, וקניתי סקי פס ל-7 ימים. ביום השני לחופשה שברתי רגל ופינו אותי לבית חולים. שילמתי 350 דולר על הסקי פס. האם אקבל החזר על הימים שלא השתמשתי בהם, ואם כן, כמה? בנוסף, אני שוקל לנסוע שוב לאותו אתר סקי בעוד חודש, אבל חושש שלא יהיה שלג. אם יבטלו את הנסיעה בגלל חוסר שלג, האם אוכל לקבל החזר על חבילת הסקי ששילמתי עליה מראש?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני נוסע לסקי בשוויץ בעוד שבוע, וקניתי חבילת סקי מראש ל-5 ימים. אם בגלל מזג אוויר תהיה עיכוב של 24 שעות בהגעה לאתר הסקי, וכרטיס הטיסה שלי עלה 600 ש\"ח, האם אקבל פיצוי על יום הסקי האבוד ועל ההוצאות של הטיסה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "needs_both",
+      "reason": "page 2 (travel/files/תנאי-פוליסת-ביטוח-נסיעות-לחול-first-class.pdf p32) answers the question on its own — the question must need both pages",
+      "question": "נסעתי לאילת, והייתה לי מצלמה חדשה שקניתי לפני הנסיעה. המצלמה נגנבה לי מהחדר במלון. סכום הביטוח שלי הוא 2,000 דולר. כמה כסף יחזירו לי על המצלמה, ואם יש השתתפות עצמית, כמה היא?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "google/gemma-3-27b-it",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "נסעתי לאירופה, והייתה לי בעיה עם המזוודה שלי - היא התעכבה בנמל התעופה בגלל בעיות של חברת התעופה. אני רוצה לדעת, כמה כסף אני יכול לתבוע על העיכוב הזה, ואם יש השתתפות עצמית שאני צריך לקחת בחשבון?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages provided do not contain complementary information that requires both to answer a single, concrete customer question. Page 1 is promotional content about Harel's travel insurance benefits",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני נוסע לחו\"ל מחר וקניתי ביטוח נסיעות דרך הראל, ועכשיו שמתי לב שאיבדתי את המטען בנמל התעופה. אני רוצה להגיש תביעה – כמה זמן יש לי לשלוח את כל המסמכים, והאם אני יכול בכלל לקבל החזר אם עוד לא שלחתי תלונה לشركة התעופה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not support a hard question requiring both pages where each page contributes a necessary and distinct component to a single, fully supported answer. Page 1 describes terms for using a",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני נוסע לחו\"ל עם אופניים חשמליים שמחירם 8,000 ש\"ח, והגעתי לאי שבו יש התפרצות של מחלת קורונה. האם יש לי כיסוי לאובדן האופניים במקרה של גניבה, והאם יש כיסוי לביטול הנסיעה בגלל המגיפה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that together support a single hard question requiring both. Page 1 lists available insurance extensions for the 'Derechon Premium' travel policy",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages provided do not contain complementary information that requires both to answer a single, concrete customer question. Page 1 mentions winter sports (skiing/snowboarding) and general trave",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "needs_both",
+      "reason": "page 1 (travel/files/הודעה-על-הגדרת-ספורט-אתגרי.pdf p1) answers the question on its own — the question must need both pages",
+      "question": "נפצעתי בטיול צלילה חופשית ביוון, והיה לי גם תאונה רגילה באותו יום שאני צריך טיפולי רפואה. יש לי הרחבה לספורט אתגרי חובבני, אבל לא היה לי רישיון לצלילה. האם יכסו לי את הצלילה בכלל, והאם ידרשו ממני שילם חלק מהטיפול?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "אני מתכנן לנסוע לחו\"ל ורציתי לעשות צלילה עם מסוק, אבל לא בטוח אם זה נחשב לספורט אתגרי. במקרה של תאונה, האם יהיה לי כיסוי אם אני משלם 100 דולר השתתפות עצמית?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that requires both to answer a single, concrete customer question. Page 1 is a web form interface for filing a travel insurance claim with no pol",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that requires both to answer a single, concrete customer question. Page 1 discusses travel safety tips and checking weather conditions, while Pag",
+      "question": ""
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "derivable",
+      "reason": "the source page(s) only support the answer 'partially' — the answer must be fully established by the page(s) shown",
+      "question": "נפצעתי בטיול צלילה חופשית ביוון, ואני רוצה להגיש תביעה לביטוח נסיעות. אני מבטיח שהצלילה הייתה באספקת שטח עם מדריך מקומى, אבל לא היה לי רישיון לצלול. האם הביטוח יכסה אותי, והאם צריך לשלוח לכם מסמכים מסוימים בשביל לטפל בזה?"
+    },
+    {
+      "kind": "multi_source",
+      "difficulty": "hard",
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "gate": "skip",
+      "reason": "The two pages do not contain complementary information that together yield a single, computable or combinable answer requiring both. Page 1 defines 'amateur extreme sports' and states a condition abou",
+      "question": ""
+    }
+  ],
+  "failures": [
+    "v3-001-apartment-hard (multi_source/hard): exhausted 8 pairs",
+    "v3-002-apartment-hard (multi_source/hard): exhausted 8 pairs",
+    "v3-003-apartment-hard (multi_source/hard): exhausted 8 pairs",
+    "v3-006-business-hard (multi_source/hard): exhausted 8 pairs",
+    "v3-009-car-hard (multi_source/hard): exhausted 8 pairs",
+    "v3-010-dental-hard (multi_source/hard): no page pair available",
+    "v3-011-dental-hard (multi_source/hard): no page pair available",
+    "v3-012-dental-hard (multi_source/hard): no page pair available",
+    "v3-013-diseases-disabilities-hard (multi_source/hard): exhausted 8 pairs",
+    "v3-015-diseases-disabilities-hard (multi_source/hard): exhausted 8 pairs",
+    "v3-023-long-term-care-hard (multi_source/hard): exhausted 8 pairs",
+    "v3-024-long-term-care-hard (multi_source/hard): exhausted 8 pairs",
+    "v3-026-loss-of-working-ability-hard (multi_source/hard): exhausted 8 pairs",
+    "v3-027-loss-of-working-ability-hard (multi_source/hard): exhausted 8 pairs",
+    "v3-028-mortgage-hard (multi_source/hard): exhausted 8 pairs",
+    "v3-029-mortgage-hard (multi_source/hard): exhausted 8 pairs",
+    "v3-033-personal-accident-hard (multi_source/hard): exhausted 8 pairs",
+    "v3-035-travel-hard (multi_source/hard): exhausted 8 pairs",
+    "v3-036-travel-hard (multi_source/hard): exhausted 8 pairs"
+  ],
+  "schema_problems": [],
+  "coverage": {
+    "business": {
+      "items": 2,
+      "distinct_files": 4,
+      "distinct_pages": 4,
+      "overused_files": []
+    },
+    "car": {
+      "items": 2,
+      "distinct_files": 3,
+      "distinct_pages": 4,
+      "overused_files": []
+    },
+    "diseases-disabilities": {
+      "items": 1,
+      "distinct_files": 2,
+      "distinct_pages": 2,
+      "overused_files": []
+    },
+    "health": {
+      "items": 3,
+      "distinct_files": 6,
+      "distinct_pages": 6,
+      "overused_files": []
+    },
+    "life": {
+      "items": 3,
+      "distinct_files": 6,
+      "distinct_pages": 6,
+      "overused_files": []
+    },
+    "long-term-care": {
+      "items": 1,
+      "distinct_files": 2,
+      "distinct_pages": 2,
+      "overused_files": []
+    },
+    "loss-of-working-ability": {
+      "items": 1,
+      "distinct_files": 2,
+      "distinct_pages": 2,
+      "overused_files": []
+    },
+    "mortgage": {
+      "items": 1,
+      "distinct_files": 2,
+      "distinct_pages": 2,
+      "overused_files": []
+    },
+    "personal-accident": {
+      "items": 2,
+      "distinct_files": 3,
+      "distinct_pages": 4,
+      "overused_files": []
+    },
+    "travel": {
+      "items": 1,
+      "distinct_files": 2,
+      "distinct_pages": 2,
+      "overused_files": []
+    }
+  }
+}
