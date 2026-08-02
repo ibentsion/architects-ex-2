@@ -8,6 +8,11 @@ each tagged with categories from the closed 12-category corpus list; the
 Classification's ``mode`` (single/multi) and top-level ``categories`` are
 derived from the validated sub-questions, never trusted from the LLM.
 
+Two hooks exist for the classification A/B harness (evalharness/classify_eval)
+and are inert by default: ``system_prompt=`` overrides the built-in prompt, and
+``classify(question, hint=...)`` appends a delimited retrieval-evidence block to
+the user turn.
+
 Failure policy: any LLM/parse failure degrades to a single-mode,
 no-category-filter classification of the original question (warning logged)
 — classification must never block answering.
@@ -67,6 +72,21 @@ def _system_prompt() -> str:
 - אל תמציא תת-שאלות שהלקוח לא שאל."""
 
 
+def _user_message(question: str, hint: str | None) -> str:
+    """The user turn: the question alone, or the question followed by a
+    delimited retrieval-evidence block. The block is self-describing because
+    the system prompt is not required to mention it (evalharness's hint arms
+    pair it with the unmodified production prompt)."""
+    if not hint:
+        return question
+    return (
+        f"{question}\n\n"
+        "--- ראיות מהאינדקס (תוצאות חיפוש ראשוניות, לידיעה בלבד — השאלה עצמה קובעת) ---\n"
+        f"{hint}\n"
+        "--- סוף ראיות ---"
+    )
+
+
 def _extract_json(text: str) -> dict[str, Any]:
     """Tolerate code fences / prose around the JSON object: parse the
     outermost ``{...}`` span."""
@@ -103,16 +123,20 @@ class QueryClassifier:
         max_tokens: int = 768,
         temperature: float = 0.0,
         extra_params: dict[str, Any] | None = None,
+        system_prompt: str | None = None,
     ) -> None:
         self.model = model
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.extra_params = extra_params or {}
+        #: Prompt override exists so evalharness can A/B prompt variants
+        #: against the production one; None keeps today's behaviour exactly.
+        self.system_prompt = _system_prompt() if system_prompt is None else system_prompt
 
-    def classify(self, question: str) -> Classification:
+    def classify(self, question: str, hint: str | None = None) -> Classification:
         messages = [
-            {"role": "system", "content": _system_prompt()},
-            {"role": "user", "content": question},
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": _user_message(question, hint)},
         ]
         cost = 0.0
         try:
