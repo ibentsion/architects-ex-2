@@ -24,9 +24,15 @@ retrieval:
                               #   with a looser top_n/gate, which is not scored yet.
 
 harness:
-  fast_synthesis_model: null  # default.yaml routes easy/medium single-topic questions
-                              #   to gpt-oss-120b. The routing rests on the committee's
-                              #   easy/medium tie, but has never been scored end-to-end;
-                              #   6.46 was measured with DeepSeek answering everything.
-                              #   Set it back to openai/gpt-oss-120b to cut cost once a
-                              #   scored run says the tie holds.
+  fast_synthesis_model: openai/gpt-oss-120b
+                              # Difficulty routing ON: easy/medium single-topic questions
+                              #   synthesize on gpt-oss-120b-low, hard | multi-category |
+                              #   needs_calculation | dependent stay on DeepSeek-V4-Pro.
+                              #   Turned on for the graded run because DeepSeek's latency
+                              #   on 2026-08-02 evening was 4-5x what the 2026-08-01 eval
+                              #   measured (p50 6.5 s then; ~26 s/question observed, with
+                              #   120 s client timeouts on hard questions). Latency is
+                              #   graded and a timed-out question scores zero, so the
+                              #   committee's easy/medium tie between the two models
+                              #   (DeepSeek only wins hard: 6.44 vs 4.12) is worth
+                              #   spending. Set to null to put everything on DeepSeek.

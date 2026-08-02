@@ -17,7 +17,8 @@ TS=$(date -u +%Y%m%dT%H%M%SZ)
 ARTIFACTS_REPO="${ARTIFACTS_REPO:-ibentsion/apex-ex2-artifacts}"
 TEAM="${TEAM:-ibentsion}"
 QUESTIONS="${QUESTIONS:-blind_questions.json}"
-OUT="submission_${TEAM}_${TS}.jsonl"
+OUT="submission_${TEAM}.jsonl"   # stable name: submit_runner resumes it
+                                 # across jobs, so a killed run continues
 export RAG_CONFIG="${RAG_CONFIG:-configs/ship.yaml}"
 
 # Import first: a broken import inside uvicorn only shows up as a health
@@ -89,7 +90,8 @@ PY
 
 echo "=== answering $(python -c "import json,sys;d=json.load(open('$QUESTIONS'));print(len(d['questions'] if isinstance(d,dict) else d))") questions"
 python submit_runner.py --questions "$QUESTIONS" --endpoint http://localhost:8000 \
-    --out "$OUT" --timeout 120
+    --out "$OUT" --timeout 240   # DeepSeek is slow tonight; an answer that takes
+                             # 200 s still scores, an abandoned one scores zero
 
 python - "$OUT" <<'PY'
 import json, statistics, sys
