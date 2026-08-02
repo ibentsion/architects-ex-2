@@ -100,9 +100,16 @@ harness:                      # agent engine (--engine agent): model roles + lim
   orchestrator_extra_params:
     reasoning_effort: low     # structured tool calls, not open-ended reasoning
     allowed_openai_params: [reasoning_effort]
-  category_filter: single     # single | set | family | none — how a sub-question's tags
-                              #   become a retrieval filter. Set by the 260802-005
-                              #   measurement; see that task's analysis before changing.
+  category_filter: family     # single | set | family | none — how a sub-question's tags
+                              #   become a retrieval filter. 260802-005 measured all four
+                              #   on the validation half: at today's top_n/gate they tie
+                              #   (38 of 84 ground-truth groups reach generation), but a
+                              #   single tag costs 8 points of pool recall when it is wrong
+                              #   and falls 7 points behind no-filter at a looser gate,
+                              #   while family tracks no-filter exactly and leaves 9
+                              #   questions with an empty pool instead of 14. Only a gold
+                              #   tag actually wins (+9/-0), and the classifier cannot
+                              #   reach it — the residual errors are corpus taxonomy.
   fast_synthesis_model: openai/gpt-oss-120b
                               # easy/medium single-topic questions synthesize here: the
                               #   committee eval had the two models tied on easy/medium
