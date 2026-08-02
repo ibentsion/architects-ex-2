@@ -402,3 +402,138 @@ def test_metrics_average_citation_accuracy_over_every_answer():
     assert agg["overall"]["citation_accuracy"] == 0.5
     assert agg["overall"]["uncited_rate"] == 0.5
     assert agg["overall"]["full_citation_credit_rate"] == 0.5
+
+
+# -- retrieval hit-rate audit ------------------------------------------------
+
+
+class FakeAuditRetriever:
+    """Returns scripted candidates/gated chunks by question, in the shape the
+    audit reads (chunk_id only)."""
+
+    def __init__(self, candidates, gated):
+        self.candidates, self.gated = candidates, gated
+
+    @staticmethod
+    def _wrap(chunk_ids):
+        from types import SimpleNamespace
+
+        return [SimpleNamespace(chunk=SimpleNamespace(chunk_id=cid), rerank_score=0.9)
+                for cid in chunk_ids]
+
+    def fuse(self, question):
+        return self._wrap(self.candidates)
+
+    def rerank_candidates(self, question, candidates):
+        return self._wrap(self.gated)
+
+
+def _group(*sources):
+    return {"any_of": [{"file": f, "page": p} for f, p in sources]}
+
+
+def test_chunk_id_parses_back_into_file_and_page():
+    from evalharness.retrieval_audit import parse_chunk_id
+
+    assert parse_chunk_id("dental/files/x.pdf#p3#c7") == ("dental/files/x.pdf", 3)
+    assert parse_chunk_id("dental/pages/claim.txt#pnull#c0") == ("dental/pages/claim.txt", None)
+
+
+def test_a_pdf_page_and_its_markdown_twin_are_the_same_page():
+    from evalharness.retrieval_audit import page_key
+
+    assert page_key("dental/files/x.pdf", 3) == page_key("dental/markdown-files/x.md", 3)
+    # Category stays in the key: every category has its own pages/claim.txt.
+    assert page_key("dental/pages/claim.txt", None) != page_key("car/pages/claim.txt", None)
+    # Page numbers still separate pages of one document.
+    assert page_key("dental/files/x.pdf", 3) != page_key("dental/files/x.pdf", 4)
+
+
+def test_each_source_group_is_filed_under_the_furthest_stage_it_reached():
+    from evalharness.retrieval_audit import classify_group, page_key
+
+    indexed = {page_key("dental/files/a.pdf", 1), page_key("dental/files/b.pdf", 1),
+               page_key("dental/files/c.pdf", 1)}
+    candidates = {page_key("dental/files/a.pdf", 1), page_key("dental/files/b.pdf", 1)}
+    gated = {page_key("dental/files/a.pdf", 1)}
+
+    def stage(*sources):
+        return classify_group(_group(*sources), gated, candidates, indexed)
+
+    assert stage(("dental/files/a.pdf", 1)) == "gated"
+    assert stage(("dental/files/b.pdf", 1)) == "not_gated"
+    assert stage(("dental/files/c.pdf", 1)) == "not_retrieved"
+    assert stage(("dental/files/d.pdf", 1)) == "missing_from_index"
+    # any_of is satisfied by its best member — these are interchangeable
+    # sources for one fact, not a list of pages all of which must be found.
+    assert stage(("dental/files/d.pdf", 1), ("dental/files/a.pdf", 1)) == "gated"
+
+
+def test_audit_question_classifies_every_group_of_one_question():
+    from evalharness.retrieval_audit import audit_question, page_key
+
+    retriever = FakeAuditRetriever(
+        candidates=["dental/files/a.pdf#p1#c0", "dental/files/b.pdf#p2#c3"],
+        gated=["dental/files/a.pdf#p1#c0"])
+    question = {
+        "id": "v3-001-dental-hard", "domain": "dental", "difficulty": "hard",
+        "kind": "multi_source", "question": "ש",
+        "ground_truth_sources": [_group(("dental/files/a.pdf", 1)),
+                                 _group(("dental/files/b.pdf", 2)),
+                                 _group(("dental/files/z.pdf", 9))],
+    }
+    record = audit_question(retriever, question, {page_key("dental/files/z.pdf", 9)})
+    assert [g["stage"] for g in record["groups"]] == ["gated", "not_gated", "not_retrieved"]
+    assert (record["n_candidates"], record["n_gated"]) == (2, 1)
+
+
+def test_summary_counts_groups_and_fully_covered_questions():
+    from evalharness.retrieval_audit import summarize
+
+    records = [
+        {"id": "a", "domain": "dental", "difficulty": "hard", "kind": "multi_source",
+         "groups": [{"stage": "gated"}, {"stage": "not_gated"}]},
+        {"id": "b", "domain": "car", "difficulty": "easy", "kind": "standard",
+         "groups": [{"stage": "gated"}]},
+    ]
+    summary = summarize("pdf-per_table", "v2", records)
+    assert summary["by_stage"] == {"gated": 2, "not_gated": 1, "not_retrieved": 0,
+                                   "missing_from_index": 0}
+    assert summary["group_hit_rate"] == 2 / 3
+    # A multi-source question is only covered when EVERY group it needs is.
+    assert summary["questions_fully_covered"] == 1
+    assert summary["question_hit_rate"] == 0.5
+    assert summary["by_difficulty"]["hard"]["not_gated"] == 1
+
+
+def test_indexed_pages_reads_what_ingest_actually_produced(tmp_path):
+    from evalharness.retrieval_audit import indexed_pages, page_key
+
+    bm25 = tmp_path / "bm25"
+    bm25.mkdir()
+    (bm25 / "chunk_ids.json").write_text(
+        json.dumps(["dental/files/a.pdf#p1#c0", "dental/files/a.pdf#p1#c1",
+                    "dental/pages/claim.txt#pnull#c0"]), encoding="utf-8")
+    assert indexed_pages(tmp_path) == {page_key("dental/files/a.pdf", 1),
+                                       page_key("dental/pages/claim.txt", None)}
+
+
+def test_an_arm_without_an_index_is_skipped_with_a_reason(tmp_path):
+    from evalharness.retrieval_audit import arm_unavailable
+
+    assert "not found" in arm_unavailable(str(tmp_path / "absent.yaml"))
+    config = tmp_path / "arm.yaml"
+    config.write_text(f"extends: configs/default.yaml\nindex_dir: {tmp_path / 'nope'}\n",
+                      encoding="utf-8")
+    assert "no ingested index" in arm_unavailable(str(config))
+
+
+def test_unanswerable_questions_are_not_audited(tmp_path):
+    from evalharness.retrieval_audit import load_questions
+
+    path = tmp_path / "questions.json"
+    path.write_text(json.dumps([
+        {"id": "a", "ground_truth_sources": [_group(("dental/files/a.pdf", 1))]},
+        {"id": "b", "ground_truth_sources": []},  # unanswerable: nothing to find
+    ]), encoding="utf-8")
+    assert [q["id"] for q in load_questions(str(path), None)] == ["a"]
