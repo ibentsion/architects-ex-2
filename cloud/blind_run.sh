@@ -25,16 +25,40 @@ python -m uvicorn contract:app --port 8000 > "uvicorn_${TS}.log" 2>&1 &
 SERVER_PID=$!
 trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
 
-for _ in $(seq 1 60); do
-    curl -sf http://localhost:8000/health >/dev/null && break
-    sleep 5
-done
-curl -sf http://localhost:8000/health || { echo "endpoint never came up"; tail -40 "uvicorn_${TS}.log"; exit 1; }
+# The node image ships no curl (see cloud/setup_node.sh) — everything that
+# talks to the endpoint goes through python's stdlib.
+python - <<'PY'
+import sys, time, urllib.request
+
+for _ in range(60):
+    try:
+        with urllib.request.urlopen("http://localhost:8000/health", timeout=5) as response:
+            if response.status == 200:
+                print("=== endpoint up")
+                sys.exit(0)
+    except Exception:
+        pass
+    time.sleep(5)
+sys.exit("endpoint never came up")
+PY
+# set -e would kill the script before the diagnostic, so handle it here.
+[ $? -eq 0 ] || { tail -40 "uvicorn_${TS}.log"; exit 1; }
 
 echo "=== warming the engine (model loads, index open)"
-curl -sf -X POST http://localhost:8000/ask -H 'Content-Type: application/json' \
-    -d '{"question": "מה תקופת ההתיישנות להגשת תביעה?"}' -o /dev/null \
-    --max-time 300 || echo "warm-up call failed — continuing, the runner records failures"
+python - <<'PY'
+import json, urllib.request
+
+request = urllib.request.Request(
+    "http://localhost:8000/ask",
+    data=json.dumps({"question": "מה תקופת ההתיישנות להגשת תביעה?"}).encode("utf-8"),
+    headers={"Content-Type": "application/json"},
+)
+try:
+    urllib.request.urlopen(request, timeout=300).read()
+    print("=== warm")
+except Exception as exc:  # the runner records per-question failures anyway
+    print(f"warm-up call failed ({exc}) — continuing")
+PY
 
 echo "=== answering $(python -c "import json,sys;d=json.load(open('$QUESTIONS'));print(len(d['questions'] if isinstance(d,dict) else d))") questions"
 python submit_runner.py --questions "$QUESTIONS" --endpoint http://localhost:8000 \
