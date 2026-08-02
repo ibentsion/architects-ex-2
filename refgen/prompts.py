@@ -125,7 +125,7 @@ Prefer, in this order:
 3. COMPARISON of two documents' figures for the same subject, where the answer states both numbers and which one governs.
 Only if the pair genuinely carries no usable numbers, fall back to a non-numeric two-part question (one part per page).
 
-When the answer involves arithmetic, the ground-truth answer must show its working: every operand, where each one comes from in plain customer language, and the result. E.g. "cover for garden plants is capped at 2 percent of the sum insured, and your policy's sum insured is 1,200,000 - so the maximum payout is 24,000". A reader must be able to check the number without the pages.
+When the answer involves arithmetic, the ground-truth answer must show its working: every operand, what it is in the customer's own terms, and the result. E.g. "cover for garden plants is capped at 2 percent of the sum insured, and your policy's sum insured is 1,200,000 - so the maximum payout is 24,000". A reader must be able to check the number without the pages. Name the entitlement, never the source: an answer that says "according to page 1 / the second document" is rejected, because the customer never saw either.
 
 The customer may supply one figure of their own (their sum insured, what they paid, how many days passed) — but at least one operand must come from EACH page, or the leave-one-out judge will reject the item.
 """
