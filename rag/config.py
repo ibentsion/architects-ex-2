@@ -95,6 +95,19 @@ class HarnessConfig(BaseModel):
         description="Passed through to tf_client.chat for orchestrator calls "
         "(e.g. reasoning_effort: low for gpt-oss's Harmony template)",
     )
+    fast_synthesis_model: str | None = Field(
+        None,
+        description="Synthesis model for easy/medium single-topic questions (the two "
+        "models tie there, and the fast one is cheaper); hard/multi/calculation/"
+        "dependent queries always synthesize on generation.model. None disables the "
+        "routing entirely.",
+    )
+    fast_synthesis_max_tokens: int = 1024
+    fast_synthesis_extra_params: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Passed through to tf_client.chat for fast-synthesis calls "
+        "(same role as generation.extra_params)",
+    )
     max_hops: int = Field(4, description="Agent tool-calling loop iteration cap")
     max_workers: int = Field(4, description="Thread pool size for concurrent sub-question retrievals")
 

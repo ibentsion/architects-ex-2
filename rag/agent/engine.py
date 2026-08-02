@@ -15,10 +15,12 @@ Flow per query:
      the LLM writes expressions, rag/agent/calculator.py computes them).
      Tool calls within one turn also execute concurrently. Hops capped by
      ``harness.max_hops``; ANY loop failure degrades to the prefetched pool.
-  4. Synthesize ONE final answer with ``generation.model`` via the standard
-     Generator (grounded_cite prompt + citation validation) over the pooled
-     evidence; calculator results are appended to the question so the answer
-     uses computed numbers verbatim.
+  4. Synthesize ONE final answer via the standard Generator (grounded_cite
+     prompt + citation validation) over the pooled evidence; calculator
+     results are appended to the question so the answer uses computed numbers
+     verbatim. Difficulty routing picks the model: easy/medium single-topic
+     questions go to ``harness.fast_synthesis_model``, everything harder to
+     ``generation.model``.
 
 Serial by necessity: classification (everything routes on it), agent hops
 (hop N+1 consumes hop N results), calculation (after its inputs are
@@ -37,7 +39,7 @@ from tf_client import chat as tf_chat
 
 from rag.agent.calculator import CalculationError, calculate
 from rag.classify import CATEGORIES, build_classifier
-from rag.generate.generator import build_generator
+from rag.generate.generator import Generator, build_generator
 from rag.generate.prompts import FALLBACK_TEXT
 from rag.retrieve.retriever import Retriever, load_retriever
 from rag.types import Answer, Classification, RetrievedChunk
@@ -129,6 +131,26 @@ def _assistant_message_dict(message: Any) -> dict[str, Any]:
     return result
 
 
+def build_fast_generator(config: Any) -> Generator | None:
+    """Second synthesis Generator on ``harness.fast_synthesis_model`` (None
+    when the routing is disabled). Everything except model/max_tokens/
+    extra_params is the generation block's — the answer contract (prompt
+    variant, temperature, citation retry) must not depend on which model
+    the query routed to."""
+    harness = config.harness
+    if not harness.fast_synthesis_model:
+        return None
+    generation = config.generation
+    return Generator(
+        model=harness.fast_synthesis_model,
+        prompt=generation.prompt,
+        max_tokens=harness.fast_synthesis_max_tokens,
+        temperature=generation.temperature,
+        retry_on_citation_failure=generation.retry_on_citation_failure,
+        extra_params=harness.fast_synthesis_extra_params,
+    )
+
+
 class AgentEngine:
     """See module docstring. Construction mirrors QueryEngine: manifest
     verification + lazy component loads happen inside load_retriever."""
@@ -139,6 +161,7 @@ class AgentEngine:
         self.classifier = build_classifier(config)
         self.retriever: Retriever = load_retriever(config)
         self.generator = build_generator(config)
+        self.fast_generator = build_fast_generator(config)
 
     # ------------------------------------------------------------------ #
     # Public contract (same as QueryEngine)
@@ -167,6 +190,7 @@ class AgentEngine:
                 "sub_questions": [sq.question for sq in classification.sub_questions],
                 "needs_calculation": classification.needs_calculation,
                 "dependent": classification.dependent,
+                "difficulty": classification.estimated_difficulty,
             }
         )
 
@@ -232,10 +256,18 @@ class AgentEngine:
             synth_question = f"{question}\n\nתוצאות חישוב:\n{lines}"
             addendum = CALCULATION_ADDENDUM
 
+        generator, routed_fast = self._select_generator(classification)
         t2 = time.monotonic()
-        result = self.generator.generate(synth_question, retrieved, system_addendum=addendum)
+        result = generator.generate(synth_question, retrieved, system_addendum=addendum)
         generation_ms = (time.monotonic() - t2) * 1000
-        trace.append({"step": "synthesize", "ms": round(generation_ms), "model": self.generator.model})
+        trace.append(
+            {
+                "step": "synthesize",
+                "ms": round(generation_ms),
+                "model": generator.model,
+                "fast_synthesis": routed_fast,
+            }
+        )
         for key in total_tokens:
             total_tokens[key] += result.tokens.get(key, 0)
 
@@ -261,6 +293,28 @@ class AgentEngine:
 
     def close(self) -> None:
         self.retriever.close()
+
+    # ------------------------------------------------------------------ #
+    # Synthesis routing
+    # ------------------------------------------------------------------ #
+
+    def _select_generator(self, classification: Classification) -> tuple[Any, bool]:
+        """Pick the synthesis model. The strong ``generation.model`` earns its
+        cost only on hard questions (committee eval: 6.44 vs 4.12 on hard,
+        a tie on easy/medium), so everything that is hard, spans categories,
+        needs arithmetic, or has dependent parts goes there; the rest goes to
+        the fast model. Returns (generator, routed_to_fast)."""
+        if self.fast_generator is None:
+            return self.generator, False
+        needs_strong = (
+            classification.estimated_difficulty == "hard"
+            or classification.mode == "multi"
+            or classification.needs_calculation
+            or classification.dependent
+        )
+        if needs_strong:
+            return self.generator, False
+        return self.fast_generator, True
 
     # ------------------------------------------------------------------ #
     # Concurrency helpers

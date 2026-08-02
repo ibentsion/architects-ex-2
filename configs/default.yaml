@@ -94,5 +94,16 @@ harness:                      # agent engine (--engine agent): model roles + lim
   orchestrator_extra_params:
     reasoning_effort: low     # structured tool calls, not open-ended reasoning
     allowed_openai_params: [reasoning_effort]
+  fast_synthesis_model: openai/gpt-oss-120b
+                              # easy/medium single-topic questions synthesize here: the
+                              #   committee eval had the two models tied on easy/medium
+                              #   (DeepSeek only pulls ahead on hard: 6.44 vs 4.12), so
+                              #   the cheap model handles them. hard | multi-category |
+                              #   needs_calculation | dependent -> generation.model.
+                              #   Set to null to synthesize everything on generation.model.
+  fast_synthesis_max_tokens: 1024
+  fast_synthesis_extra_params:
+    reasoning_effort: low
+    allowed_openai_params: [reasoning_effort]
   max_hops: 4                 # agent tool-loop iteration cap
   max_workers: 4              # concurrent sub-question retrievals (thread pool)

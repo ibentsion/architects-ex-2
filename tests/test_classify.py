@@ -115,6 +115,35 @@ def test_classify_flags_default_false(monkeypatch):
     monkeypatch.setattr(classify_mod, "tf_chat", fake_chat(reply))
     result = QueryClassifier("m").classify("ש")
     assert result.needs_calculation is False and result.dependent is False
+    assert result.estimated_difficulty == "medium"  # unstated -> the safe middle
+
+
+@pytest.mark.parametrize("difficulty", ["easy", "medium", "hard"])
+def test_classify_parses_difficulty(monkeypatch, difficulty):
+    reply = json.dumps(
+        {"sub_questions": [{"question": "ש", "categories": ["car"]}], "difficulty": difficulty},
+        ensure_ascii=False,
+    )
+    monkeypatch.setattr(classify_mod, "tf_chat", fake_chat(reply))
+    assert QueryClassifier("m").classify("ש").estimated_difficulty == difficulty
+
+
+@pytest.mark.parametrize("value", ["trivial", "", 3, None])
+def test_classify_unknown_difficulty_falls_back_to_medium(monkeypatch, value):
+    reply = json.dumps(
+        {"sub_questions": [{"question": "ש", "categories": ["car"]}], "difficulty": value},
+        ensure_ascii=False,
+    )
+    monkeypatch.setattr(classify_mod, "tf_chat", fake_chat(reply))
+    assert QueryClassifier("m").classify("ש").estimated_difficulty == "medium"
+
+
+def test_classify_fallback_difficulty_is_medium(monkeypatch):
+    def boom(messages, **kwargs):
+        raise RuntimeError("network down")
+
+    monkeypatch.setattr(classify_mod, "tf_chat", boom)
+    assert QueryClassifier("m").classify(QUESTION).estimated_difficulty == "medium"
 
 
 def test_system_prompt_lists_all_corpus_categories():
