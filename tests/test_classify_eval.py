@@ -103,6 +103,7 @@ def test_summarize_metric_arithmetic():
     assert summary["n"] == 5
     assert summary["harmful_rate"] == 0.4          # q2, q5
     assert summary["filter_correct_rate"] == 0.2   # q1
+    assert summary["net"] == pytest.approx(-0.2)   # correct - harmful
     assert summary["no_filter_rate"] == 0.4        # q3, q4
     assert summary["recall_any"] == 0.4            # q1, q4
     assert summary["parse_fail_rate"] == 0.2
@@ -168,6 +169,23 @@ def test_paired_counts_fixed_and_broken_on_shared_ids():
     assert stats["n_broken"] == 1
     assert stats["fixed_ids"] == ["q1", "q2"]
     assert stats["broken_ids"] == ["q3"]
+
+
+def test_paired_also_counts_the_useful_verdict_separately():
+    """The two halves of `net` move independently: this arm removes one wrong
+    filter and loses one right one, which a harmful-only count cannot show."""
+    baseline = [
+        _record("q1", "car", ["apartment"]),   # harmful
+        _record("q2", "car", ["car"]),         # useful
+    ]
+    arm = [
+        _record("q1", "car", []),              # harmful -> none: fixed
+        _record("q2", "car", []),              # useful  -> none: a correct lost
+    ]
+    stats = ce.paired(baseline, arm)
+    assert (stats["n_fixed"], stats["n_broken"]) == (1, 0)
+    assert (stats["n_correct_gained"], stats["n_correct_lost"]) == (0, 1)
+    assert stats["mcnemar_p"] == stats["mcnemar_p_correct"] == 1.0
 
 
 @pytest.mark.parametrize(
@@ -643,15 +661,61 @@ def test_effort_medium_changes_only_the_reasoning_effort(tiny_config):
 
 
 def test_every_arm_builds_and_only_hint_arms_ask_for_hints(tiny_config):
-    from evalharness.classify_arms import ARMS
+    from evalharness.classify_arms import ARMS, MERGE_ARMS, SWEEP_ARMS
 
-    assert len(ARMS) == 12
-    assert len({a.id for a in ARMS}) == 12
+    assert len(SWEEP_ARMS) == 12
+    assert ARMS == SWEEP_ARMS + MERGE_ARMS
+    assert len({a.id for a in ARMS}) == len(ARMS)
     needs = {a.id for a in ARMS if a.needs_hints}
-    assert needs == {"hint-sparse", "hint-vote", "verify-2stage"}
+    assert needs == {"hint-sparse", "hint-vote", "verify-2stage", "merged-A",
+                     "merged-B", "merged-C", "abl-B-no-rules", "abl-C-no-rules",
+                     "abl-C-no-abstain"}
     for arm in ARMS:
         if arm.strategy != "hint_vote":
             ce.build_arm_classifier(arm, tiny_config)
+
+
+def test_compare_to_only_names_arms_that_exist(tiny_config):
+    from evalharness.classify_arms import ARMS, ARMS_BY_ID
+
+    for arm in ARMS:
+        assert arm.id not in arm.compare_to
+        for reference in arm.compare_to:
+            assert reference in ARMS_BY_ID, f"{arm.id} compares to unknown {reference}"
+
+
+#: The composite prompt variants, spelled out as the treatments they carry.
+_PROMPT_TREATMENTS = {"baseline": set(),
+                      "decision-rules-abstain": {"decision-rules", "abstain"}}
+
+
+def _treatments(arm) -> frozenset[str]:
+    """Everything an arm changes relative to `baseline`."""
+    parts = set(_PROMPT_TREATMENTS.get(arm.prompt, {arm.prompt}))
+    if arm.use_hint:
+        parts.add("hint")
+    if arm.model:
+        parts.add(arm.model)
+    return frozenset(parts)
+
+
+def test_each_merge_candidate_has_a_leave_one_out_for_every_component():
+    """The claim T4 settles is per-component, so every treatment inside a merge
+    needs a companion arm that differs from it by exactly that treatment — some
+    were defined for the purpose, others already exist under another name
+    (merged-B without abstain *is* merged-A)."""
+    from evalharness.classify_arms import ARMS, ARMS_BY_ID
+
+    by_treatments = {}
+    for arm in ARMS:
+        by_treatments.setdefault(_treatments(arm), []).append(arm.id)
+
+    for merged_id in ("merged-A", "merged-B", "merged-C"):
+        components = _treatments(ARMS_BY_ID[merged_id])
+        assert len(components) > 1, f"{merged_id} merges nothing"
+        for dropped in components:
+            assert by_treatments.get(components - {dropped}), \
+                f"no leave-one-out arm for {merged_id} minus {dropped}"
 
 
 # --------------------------------------------------------------------------- #
@@ -750,3 +814,46 @@ def test_report_renders_with_paired_stats_and_confusion(tmp_path):
     assert "`abstain`" in report
     assert "McNemar" in report
     assert "gold \\ predicted" in report
+    # No merged arm ran, so there is nothing to compare against a component.
+    assert "Paired against components" not in report
+
+
+def test_a_merged_arm_is_scored_against_each_component_it_merges():
+    results = {
+        "baseline": [_record("q1", "car", ["apartment"]), _record("q2", "life", ["travel"])],
+        "decision-rules": [_record("q1", "car", ["car"]), _record("q2", "life", ["travel"])],
+        "hint-sparse": [_record("q1", "car", ["apartment"]), _record("q2", "life", ["life"])],
+        "merged-A": [_record("q1", "car", ["car"]), _record("q2", "life", ["life"])],
+    }
+    arms = {arm_id: get_arm(arm_id) for arm_id in results}
+    agg = ce.aggregate(results, arms)
+    references = agg["merged-A"]["paired_vs_reference"]
+    assert set(references) == {"decision-rules", "hint-sparse"}
+    # merged-A fixes the one wrong filter each component still leaves behind.
+    assert references["decision-rules"]["n_fixed"] == 1
+    assert references["hint-sparse"]["n_fixed"] == 1
+    assert agg["merged-A"]["sets"]["pooled"]["net"] == 1.0
+    assert "paired_vs_reference" not in agg["baseline"]
+
+    report = ce.render_report(agg, {"run_name": "t", "date": "2026-08-02",
+                                    "questions_files": ["ref.json"],
+                                    "n_questions": 2, "total_cost_usd": 0.01})
+    assert "Paired against components and merges" in report
+    assert "| `merged-A` | `decision-rules` |" in report
+
+
+def test_arms_are_ranked_by_net_not_by_harmful_alone():
+    """A pure abstainer has a perfect harmful_rate and must still lose."""
+    results = {
+        "hint-vote": [_record(qid, "car", []) for qid in ("q1", "q2", "q3")],
+        "baseline": [_record("q1", "car", ["car"]), _record("q2", "car", ["car"]),
+                     _record("q3", "life", ["travel"])],
+    }
+    agg = ce.aggregate(results, {arm_id: get_arm(arm_id) for arm_id in results})
+    pooled = {arm_id: entry["sets"]["pooled"] for arm_id, entry in agg.items()}
+    assert pooled["hint-vote"]["harmful_rate"] < pooled["baseline"]["harmful_rate"]
+    assert pooled["hint-vote"]["net"] == 0.0
+    assert pooled["baseline"]["net"] == pytest.approx(0.3333, abs=1e-4)
+
+    table = ce._metric_table(agg, "pooled")
+    assert table.index("`baseline`") < table.index("`hint-vote`")

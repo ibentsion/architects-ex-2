@@ -11,6 +11,10 @@ ONE thing, so the sweep attributes a difference to a single treatment:
                   belongs / does-NOT-belong text + overlap disambiguation
   decision-rules  one appended block: ordered cues + a precedence order
 
+``decision-rules-abstain`` is the one exception to the one-treatment rule: it is
+the merge of the two variants that won in isolation, composed from their exact
+text so the merged arms measure the combination rather than new wording.
+
 ``decision-rules`` deliberately stops at the precedence list and does NOT
 restate the "return an empty list when nothing matches" fallback (baseline
 already carries it) — otherwise it would silently also be an abstain arm and
@@ -244,12 +248,21 @@ def _decision_rules() -> str:
     return _baseline() + "\n\n" + DECISION_RULES
 
 
+def _decision_rules_abstain() -> str:
+    """The merged prompt: both treatments composed, each rendered exactly as its
+    isolated arm renders it — the abstain rule joins the כללים list, the decision
+    rules follow as their own block. Nothing new is written here, so a merged-arm
+    win is attributable to the combination and not to fresh prompt text."""
+    return _abstain() + "\n\n" + DECISION_RULES
+
+
 PROMPT_VARIANTS = {
     "baseline": _baseline,
     "abstain": _abstain,
     "examples": _examples,
     "rich-desc": _rich_desc,
     "decision-rules": _decision_rules,
+    "decision-rules-abstain": _decision_rules_abstain,
 }
 
 

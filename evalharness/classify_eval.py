@@ -16,9 +16,13 @@ categories mean no filter. So a predicted tag set maps onto three outcomes:
     exactly one wrong tag -> filters to the wrong slice   -> harmful
     empty, or 2+ tags     -> no filter at all             -> none
 
-``harmful_rate`` is the primary metric (lower is better) and
-``filter_correct_rate`` the tie-break: a wrong filter costs a whole retrieval
-round and a degraded pool, a missing one only costs precision.
+A wrong filter costs a whole retrieval round and a degraded pool; a missing one
+only costs precision. But ``harmful_rate`` alone cannot decide anything, because
+an arm that never emits a tag scores a perfect 0 on it — T2's ``hint-vote``
+topped that table by abstaining on 43% of the questions. The decision metric is
+therefore ``net = filter_correct_rate - harmful_rate``, which a pure abstainer
+cannot win, with ``harmful_rate`` reported beside it because the two errors are
+not interchangeable.
 
 The question-level ``verdict`` is computed from the derived union of the
 sub-question categories, exactly as the plan defines it. That collapses one
@@ -32,9 +36,12 @@ Reading the numbers
 -------------------
 n is 169 across both sets, so arm-to-arm gaps of a few points are noise. Every
 arm is therefore also scored *paired* against ``baseline`` on the same question
-ids: ``n_fixed`` (baseline harmful, arm not), ``n_broken`` (the reverse), and an
-exact two-sided McNemar p-value over those two counts. An arm with a better
-harmful_rate and p > 0.05 has not been shown to be better.
+ids: ``n_fixed`` (baseline harmful, arm not), ``n_broken`` (the reverse), the
+same two counts on the useful verdict, and an exact two-sided McNemar p-value
+over each pair. An arm with a better net and p > 0.05 on both has not been shown
+to be better. An arm's ``compare_to`` adds the comparisons that matter for the
+merge: a merged arm against every isolated arm it combines, an ablation against
+the merge it came from.
 
 Instrumentation note
 --------------------
@@ -535,10 +542,16 @@ def summarize(records: list[dict]) -> dict:
     # Diagnostic: over the sub-questions that really do filter, how many filter
     # to the wrong slice (see the module docstring on 2+-tag questions).
     sub_filters = [(f, r["gold"]) for r in records for f in r["applied_filters"]]
+    harmful_rate = _rate([v == "harmful" for v in verdicts])
+    filter_correct_rate = _rate([v == "useful" for v in verdicts])
     return {
         "n": len(records),
-        "harmful_rate": _rate([v == "harmful" for v in verdicts]),
-        "filter_correct_rate": _rate([v == "useful" for v in verdicts]),
+        "harmful_rate": harmful_rate,
+        "filter_correct_rate": filter_correct_rate,
+        # The decision metric. Minimising harmful_rate alone is degenerate — an
+        # arm that never tags anything scores a perfect 0 — so the two are
+        # combined into one number that a pure abstainer cannot win.
+        "net": round(filter_correct_rate - harmful_rate, 4),
         "no_filter_rate": _rate([v == "none" for v in verdicts]),
         "recall_any": _rate([r["recall_any"] for r in records]),
         "mean_tags_per_sub": _rate(tags_per_sub),
@@ -580,21 +593,35 @@ def mcnemar_exact(n_fixed: int, n_broken: int) -> float:
     return round(min(1.0, 2 * tail), 6)
 
 
-def paired(baseline_records: list[dict], arm_records: list[dict]) -> dict:
-    """Fixed/broken counts and McNemar p for an arm against baseline, over the
-    question ids both actually produced."""
-    base = {r["id"]: r["verdict"] == "harmful" for r in baseline_records}
-    arm = {r["id"]: r["verdict"] == "harmful" for r in arm_records}
-    shared = sorted(set(base) & set(arm))
-    n_fixed = sum(1 for qid in shared if base[qid] and not arm[qid])
-    n_broken = sum(1 for qid in shared if not base[qid] and arm[qid])
+def paired(reference_records: list[dict], arm_records: list[dict]) -> dict:
+    """Fixed/broken counts and McNemar p for an arm against a reference arm,
+    over the question ids both actually produced.
+
+    Scored twice, because ``net`` has two halves that move independently: on the
+    harmful verdict (``n_fixed`` / ``n_broken``) and on the useful one
+    (``n_correct_gained`` / ``n_correct_lost``). An arm can remove wrong filters
+    and lose right ones at the same time, and one p-value would hide that."""
+    shared = sorted({r["id"] for r in reference_records} &
+                    {r["id"] for r in arm_records})
+
+    def discordant(verdict: str) -> tuple[list[str], list[str]]:
+        ref = {r["id"]: r["verdict"] == verdict for r in reference_records}
+        arm = {r["id"]: r["verdict"] == verdict for r in arm_records}
+        return ([qid for qid in shared if ref[qid] and not arm[qid]],
+                [qid for qid in shared if not ref[qid] and arm[qid]])
+
+    lost_harm, gained_harm = discordant("harmful")
+    lost_good, gained_good = discordant("useful")
     return {
         "n_pairs": len(shared),
-        "n_fixed": n_fixed,
-        "n_broken": n_broken,
-        "mcnemar_p": mcnemar_exact(n_fixed, n_broken),
-        "fixed_ids": [qid for qid in shared if base[qid] and not arm[qid]],
-        "broken_ids": [qid for qid in shared if not base[qid] and arm[qid]],
+        "n_fixed": len(lost_harm),
+        "n_broken": len(gained_harm),
+        "mcnemar_p": mcnemar_exact(len(lost_harm), len(gained_harm)),
+        "n_correct_gained": len(gained_good),
+        "n_correct_lost": len(lost_good),
+        "mcnemar_p_correct": mcnemar_exact(len(gained_good), len(lost_good)),
+        "fixed_ids": lost_harm,
+        "broken_ids": gained_harm,
     }
 
 
@@ -624,6 +651,14 @@ def aggregate(results: dict[str, list[dict]], arms: dict[str, Arm]) -> dict:
                                 [r for r in records if r["set"] == name])
                    for name in sorted({r["set"] for r in records})},
             }
+        # A merged arm is only interesting if it beats the components it merges,
+        # not just baseline; an ablation is only interesting against its merge.
+        references = [ref for ref in arms[arm_id].compare_to
+                      if ref in results and ref != arm_id]
+        if references:
+            entry["paired_vs_reference"] = {
+                ref: paired(results[ref], records) for ref in references
+            }
         out[arm_id] = entry
     return out
 
@@ -633,6 +668,7 @@ def aggregate(results: dict[str, list[dict]], arms: dict[str, Arm]) -> dict:
 # --------------------------------------------------------------------------- #
 
 _REPORT_COLS = [
+    ("net", "Net"),
     ("harmful_rate", "Harmful"),
     ("filter_correct_rate", "Correct"),
     ("no_filter_rate", "No filter"),
@@ -660,11 +696,17 @@ def _harmful(entry: dict, set_name: str = "pooled") -> float:
     return 1.0 if value is None else value
 
 
+def _rank(entry: dict, set_name: str = "pooled") -> float:
+    """Ranking key — net, descending, with empty arms pushed to the bottom."""
+    value = entry["sets"].get(set_name, {}).get("net")
+    return 2.0 if value is None else -value
+
+
 def _metric_table(agg: dict, set_name: str) -> str:
     header = "| Arm | n | " + " | ".join(name for _, name in _REPORT_COLS) + " |"
     sep = "|" + "---|" * (len(_REPORT_COLS) + 2)
     rows = []
-    for arm_id, entry in sorted(agg.items(), key=lambda kv: _harmful(kv[1], set_name)):
+    for arm_id, entry in sorted(agg.items(), key=lambda kv: _rank(kv[1], set_name)):
         bucket = entry["sets"].get(set_name)
         if not bucket or not bucket.get("n"):
             continue
@@ -673,27 +715,49 @@ def _metric_table(agg: dict, set_name: str) -> str:
     return "\n".join([header, sep] + rows)
 
 
+_PAIRED_HEADER = ("| Arm | vs | net | fixed | broken | p(harmful) | "
+                  "+correct | -correct | p(correct) | verdict |")
+_PAIRED_SEP = "|" + "---|" * 10
+
+
+def _paired_row(arm_id: str, reference: str, entry: dict, stats: dict,
+                reference_net: float) -> str:
+    net = entry["sets"]["pooled"]["net"]
+    significant = min(stats["mcnemar_p"], stats["mcnemar_p_correct"]) <= 0.05
+    if not significant:
+        call = f"tied with `{reference}`"
+    else:
+        call = "**better**" if net > reference_net else "worse"
+    return (f"| `{arm_id}` | `{reference}` | {_fmt(net)} | {stats['n_fixed']} | "
+            f"{stats['n_broken']} | {stats['mcnemar_p']:.4f} | "
+            f"{stats['n_correct_gained']} | {stats['n_correct_lost']} | "
+            f"{stats['mcnemar_p_correct']:.4f} | {call} |")
+
+
 def _paired_table(agg: dict) -> str:
-    header = "| Arm | pooled harmful | fixed | broken | McNemar p | verdict |"
-    sep = "|---|---|---|---|---|---|"
+    """Every arm against baseline."""
     rows = []
-    base = _harmful(agg[BASELINE_ARM])
-    for arm_id, entry in sorted(agg.items(), key=lambda kv: _harmful(kv[1])):
+    base_net = agg[BASELINE_ARM]["sets"]["pooled"]["net"]
+    for arm_id, entry in sorted(agg.items(), key=lambda kv: _rank(kv[1])):
         if arm_id == BASELINE_ARM or "paired_vs_baseline" not in entry:
             continue
-        stats = entry["paired_vs_baseline"]["pooled"]
-        harmful = entry["sets"]["pooled"].get("harmful_rate")
-        if harmful is None:
+        if entry["sets"]["pooled"].get("net") is None:
             continue
-        if stats["mcnemar_p"] > 0.05:
-            call = "tied with baseline"
-        elif harmful < base:
-            call = "**better**"
-        else:
-            call = "worse"
-        rows.append(f"| `{arm_id}` | {_fmt(harmful)} | {stats['n_fixed']} | "
-                    f"{stats['n_broken']} | {stats['mcnemar_p']:.4f} | {call} |")
-    return "\n".join([header, sep] + rows)
+        rows.append(_paired_row(arm_id, BASELINE_ARM, entry,
+                                entry["paired_vs_baseline"]["pooled"], base_net))
+    return "\n".join([_PAIRED_HEADER, _PAIRED_SEP] + rows)
+
+
+def _reference_table(agg: dict) -> str:
+    """Merged arms against each component they merge, ablations against the
+    merge they came from — the comparisons that settle whether combining the
+    treatments bought anything the best single treatment did not."""
+    rows = []
+    for arm_id, entry in sorted(agg.items(), key=lambda kv: _rank(kv[1])):
+        for reference, stats in entry.get("paired_vs_reference", {}).items():
+            rows.append(_paired_row(arm_id, reference, entry, stats,
+                                    agg[reference]["sets"]["pooled"]["net"]))
+    return "\n".join([_PAIRED_HEADER, _PAIRED_SEP] + rows) if rows else ""
 
 
 def _confusion_table(table: dict) -> str:
@@ -724,7 +788,7 @@ def _worst_pairs(table: dict, limit: int = 8) -> list[str]:
 def render_report(agg: dict, meta: dict) -> str:
     sets = [s for s in sorted({s for e in agg.values() for s in e["sets"]})
             if s != "pooled"]
-    best_id = min(agg, key=lambda arm_id: _harmful(agg[arm_id]))
+    best_id = min(agg, key=lambda arm_id: _rank(agg[arm_id]))
     lines = [
         f"# Classifier arm sweep — {meta['run_name']}",
         "",
@@ -738,10 +802,17 @@ def render_report(agg: dict, meta: dict) -> str:
         "The agent filters retrieval for a sub-question only when it carries "
         "exactly one category, so `harmful` = filtered to the wrong domain, "
         "`correct` = filtered to the gold domain, `no filter` = zero or 2+ tags. "
-        "**Harmful is the primary metric** (lower is better); a wrong filter "
-        "costs a retrieval round, a missing one only costs precision.",
+        "A wrong filter costs a retrieval round; a missing one only costs "
+        "precision.",
         "",
-        f"## Pooled ({' + '.join(sets)}), ranked by harmful_rate",
+        "**`net` = correct − harmful is the decision metric** and arms are "
+        "ranked by it. Minimising `harmful` on its own is degenerate: an arm "
+        "that tags nothing scores a perfect 0 and is worthless, which is exactly "
+        "how `hint-vote` topped the T2 harmful table while abstaining on 43% of "
+        "the questions. `harmful` is still reported next to it, because the two "
+        "errors are not interchangeable.",
+        "",
+        f"## Pooled ({' + '.join(sets)}), ranked by net",
         "",
         _metric_table(agg, "pooled"),
         "",
@@ -749,16 +820,37 @@ def render_report(agg: dict, meta: dict) -> str:
     for set_name in sets:
         lines += [f"## {set_name}", "", _metric_table(agg, set_name), ""]
 
+    paired_note = (
+        "`fixed` = the reference arm was harmful and this arm is not; `broken` = "
+        "the reverse; `+correct`/`-correct` are the same two counts on the useful "
+        "verdict. Each p is an exact two-sided McNemar over its own pair of "
+        "counts. At n=169 an arm significant on neither has not been shown to "
+        "differ at all — and the two halves of `net` move independently, so an "
+        "arm can remove wrong filters and lose right ones in the same breath."
+    )
     if len(agg) > 1 and BASELINE_ARM in agg:
         lines += [
             "## Paired against baseline (same question ids)",
             "",
-            "`fixed` = baseline was harmful and this arm is not; `broken` = the "
-            "reverse. p is an exact two-sided McNemar over those two counts — at "
-            "n=169 an arm that is not significant here has not been shown to "
-            "differ from baseline at all.",
+            paired_note,
             "",
             _paired_table(agg),
+            "",
+        ]
+
+    reference_table = _reference_table(agg)
+    if reference_table:
+        lines += [
+            "## Paired against components and merges",
+            "",
+            "A merged arm scored against each isolated arm whose treatment it "
+            "combines, and each ablation against the merge it drops a component "
+            "from. This is what settles whether merging bought anything the best "
+            "single treatment did not.",
+            "",
+            paired_note,
+            "",
+            reference_table,
             "",
         ]
 
