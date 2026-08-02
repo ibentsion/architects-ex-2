@@ -22,6 +22,20 @@ export RAG_CONFIG="${RAG_CONFIG:-configs/ship.yaml}"
 
 # Import first: a broken import inside uvicorn only shows up as a health
 # check that never passes, which costs 5 minutes to learn nothing.
+# The graded questions are deliberately not in git — they live on the private
+# artifacts dataset, the same place the corpus and indexes come from.
+if [ ! -f "$QUESTIONS" ]; then
+    echo "=== fetching $QUESTIONS from $ARTIFACTS_REPO"
+    python - "$ARTIFACTS_REPO" "$QUESTIONS" <<'PY'
+import shutil, sys
+from huggingface_hub import hf_hub_download
+
+repo, name = sys.argv[1], sys.argv[2]
+shutil.copyfile(hf_hub_download(repo, name, repo_type="dataset"), name)
+print(f"fetched {name}")
+PY
+fi
+
 echo "=== import check"
 python -c "import contract; print('contract imports OK -> ' + contract._rag_config_path())"
 
