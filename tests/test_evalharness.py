@@ -404,32 +404,104 @@ def test_metrics_average_citation_accuracy_over_every_answer():
     assert agg["overall"]["full_citation_credit_rate"] == 0.5
 
 
+# -- validation / holdout split ---------------------------------------------
+
+
+def _split_item(qid, domain, difficulty, kind="standard"):
+    return {"id": qid, "domain": domain, "difficulty": difficulty, "kind": kind,
+            "question": "ש" * 25, "ground_truth_answer": "ת" * 15,
+            "ground_truth_sources": []}
+
+
+def test_split_halves_every_stratum_and_never_shares_a_question():
+    from evalharness.split import split
+
+    items = [{**_split_item(f"q{n:03d}", domain, difficulty), "_set": "v2"}
+             for domain in ("dental", "car", "life")
+             for difficulty in ("easy", "medium", "hard")
+             for n in range(6)]
+    for n, item in enumerate(items):
+        item["id"] = f"q{n:03d}-{item['domain']}-{item['difficulty']}"
+    validation, holdout = split(items, 0.5, seed=1)
+    assert len(validation) == len(holdout) == 27
+    assert not ({i["id"] for i in validation} & {i["id"] for i in holdout})
+    # Every stratum contributes to both halves, which an unstratified coin flip
+    # would not guarantee for the 4-6 question categories.
+    for half in (validation, holdout):
+        assert len({(i["domain"], i["difficulty"]) for i in half}) == 9
+
+
+def test_split_carries_the_remainder_instead_of_rounding_every_stratum_the_same():
+    """12 singleton strata at 50% must not all land in the same half."""
+    from evalharness.split import split
+
+    items = [{**_split_item(f"q{n}", f"cat{n}", "easy"), "_set": "v1"} for n in range(12)]
+    validation, holdout = split(items, 0.5, seed=1)
+    assert len(validation) == len(holdout) == 6
+
+
+def test_split_is_deterministic_in_the_seed():
+    from evalharness.split import split
+
+    items = [{**_split_item(f"q{n}", "dental", "easy"), "_set": "v1"} for n in range(20)]
+    first = [i["id"] for i in split(items, 0.5, seed=7)[0]]
+    assert first == [i["id"] for i in split(items, 0.5, seed=7)[0]]
+    assert first != [i["id"] for i in split(items, 0.5, seed=8)[0]]
+
+
+def test_reference_sets_load_from_json_and_jsonl(tmp_path):
+    from evalharness.split import load_reference
+
+    items = [_split_item("q1", "dental", "easy"), _split_item("q2", "car", "hard")]
+    as_json = tmp_path / "ref.json"
+    as_jsonl = tmp_path / "ref.jsonl"
+    as_json.write_text(json.dumps(items, ensure_ascii=False), encoding="utf-8")
+    as_jsonl.write_text("".join(json.dumps(i, ensure_ascii=False) + "\n" for i in items),
+                        encoding="utf-8")
+    assert load_reference(as_json) == load_reference(as_jsonl) == items
+
+
 # -- retrieval hit-rate audit ------------------------------------------------
 
 
 class FakeAuditRetriever:
-    """Returns scripted candidates/gated chunks by question, in the shape the
-    audit reads (chunk_id only)."""
+    """Enough of Retriever for the audit: a fused candidate list (category
+    filtering included, since the audit's filter modes depend on it) and a
+    reranker returning scripted scores. The gate is the real one."""
 
-    def __init__(self, candidates, gated):
-        self.candidates, self.gated = candidates, gated
+    def __init__(self, candidates, scores=None, gate_threshold=0.35, top_n=6):
+        self.candidates = candidates
+        self.scores = scores or {}
+        self.gate_threshold, self.top_n = gate_threshold, top_n
+        self.reranker = self
+        self.calls = []
 
     @staticmethod
-    def _wrap(chunk_ids):
+    def _wrap(chunk_id, score=None):
         from types import SimpleNamespace
 
-        return [SimpleNamespace(chunk=SimpleNamespace(chunk_id=cid), rerank_score=0.9)
-                for cid in chunk_ids]
+        return SimpleNamespace(chunk=SimpleNamespace(chunk_id=chunk_id),
+                               rerank_score=score)
 
-    def fuse(self, question):
-        return self._wrap(self.candidates)
+    def fuse(self, question, *, dense_top_k=None, sparse_top_k=None, category=None):
+        self.calls.append({"top_k": dense_top_k, "category": category})
+        ids = [c for c in self.candidates
+               if category is None or c.startswith(f"{category}/")]
+        return [self._wrap(cid) for cid in ids[:dense_top_k or 20]]
 
-    def rerank_candidates(self, question, candidates):
-        return self._wrap(self.gated)
+    def score(self, question, candidates):
+        return [self._wrap(c.chunk.chunk_id, self.scores.get(c.chunk.chunk_id, 0.9))
+                for c in candidates]
 
 
 def _group(*sources):
     return {"any_of": [{"file": f, "page": p} for f, p in sources]}
+
+
+def _question(qid="v2-001-dental-hard", domain="dental", difficulty="hard",
+              kind="standard", sources=()):
+    return {"id": qid, "domain": domain, "difficulty": difficulty, "kind": kind,
+            "question": "ש", "ground_truth_sources": list(sources)}
 
 
 def test_chunk_id_parses_back_into_file_and_page():
@@ -473,37 +545,124 @@ def test_audit_question_classifies_every_group_of_one_question():
     from evalharness.retrieval_audit import audit_question, page_key
 
     retriever = FakeAuditRetriever(
-        candidates=["dental/files/a.pdf#p1#c0", "dental/files/b.pdf#p2#c3"],
-        gated=["dental/files/a.pdf#p1#c0"])
-    question = {
-        "id": "v3-001-dental-hard", "domain": "dental", "difficulty": "hard",
-        "kind": "multi_source", "question": "ש",
-        "ground_truth_sources": [_group(("dental/files/a.pdf", 1)),
-                                 _group(("dental/files/b.pdf", 2)),
-                                 _group(("dental/files/z.pdf", 9))],
-    }
+        candidates=["dental/files/a.pdf#p1#c0", "dental/files/b.pdf#p2#c3"], top_n=1)
+    question = _question(sources=[_group(("dental/files/a.pdf", 1)),
+                                  _group(("dental/files/b.pdf", 2)),
+                                  _group(("dental/files/z.pdf", 9))])
     record = audit_question(retriever, question, {page_key("dental/files/z.pdf", 9)})
     assert [g["stage"] for g in record["groups"]] == ["gated", "not_gated", "not_retrieved"]
     assert (record["n_candidates"], record["n_gated"]) == (2, 1)
 
 
+def test_audit_records_how_deep_each_ground_truth_page_sat():
+    from evalharness.retrieval_audit import audit_question
+
+    # The wanted page is the 3rd candidate and contributes two chunks; the
+    # reranker then promotes it to the top.
+    retriever = FakeAuditRetriever(
+        candidates=["dental/files/x.pdf#p1#c0", "dental/files/y.pdf#p1#c0",
+                    "dental/files/a.pdf#p1#c0", "dental/files/a.pdf#p1#c1"],
+        scores={"dental/files/a.pdf#p1#c0": 0.99})
+    record = audit_question(retriever, _question(sources=[_group(("dental/files/a.pdf", 1))]),
+                            set(), deep_k=100)
+    group = record["groups"][0]
+    assert group["fused_rank"] == 3      # would have needed top_k >= 3
+    assert group["rerank_rank"] == 1     # the cross-encoder found it
+    assert group["rerank_score"] == 0.99
+    assert group["n_chunks"] == 2        # one page, two chunks in the pool
+    assert retriever.calls[0]["top_k"] == 100
+
+
+def test_a_page_below_the_gate_is_not_gated_however_well_it_ranks():
+    from evalharness.retrieval_audit import audit_question, summarize
+
+    retriever = FakeAuditRetriever(candidates=["dental/files/a.pdf#p1#c0"],
+                                   scores={"dental/files/a.pdf#p1#c0": 0.20})
+    record = audit_question(retriever, _question(sources=[_group(("dental/files/a.pdf", 1))]),
+                            set())
+    assert record["groups"][0]["rerank_rank"] == 1
+    assert record["groups"][0]["stage"] == "not_gated"
+    # Rank 1 and still dropped: that is the gate threshold, not the depth.
+    assert summarize("arm", "v2", [record], 0.35)["gate_blocked_groups"] == 1
+
+
+def test_coverage_curve_says_what_each_pool_depth_would_have_covered():
+    from evalharness.retrieval_audit import coverage_curves
+
+    groups = [
+        {"fused_rank": 2, "rerank_rank": 1, "rerank_score": 0.9, "n_chunks": 1},
+        {"fused_rank": 25, "rerank_rank": 9, "rerank_score": 0.9, "n_chunks": 2},
+        {"fused_rank": 80, "rerank_rank": 3, "rerank_score": 0.1, "n_chunks": 1},
+        {"fused_rank": None, "rerank_rank": None, "rerank_score": None, "n_chunks": 0},
+    ]
+    curves = coverage_curves(groups, gate_threshold=0.35)
+    assert curves["by_top_k"][5] == 0.25
+    assert curves["by_top_k"][30] == 0.5
+    assert curves["by_top_k"][100] == 0.75    # one group is nowhere in the pool
+    # Post-rerank AND post-gate: rank 3 is inside top 6 but scores under the gate.
+    assert curves["by_top_n"][6] == 0.25
+    assert curves["by_top_n"][10] == 0.5
+    assert curves["depth_percentiles"] == {"p50": 25, "p80": None, "p90": None}
+
+
+def test_filter_modes_pick_none_gold_or_the_classifier_s_own_tag(tmp_path):
+    from evalharness.retrieval_audit import filter_for, load_predicted_filters
+
+    predictions = tmp_path / "predictions.jsonl"
+    predictions.write_text(
+        json.dumps({"id": "q1", "effective_filter": "car"}) + "\n"
+        + json.dumps({"id": "q2", "effective_filter": None}) + "\n", encoding="utf-8")
+    predicted = load_predicted_filters(predictions)
+    q1, q2 = _question("q1", domain="dental"), _question("q2", domain="dental")
+
+    assert filter_for("none", q1, predicted) is None
+    assert filter_for("gold", q1, predicted) == "dental"
+    assert filter_for("predicted", q1, predicted) == "car"   # a wrong filter, replayed
+    # No tag, or 2+ tags, means production filters nothing — so neither does this.
+    assert filter_for("predicted", q2, predicted) is None
+
+
+def test_a_wrong_predicted_filter_costs_the_ground_truth_page():
+    from evalharness.retrieval_audit import audit_question, filter_for
+
+    retriever = FakeAuditRetriever(candidates=["dental/files/a.pdf#p1#c0",
+                                                "car/files/b.pdf#p1#c0"])
+    question = _question("q1", domain="dental",
+                         sources=[_group(("dental/files/a.pdf", 1))])
+    predicted = {"q1": "car"}
+    filtered = audit_question(retriever, question, set(),
+                              category=filter_for("predicted", question, predicted))
+    unfiltered = audit_question(retriever, question, set(),
+                                category=filter_for("none", question, predicted))
+    assert filtered["groups"][0]["stage"] == "missing_from_index"  # filtered out of reach
+    assert unfiltered["groups"][0]["stage"] == "gated"
+
+
 def test_summary_counts_groups_and_fully_covered_questions():
     from evalharness.retrieval_audit import summarize
 
+    def group(stage, fused_rank=1, rerank_rank=1, score=0.9):
+        return {"stage": stage, "fused_rank": fused_rank, "rerank_rank": rerank_rank,
+                "rerank_score": score, "n_chunks": 1}
+
     records = [
         {"id": "a", "domain": "dental", "difficulty": "hard", "kind": "multi_source",
-         "groups": [{"stage": "gated"}, {"stage": "not_gated"}]},
+         "n_gated": 6, "groups": [group("gated"), group("not_gated", 40, 12)]},
         {"id": "b", "domain": "car", "difficulty": "easy", "kind": "standard",
-         "groups": [{"stage": "gated"}]},
+         "n_gated": 0, "groups": [group("gated")]},
     ]
-    summary = summarize("pdf-per_table", "v2", records)
+    summary = summarize("pdf-per_table", "v2", records, 0.35)
     assert summary["by_stage"] == {"gated": 2, "not_gated": 1, "not_retrieved": 0,
                                    "missing_from_index": 0}
     assert summary["group_hit_rate"] == 2 / 3
     # A multi-source question is only covered when EVERY group it needs is.
     assert summary["questions_fully_covered"] == 1
     assert summary["question_hit_rate"] == 0.5
+    assert summary["questions_gated_to_nothing"] == 1
     assert summary["by_difficulty"]["hard"]["not_gated"] == 1
+    # The depth curve is sliced the same way, so per-difficulty top_k is readable.
+    assert summary["by_difficulty"]["hard"]["by_top_k"][20] == 0.5
+    assert summary["by_difficulty"]["easy"]["by_top_k"][20] == 1.0
 
 
 def test_indexed_pages_reads_what_ingest_actually_produced(tmp_path):
