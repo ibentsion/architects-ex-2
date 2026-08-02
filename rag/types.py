@@ -87,6 +87,11 @@ class Classification(BaseModel):
     needs_calculation: bool = Field(
         False, description="Query asks for arithmetic on numbers (agent must use the calculate tool)"
     )
+    estimated_difficulty: Literal["easy", "medium", "hard"] = Field(
+        "medium",
+        description="Classifier's difficulty estimate — drives synthesis-model routing "
+        "(hard routes to the strong generation model)",
+    )
     dependent: bool = Field(
         False,
         description="Sub-questions depend on each other's answers (forces the serial agent loop)",

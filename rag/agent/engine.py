@@ -178,18 +178,19 @@ class AgentEngine:
         ]
         pool: dict[str, RetrievedChunk] = {}
         stats_sum: dict[str, dict[str, int]] = {}
-        for (sub_q, sub_cat), (results, stats) in zip(requests, self._retrieve_many(requests)):
+        for (sub_q, sub_cat), (results, stats, retried) in zip(requests, self._retrieve_many(requests)):
             self._merge_pool(pool, results)
             self._merge_stats(stats_sum, stats)
-            trace.append(
-                {
-                    "step": "retrieve",
-                    "phase": "prefetch",
-                    "query": sub_q,
-                    "category": sub_cat,
-                    "n_gated": len(results),
-                }
-            )
+            entry = {
+                "step": "retrieve",
+                "phase": "prefetch",
+                "query": sub_q,
+                "category": sub_cat,
+                "n_gated": len(results),
+            }
+            if retried:
+                entry["retried_unfiltered"] = True
+            trace.append(entry)
         retrieval_ms = (time.monotonic() - t1) * 1000
 
         # Agent loop only when the fast paths can't handle the query.
@@ -265,18 +266,35 @@ class AgentEngine:
     # Concurrency helpers
     # ------------------------------------------------------------------ #
 
+    def _retrieve_sub(
+        self, question: str, category: str | None
+    ) -> tuple[list[RetrievedChunk], dict[str, dict[str, int]], bool]:
+        """One sub-question retrieval with the unfiltered-retry policy: a
+        category filter must never be the reason for an empty pool (the
+        classifier's tags are ~76-88% accurate — a wrong single tag used to
+        turn into a hard refusal). Returns (results, stats, retried)."""
+        results, stats = self.retriever.retrieve_with_stats(question, category=category)
+        if results or category is None:
+            return results, stats, False
+        logger.info(
+            "Category-filtered retrieval gated to zero (category=%s) — retrying unfiltered",
+            category,
+        )
+        results, stats = self.retriever.retrieve_with_stats(question, category=None)
+        return results, stats, True
+
     def _retrieve_many(
         self, requests: list[tuple[str, str | None]]
-    ) -> list[tuple[list[RetrievedChunk], dict[str, dict[str, int]]]]:
+    ) -> list[tuple[list[RetrievedChunk], dict[str, dict[str, int]], bool]]:
         """Run retrievals concurrently (embedding is HTTP-bound; the sparse
         stage self-serializes inside Retriever). Order preserved."""
         if len(requests) == 1:
             question, category = requests[0]
-            return [self.retriever.retrieve_with_stats(question, category=category)]
+            return [self._retrieve_sub(question, category)]
         workers = min(self.harness.max_workers, len(requests))
         with ThreadPoolExecutor(max_workers=workers) as executor:
             futures = [
-                executor.submit(self.retriever.retrieve_with_stats, question, category=category)
+                executor.submit(self._retrieve_sub, question, category)
                 for question, category in requests
             ]
             return [future.result() for future in futures]
@@ -398,8 +416,10 @@ class AgentEngine:
                     category = None
                 if not query:
                     return "error: empty query", {"error": "empty-query"}, []
-                results, _stats = self.retriever.retrieve_with_stats(query, category=category)
+                results, _stats, retried = self._retrieve_sub(query, category)
                 detail = {"query": query, "category": category, "n_gated": len(results)}
+                if retried:
+                    detail["retried_unfiltered"] = True
                 return _render_evidence(results), detail, results
             return f"error: unknown tool {tc.function.name}", {"error": "unknown-tool"}, []
 

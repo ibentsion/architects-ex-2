@@ -53,9 +53,13 @@ def _system_prompt() -> str:
 3. קבע שני דגלים:
    - needs_calculation: האם נדרש חישוב אריתמטי על מספרים (אחוזים, סכומים, הפרשים וכו').
    - dependent: האם תת-שאלה תלויה בתשובה של תת-שאלה אחרת (לא ניתן לענות עליהן במקביל).
+4. הערך את רמת הקושי של השאלה כולה (difficulty):
+   - easy: עובדה בודדת ומפורשת שסביר שכתובה במסמך אחד.
+   - medium: דורש קריאת תנאים או פרטים מדויקים.
+   - hard: דורש שילוב מספר מקורות, חריגים, טבלאות, או הסקה זהירה.
 
 החזר JSON בלבד, בדיוק בפורמט הבא, ללא טקסט נוסף:
-{{"sub_questions": [{{"question": "...", "categories": ["<id>"]}}], "needs_calculation": false, "dependent": false}}
+{{"sub_questions": [{{"question": "...", "categories": ["<id>"]}}], "needs_calculation": false, "dependent": false, "difficulty": "easy|medium|hard"}}
 
 כללים:
 - השתמש רק ב-ids מהרשימה. אם אף תחום לא מתאים לתת-שאלה, החזר עבורה רשימת categories ריקה.
@@ -142,6 +146,9 @@ class QueryClassifier:
             sub_questions=sub_questions,
             needs_calculation=bool(data.get("needs_calculation", False)),
             dependent=bool(data.get("dependent", False)),
+            estimated_difficulty=(
+                data.get("difficulty") if data.get("difficulty") in ("easy", "medium", "hard") else "medium"
+            ),
             cost_estimate=cost,
         )
 
