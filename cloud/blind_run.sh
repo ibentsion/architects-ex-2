@@ -20,29 +20,42 @@ QUESTIONS="${QUESTIONS:-blind_questions.json}"
 OUT="submission_${TEAM}_${TS}.jsonl"
 export RAG_CONFIG="${RAG_CONFIG:-configs/ship.yaml}"
 
+# Import first: a broken import inside uvicorn only shows up as a health
+# check that never passes, which costs 5 minutes to learn nothing.
+echo "=== import check"
+python -c "import contract; print('contract imports OK -> ' + contract._rag_config_path())"
+
 echo "=== serving contract:app with RAG_CONFIG=$RAG_CONFIG"
 python -m uvicorn contract:app --port 8000 > "uvicorn_${TS}.log" 2>&1 &
 SERVER_PID=$!
 trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+sleep 5
+kill -0 "$SERVER_PID" 2>/dev/null || { echo "=== server died on startup:"; cat "uvicorn_${TS}.log"; exit 1; }
 
 # The node image ships no curl (see cloud/setup_node.sh) — everything that
-# talks to the endpoint goes through python's stdlib.
-python - <<'PY'
+# talks to the endpoint goes through python's stdlib. `|| health=1` keeps
+# set -e from killing the script before the log can be printed.
+health=0
+python - <<'PY' || health=1
 import sys, time, urllib.request
 
-for _ in range(60):
+for attempt in range(60):
     try:
         with urllib.request.urlopen("http://localhost:8000/health", timeout=5) as response:
             if response.status == 200:
-                print("=== endpoint up")
+                print(f"=== endpoint up after ~{attempt * 5}s")
                 sys.exit(0)
-    except Exception:
-        pass
+    except Exception as exc:
+        if attempt % 6 == 0:
+            print(f"  waiting for endpoint ({type(exc).__name__})", flush=True)
     time.sleep(5)
-sys.exit("endpoint never came up")
+sys.exit(1)
 PY
-# set -e would kill the script before the diagnostic, so handle it here.
-[ $? -eq 0 ] || { tail -40 "uvicorn_${TS}.log"; exit 1; }
+if [ "$health" -ne 0 ]; then
+    echo "=== endpoint never came up — uvicorn log:"
+    tail -60 "uvicorn_${TS}.log"
+    exit 1
+fi
 
 echo "=== warming the engine (model loads, index open)"
 python - <<'PY'
