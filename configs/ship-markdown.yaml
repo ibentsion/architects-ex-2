@@ -1,0 +1,16 @@
+extends: configs/ship.yaml
+# The ship config with one variable changed: documents come from the
+# Marker/DataLab markdown parse instead of Docling's. Same chunker
+# (per_table), embedder (bge-m3), normalizer, retrieval knobs, synthesis
+# routing and models — so a delta against configs/ship.yaml is a delta of the
+# parse, and nothing else.
+#
+# 260801-002 compared the two end-to-end on the rag engine (markdown parses
+# better, Docling scores better) and 260802-002 compared them at the retrieval
+# level (Docling ahead on every arm). Neither measured markdown under the
+# agent harness, which is what this config is for.
+index_dir: rag_index/markdown-pertable-bgem3
+parser:
+  impl: markdown
+  params: {}   # no canary knobs: the markdown is pre-parsed, and the RTL
+               # canary reads Docling's output specifically
