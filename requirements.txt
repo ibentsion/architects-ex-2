@@ -2,6 +2,8 @@ fastapi
 uvicorn
 pydantic>=2
 requests
+httpx            # webapi/bridge_app.py streams the agent app's SSE body
+python-multipart # FastAPI multipart: the bridge's audio upload
 litellm
 huggingface_hub
 # --- RAG pipeline (rag_plan.md §2, pinned 2026-07-20) ---
