@@ -41,6 +41,18 @@ def _agent_base_url() -> str:
     return os.environ.get("AGENT_BASE_URL", DEFAULT_AGENT_BASE_URL).rstrip("/")
 
 
+def _agent_headers() -> dict[str, str]:
+    """Bearer token for the agent, when it is behind one.
+
+    A Nebius `ai endpoint` created with `--auth token` is reachable at a managed
+    public https:// URL, so it must not be left open — the agent spends the
+    shared Token Factory key on every question. Unset for a localhost agent or
+    an SSH tunnel, where there is nothing to authenticate against.
+    """
+    token = os.environ.get("AGENT_TOKEN", "").strip()
+    return {"Authorization": f"Bearer {token}"} if token else {}
+
+
 def _client() -> httpx.AsyncClient:
     # No read timeout: a streamed answer can be silent for a minute between
     # frames. The connect timeout is what catches a node that isn't there.
@@ -89,7 +101,9 @@ async def query(request: Request) -> StreamingResponse:
 
     base = _agent_base_url()
     client = _client()
-    stream = client.stream("POST", f"{base}/query", json={"question": question})
+    stream = client.stream(
+        "POST", f"{base}/query", json={"question": question}, headers=_agent_headers()
+    )
 
     # Enter the upstream stream BEFORE returning a response, so an agent that
     # is not there is an honest 502 rather than a 200 that immediately errors.

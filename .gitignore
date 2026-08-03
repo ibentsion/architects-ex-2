@@ -10,3 +10,4 @@ backups/
 *.partial.jsonl
 node_modules/
 webui/dist/
+.agent_token

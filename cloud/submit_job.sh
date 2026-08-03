@@ -101,6 +101,12 @@ esac
 
 NAME="${NAME:-ex2-$MODE-$(date +%Y%m%d-%H%M%S)}"
 
+# Jobs are for batch work that produces artifacts and exits. They get a private
+# VPC IP only -- no public IP, no SSH authorized keys, and `nebius ai job ssh`
+# has no port-forward flag -- so nothing served inside a job is reachable from a
+# laptop. `--container-port` on a job only ever yields a private endpoint.
+# To SERVE something (the web UI's agent), use cloud/serve_endpoint.sh, which
+# creates a `nebius ai endpoint` and gets a managed public https:// URL.
 echo "submitting job $NAME (timeout $TIMEOUT)"
 nebius ai job create \
     --name "$NAME" \

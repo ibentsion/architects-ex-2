@@ -15,38 +15,56 @@ Two views:
 - **היסטוריית שאלות** — browse every answer/judgment JSONL in the repo next to
   the reference answer and the evaluation committee's grades. Read-only.
 
-## Running it (three processes)
+## Running it
 
-**1. The agent, on the GPU node.** The cross-encoder is 9 ms/pair there against
-~1.7 s/pair on a laptop CPU, so the engine runs where the GPU is:
+The engine can run locally, but the cross-encoder is ~1.7 s/pair on a laptop CPU
+against 9 ms/pair on the node's L40S — measured end to end, that is **~30 s per
+question locally vs ~3 s on the node**.
+
+### Local only (no cloud, ~30 s/question)
 
 ```bash
-cloud/submit_job.sh run 'bash cloud/serve_ui.sh' --timeout 3h
+./venv/bin/python -m uvicorn webapi.agent_app:app --port 8000    # the engine
+./venv/bin/python -m uvicorn webapi.bridge_app:app --port 8080   # the bridge
+npm --prefix webui install && npm --prefix webui run dev         # localhost:5173
 ```
 
-**2. The tunnel and the bridge, on the laptop:**
+The history view needs none of this — only the bridge.
+
+### Agent on the GPU node (~3 s/question)
+
+**There is no SSH tunnel to a job.** A `nebius ai job` gets a private VPC IP
+only: no public IP, no SSH authorized keys, and `nebius ai job ssh` has no `-L`.
+`--container-port` on a job yields a private endpoint and nothing more. Anything
+that must be *reachable* is a `nebius ai endpoint`, which publishes each HTTP
+port on a managed `https://` URL with no public IP required.
 
 ```bash
-ssh -N -L 8000:localhost:8000 <node>              # AGENT_BASE_URL points here
+cloud/serve_endpoint.sh create      # ~4 min: clone, setup, serve, warm
+cloud/serve_endpoint.sh status      # URL + state
+
+export AGENT_BASE_URL=$(cloud/serve_endpoint.sh status | grep -o 'https://[^ ]*')
+export AGENT_TOKEN=$(cat .agent_token)
 ./venv/bin/python -m uvicorn webapi.bridge_app:app --port 8080
+npm --prefix webui run dev
+
+cloud/serve_endpoint.sh stop        # it holds a GPU until you do this
 ```
 
-**3. The frontend, on the laptop:**
-
-```bash
-npm --prefix webui install
-npm --prefix webui run dev                        # http://localhost:5173
-```
+The endpoint is created with `--auth token` and a generated bearer token: the
+URL is public, and every question spends the **shared** course Token Factory
+key. `AGENT_TOKEN` is what the bridge presents; without it the endpoint answers
+401. Leave both unset for a local agent.
 
 Vite proxies `/api` to the bridge on 8080, so the browser is always
-same-origin — which is why the bridge ships no CORS middleware. Port 8080 keeps
-8000 free for the tunnel.
+same-origin — which is why the bridge ships no CORS middleware.
 
 ## Environment
 
 | Variable | Default | Where | What |
 |---|---|---|---|
 | `AGENT_BASE_URL` | `http://localhost:8000` | bridge | The agent app. Read per request, so pointing it at a public node URL needs no code change. |
+| `AGENT_TOKEN` | *(unset)* | bridge | Bearer token sent to the agent. Required when it is a `nebius ai endpoint` created with `--auth token`; unset for a local agent. |
 | `RAG_CONFIG` | `configs/ship.yaml` | agent app | Same config the graded endpoint uses. Read, never written. |
 | `STT_MODEL` | *(unset — STT off)* | bridge | Enables backend transcription, e.g. `base` on CPU or an `ivrit-ai` model on the node. |
 | `STT_DEVICE` | `cpu` | bridge | `cuda` on the node. |
