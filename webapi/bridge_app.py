@@ -180,11 +180,14 @@ def citation_content(
 ) -> dict[str, Any]:
     is_pdf = file.lower().endswith(".pdf")
     try:
-        # A PDF's text is NOT re-extracted here: that would re-run the ingest
-        # parser on a UI request. The rendered page is the preview.
-        text, url = (None, corpus_view.source_url(file)) if is_pdf else corpus_view.page_text(file)
+        # Nothing is re-parsed on a UI request: a PDF page's text comes from
+        # the Docling parse cache the index was built from (and is None when
+        # that cache has no entry for the document).
         if is_pdf:
             corpus_view.page_thumbnail(file, page or 1)  # 404s if it isn't there
+            text, url = corpus_view.page_preview(file, page or 1), corpus_view.source_url(file)
+        else:
+            text, url = corpus_view.page_text(file)
     except PathEscape as exc:
         raise HTTPException(400, detail=str(exc)) from exc
     except CorpusUnavailable as exc:

@@ -73,10 +73,15 @@ verbatim. It never invents or empties a transcript.
 
 ## Caveats
 
-- **Thumbnails need a local `corpus/`**, which is gitignored and often absent.
-  When it is, citation cards fall back to a "no preview available" placeholder
-  and the endpoints answer 404 — the app keeps working.
-- Rendered pages are cached under `cache/webui_thumbs/` (also gitignored).
+- **Citation previews need a local `corpus/` and `cache/parsed/`**, both
+  gitignored and often absent. Page images are rendered with pypdfium2; page
+  *text* is resolved through `evalharness.pages.PageStore` (corpus walk →
+  sha256 → Docling parse cache), so nothing is ever parsed on a request. With
+  either missing, cards fall back to "no preview available" and the endpoints
+  answer 404 — the app keeps working.
+- The first citation preview after startup walks the corpus once (~3 s for 571
+  files) and is memoized for the life of the process; every later lookup is
+  instant. Thumbnails are cached on disk under `cache/webui_thumbs/`.
 - **No auth, by decision.** This is a localhost tool. Do not expose the bridge
   on a public interface: it reads repo files by design.
 - No multi-turn memory — the engine is stateless per query, and the UI's

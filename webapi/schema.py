@@ -66,14 +66,17 @@ def _first(*values: Any) -> Any:
     return None
 
 
-def _resolve_preview(file_name: str, quote: str | None) -> str | None:
+def _resolve_preview(file_name: str, page: int | None, quote: str | None) -> str | None:
     """Citation preview text. Precedence — defined here and nowhere else:
-    the record's own quote, then the resolved corpus page, then nothing."""
+    the record's own quote, then the resolved corpus page, then nothing.
+
+    The page number matters: a preview of the wrong page is worse than none.
+    """
     if quote:
         return quote
     from webapi import corpus_view  # local: corpus/ is gitignored and optional
 
-    return corpus_view.preview_text(file_name)
+    return corpus_view.preview_text(file_name, page)
 
 
 def _citations(raw: list[dict[str, Any]] | None, pair_id: str) -> list[SupportCitation]:
@@ -93,7 +96,7 @@ def _citations(raw: list[dict[str, Any]] | None, pair_id: str) -> list[SupportCi
                 id=f"{pair_id}:{i}",
                 file_name=file_name,
                 page_number=page,
-                content_preview=_resolve_preview(file_name, citation.get("quote")),
+                content_preview=_resolve_preview(file_name, page, citation.get("quote")),
                 thumbnail_url=thumbnail,
             )
         )

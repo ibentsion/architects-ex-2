@@ -6,13 +6,16 @@ or raises :class:`CorpusUnavailable`, which the routes answer with 404. Nothing
 here ever 500s because a file is missing.
 
 Rendering uses pypdfium2, which is already in the tree as a Docling dependency
-— no new upstream for the sake of a thumbnail.
+— no new upstream for the sake of a thumbnail. Page TEXT comes from
+``evalharness.pages.PageStore``: corpus walk -> sha256 -> Docling parse cache,
+the same resolution the citation judge uses. Nothing is parsed on a request.
 """
 from __future__ import annotations
 
 import hashlib
 import json
 import logging
+import threading
 from functools import lru_cache
 from pathlib import Path
 
@@ -77,17 +80,87 @@ def page_text(file: str) -> tuple[str, str | None]:
     return path.read_text(encoding="utf-8"), source_url(file)
 
 
-def preview_text(file: str) -> str | None:
+# --------------------------------------------------------------------------- #
+# Paged (PDF) page text, via the evalharness page store
+# --------------------------------------------------------------------------- #
+
+# One store per repo root, built on first use and kept for the process: the
+# first lookup walks the corpus (~570 files, ~3 s), everything after it is
+# memoized. The bridge is long-lived, so re-walking per request is not an
+# option. PageStore's memoization is plain dict mutation, so the lock guards
+# lookups too — uvicorn runs sync endpoints on a thread pool.
+_store_lock = threading.Lock()
+_stores: dict[str, object] = {}
+
+
+def _page_store():
+    """The evalharness PageStore for the current repo root.
+
+    Reuses the citation-judging machinery rather than a second, differently
+    parsed view of the corpus: corpus walk -> sha256 -> Docling parse cache,
+    direct lookup and never a search. That is the same text the retriever
+    indexed, which is exactly what a citation preview should show.
+    """
+    root = str(paths.REPO_ROOT)
+    store = _stores.get(root)
+    if store is None:
+        from evalharness.pages import PageStore
+
+        store = PageStore(paths.REPO_ROOT / "corpus", paths.REPO_ROOT / "cache")
+        _stores[root] = store
+    return store
+
+
+def page_preview(file: str, page: int) -> str | None:
+    """Text of one PDF page, or None if it cannot be resolved.
+
+    Never raises. The store raises for a missing corpus/ and for a document
+    with no parse-cache entry, and returns a reason code for an unknown file
+    or an out-of-range page — for a preview all of those are simply "nothing
+    to show", and a citation list must render regardless.
+    """
+    try:
+        with _store_lock:
+            text, reason = _page_store().resolve(file, page)
+    except Exception as exc:  # missing corpus/, missing parse, parse error
+        logger.debug("no page preview for %s p%s (%s: %s)", file, page, type(exc).__name__, exc)
+        return None
+    if text is None:
+        logger.debug("no page preview for %s p%s (%s)", file, page, reason)
+    return text
+
+
+def reset_page_store() -> None:
+    """Drop the memoized stores (tests move REPO_ROOT under the process)."""
+    with _store_lock:
+        _stores.clear()
+
+
+def preview_text(file: str, page: int | None = None) -> str | None:
     """Best-effort preview for a citation with no quote of its own.
 
-    Only TXT sources: a PDF page's text would mean re-running the ingest
-    parser on a UI request. Never raises — a missing corpus is the normal case.
+    Paged citations resolve through the parse cache; page-less TXT citations
+    read the corpus page directly. Never raises — an absent corpus/ (gitignored)
+    is the normal case, not an error path.
     """
-    if not file.endswith(".txt"):
+    if not file:
         return None
     try:
-        text, _url = page_text(file)
-    except (CorpusUnavailable, PathEscape, OSError, UnicodeDecodeError):
+        resolve_in_repo(f"corpus/{file}")  # the chokepoint applies to previews too
+    except PathEscape:
+        return None
+
+    if page is not None:
+        text = page_preview(file, page)
+    elif file.endswith(".txt"):
+        try:
+            text, _url = page_text(file)
+        except (CorpusUnavailable, OSError, UnicodeDecodeError):
+            return None
+    else:
+        return None  # a paged document cited without a page identifies nothing
+
+    if text is None:
         return None
     return text.strip()[:PREVIEW_CHARS] or None
 

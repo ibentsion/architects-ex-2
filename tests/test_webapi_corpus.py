@@ -23,15 +23,30 @@ ANCHOR_TXT = "apartment/pages/cancellation.txt"
 
 
 @pytest.fixture
-def corpus_repo(tmp_path, monkeypatch, mini_corpus_dir) -> Path:
+def corpus_repo(tmp_path, monkeypatch, mini_corpus_dir, repo_root) -> Path:
     """A repo root whose corpus/ is the real mini-corpus fixture (a real PDF
-    and real Hebrew TXTs). Copied, not symlinked — a symlink would resolve out
-    of the fake root and be rejected, correctly."""
+    and real Hebrew TXTs), plus the Docling parse-cache entries for its PDFs.
+
+    Copied, not symlinked — a symlink would resolve out of the fake root and be
+    rejected, correctly. The parse entries come from the shared repo cache, so
+    this triggers no Docling run (both fixture PDFs are already parsed there).
+    """
+    from rag.parsing import discover
+
     root = tmp_path / "repo"
     root.mkdir()
     shutil.copytree(mini_corpus_dir, root / "corpus")
+
+    parsed = root / "cache" / "parsed"
+    parsed.mkdir(parents=True)
+    for source in discover(mini_corpus_dir):
+        entry = repo_root / "cache" / "parsed" / f"{source.sha256}.json"
+        if entry.is_file():
+            shutil.copyfile(entry, parsed / entry.name)
+
     monkeypatch.setattr(paths, "REPO_ROOT", root)
     corpus_view._manifest.cache_clear()
+    corpus_view.reset_page_store()
     return root
 
 
@@ -42,6 +57,7 @@ def empty_repo(tmp_path, monkeypatch) -> Path:
     root.mkdir()
     monkeypatch.setattr(paths, "REPO_ROOT", root)
     corpus_view._manifest.cache_clear()
+    corpus_view.reset_page_store()
     return root
 
 
@@ -120,16 +136,29 @@ def test_txt_citation_content_carries_the_page_text_and_its_source_url(corpus_re
     )
 
 
-def test_pdf_citation_content_points_at_the_thumbnail_not_a_re_parse(corpus_repo, client):
+def test_pdf_citation_content_serves_the_cached_page_text(corpus_repo, client):
     body = client.get("/api/citation/content",
                       params={"file": ANCHOR_PDF, "page": 1}).json()
 
     assert body["kind"] == "pdf"
     assert body["page_number"] == 1
-    # Re-parsing a PDF page on a UI request would take seconds and duplicate
-    # the ingest pipeline; the page image is the preview.
-    assert body["text"] is None
+    # From the parse cache, not a fresh parse — the same text the index holds.
+    assert body["text"] and "התיישנות" in body["text"]
     assert body["source_url"].endswith(".pdf")
+
+
+def test_pdf_citation_content_without_a_parse_cache_still_serves_the_image(
+    corpus_repo, client
+):
+    for entry in (corpus_repo / "cache" / "parsed").glob("*.json"):
+        entry.unlink()
+    corpus_view.reset_page_store()
+
+    body = client.get("/api/citation/content",
+                      params={"file": ANCHOR_PDF, "page": 1}).json()
+    assert body["kind"] == "pdf" and body["text"] is None
+    assert client.get("/api/citation/thumbnail",
+                      params={"file": ANCHOR_PDF, "page": 1}).status_code == 200
 
 
 def test_content_traversal_is_400(corpus_repo, client):
@@ -177,6 +206,92 @@ def test_previews_are_none_rather_than_an_error_without_a_corpus(empty_repo):
 
 def test_preview_never_leaves_the_repo(corpus_repo):
     assert corpus_view.preview_text("../../etc/passwd") is None
+    assert corpus_view.preview_text("../../etc/passwd", 1) is None
+
+
+# --------------------------------------------------------------------------- #
+# PDF page previews — the citation accordion's text, from the parse cache
+# --------------------------------------------------------------------------- #
+
+
+def test_a_pdf_citation_previews_the_cited_page(corpus_repo):
+    """The page text comes from the same corpus-walk + Docling parse cache the
+    citation judge uses, so the card shows the text the retriever indexed."""
+    pair = schema.record_to_pair(
+        {"id": "q1", "citations": [{"file": ANCHOR_PDF, "page": 1}]}, pair_id="q1"
+    )
+    preview = pair.citations[0].content_preview
+    assert preview, "the anchor PDF's page 1 must resolve"
+    assert len(preview) <= corpus_view.PREVIEW_CHARS
+    assert "התיישנות" in preview  # the ground-truth anchor's page-1 content
+
+
+def test_the_preview_is_the_cited_page_not_just_the_document(corpus_repo):
+    """A preview of the wrong page is worse than none, which is why the page
+    number is threaded all the way through the adapter."""
+    page_one = corpus_view.page_preview(ANCHOR_PDF, 1)
+    assert page_one and "התיישנות" in page_one
+    assert corpus_view.page_preview(ANCHOR_PDF, 2) is None  # 1-page document
+
+
+@pytest.mark.parametrize(
+    ("file", "page"),
+    [
+        (ANCHOR_PDF, 9999),  # page outside the document
+        (ANCHOR_PDF, 0),  # not a real page number
+        ("apartment/files/no-such-document.pdf", 1),  # unknown file
+        (ANCHOR_PDF, None),  # a paged document cited without a page
+    ],
+)
+def test_unresolvable_page_previews_are_none_not_exceptions(corpus_repo, file, page):
+    assert corpus_view.preview_text(file, page) is None
+
+
+def test_a_pdf_with_no_parse_cache_entry_previews_as_none(corpus_repo):
+    """cache/parsed/ is gitignored and may be empty — a preview must degrade,
+    and must not try to parse a PDF on a UI request."""
+    for entry in (corpus_repo / "cache" / "parsed").glob("*.json"):
+        entry.unlink()
+    corpus_view.reset_page_store()
+
+    assert corpus_view.preview_text(ANCHOR_PDF, 1) is None
+    # ...and the citation list still renders.
+    pair = schema.record_to_pair(
+        {"id": "q1", "citations": [{"file": ANCHOR_PDF, "page": 1}]}, pair_id="q1"
+    )
+    assert pair.citations[0].content_preview is None
+    assert pair.citations[0].thumbnail_url is not None
+
+
+def test_page_previews_never_raise_out_of_the_adapter(corpus_repo, monkeypatch):
+    """Whatever the store does — and it raises FileNotFoundError for a missing
+    parse — a citation list must render."""
+    class Exploding:
+        def resolve(self, file, page):
+            raise RuntimeError("parse cache is on fire")
+
+    monkeypatch.setattr(corpus_view, "_page_store", lambda: Exploding())
+    assert corpus_view.page_preview(ANCHOR_PDF, 1) is None
+
+    pair = schema.record_to_pair(
+        {"id": "q1", "citations": [{"file": ANCHOR_PDF, "page": 1}]}, pair_id="q1"
+    )
+    assert pair.citations[0].content_preview is None
+
+
+def test_the_page_store_is_built_once_per_repo_root(corpus_repo):
+    corpus_view.preview_text(ANCHOR_PDF, 1)
+    first = corpus_view._page_store()
+    corpus_view.preview_text(ANCHOR_PDF, 1)
+    assert corpus_view._page_store() is first  # no re-walk of the corpus
+
+
+def test_a_quote_still_wins_over_the_resolved_page(corpus_repo):
+    pair = schema.record_to_pair(
+        {"id": "q1", "citations": [{"file": ANCHOR_PDF, "page": 1, "quote": "הציטוט"}]},
+        pair_id="q1",
+    )
+    assert pair.citations[0].content_preview == "הציטוט"
 
 
 # --------------------------------------------------------------------------- #

@@ -98,17 +98,17 @@ function CitationDetail({ citation }: { citation: SupportCitation }) {
         {citation.file_name}
       </div>
 
-      {citation.thumbnail_url ? (
-        <Thumbnail url={citation.thumbnail_url} />
-      ) : (
-        text && (
-          <p
-            dir={detectDir(text)}
-            className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-[var(--color-line)] bg-white p-2.5 text-xs leading-relaxed"
-          >
-            {text}
-          </p>
-        )
+      {citation.thumbnail_url && <Thumbnail url={citation.thumbnail_url} />}
+
+      {/* The cited page's text, from the parse cache — shown alongside the
+          page image, since it is the text the retriever actually indexed. */}
+      {text && (
+        <p
+          dir={detectDir(text)}
+          className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-[var(--color-line)] bg-white p-2.5 text-xs leading-relaxed"
+        >
+          {text}
+        </p>
       )}
 
       {error && (
