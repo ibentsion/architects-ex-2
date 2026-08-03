@@ -69,7 +69,11 @@ def _first(*values: Any) -> Any:
 def _resolve_preview(file_name: str, quote: str | None) -> str | None:
     """Citation preview text. Precedence — defined here and nowhere else:
     the record's own quote, then the resolved corpus page, then nothing."""
-    return quote or None
+    if quote:
+        return quote
+    from webapi import corpus_view  # local: corpus/ is gitignored and optional
+
+    return corpus_view.preview_text(file_name)
 
 
 def _citations(raw: list[dict[str, Any]] | None, pair_id: str) -> list[SupportCitation]:

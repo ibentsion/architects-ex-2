@@ -20,9 +20,10 @@ from typing import Any, AsyncIterator
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 
-from webapi import stt
+from webapi import corpus_view, stt
+from webapi.corpus_view import CorpusUnavailable
 from webapi.datasets import DatasetInfo, UnknownDataset, discover_datasets, load_pairs
 from webapi.paths import PathEscape
 from webapi.stt import SttNotConfigured
@@ -146,3 +147,52 @@ def offline_pairs(
     except (PathEscape, UnknownDataset) as exc:
         raise HTTPException(400, detail=str(exc)) from exc
     return {"dataset": dataset, "total": total, "pairs": pairs}
+
+
+# --------------------------------------------------------------------------- #
+# Citations (local corpus/, which is gitignored and often absent)
+# --------------------------------------------------------------------------- #
+
+
+@app.get("/api/citation/thumbnail")
+def citation_thumbnail(
+    file: str = Query(..., description="Category-relative corpus path"),
+    page: int = Query(..., description="1-based page number"),
+) -> FileResponse:
+    try:
+        rendered = corpus_view.page_thumbnail(file, page)
+    except PathEscape as exc:
+        raise HTTPException(400, detail=str(exc)) from exc
+    except CorpusUnavailable as exc:
+        raise HTTPException(404, detail=str(exc)) from exc
+    return FileResponse(
+        rendered,
+        media_type="image/jpeg",
+        # Immutable once rendered: the corpus is a fixed snapshot.
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
+
+
+@app.get("/api/citation/content")
+def citation_content(
+    file: str = Query(..., description="Category-relative corpus path"),
+    page: int | None = Query(None, description="1-based page number, PDFs only"),
+) -> dict[str, Any]:
+    is_pdf = file.lower().endswith(".pdf")
+    try:
+        # A PDF's text is NOT re-extracted here: that would re-run the ingest
+        # parser on a UI request. The rendered page is the preview.
+        text, url = (None, corpus_view.source_url(file)) if is_pdf else corpus_view.page_text(file)
+        if is_pdf:
+            corpus_view.page_thumbnail(file, page or 1)  # 404s if it isn't there
+    except PathEscape as exc:
+        raise HTTPException(400, detail=str(exc)) from exc
+    except CorpusUnavailable as exc:
+        raise HTTPException(404, detail=str(exc)) from exc
+    return {
+        "kind": "pdf" if is_pdf else "text",
+        "text": text,
+        "source_url": url,
+        "file_name": file,
+        "page_number": page,
+    }
