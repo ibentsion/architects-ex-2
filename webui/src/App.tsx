@@ -1,7 +1,8 @@
 import { useState } from "react";
 
-import { CitationSidebar } from "./components/CitationSidebar";
 import { SelectionProvider } from "./state/SelectionContext";
+import { HistoryView } from "./views/HistoryView";
+import { LiveChatView } from "./views/LiveChatView";
 
 type Tab = "live" | "history";
 
@@ -37,13 +38,9 @@ export default function App() {
         </header>
 
         <main className="min-h-0 flex-1">
-          {/* RTL-mirrored split: content on the right, sources on the left. */}
-          <div className="grid h-full grid-cols-[35%_65%]">
-            <CitationSidebar />
-            <section className="overflow-y-auto p-4 text-sm text-[var(--color-muted)]">
-              {tab === "live" ? "תמיכה חיה" : "היסטוריית שאלות"}
-            </section>
-          </div>
+          {/* Each view owns its own split, because the proportions differ:
+              65/35 for the conversation, 25/50/25 for the history triptych. */}
+          {tab === "live" ? <LiveChatView /> : <HistoryView />}
         </main>
       </div>
     </SelectionProvider>

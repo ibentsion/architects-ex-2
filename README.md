@@ -12,6 +12,12 @@ Read **`exercise2_customer_support_agent.md`** for the full exercise.
 | `baseline_runner.py` | Stage 1: run the questions through a bare model, answers JSONL out |
 | `submit_runner.py` | Batch-asks your `/ask` endpoint → answers JSONL (used for final submission) |
 | `tf_client.py` | Minimal Token Factory client with per-call cost estimate (shared key — play fair) |
+| `webapi/` | FastAPI layer for the web UI: an SSE app that streams the agent's pipeline trace, plus a local bridge serving the QA-history and citation endpoints |
+| `webui/` | React web UI — live support chat with the pipeline trace as it happens, and a QA-history browser over the eval runs (see `webui/README.md`) |
+
+`webui/` and `webapi/` are Stage 3's **optional bonus** ("voice interface,
+simple UI") and are explicitly not part of the graded contract — grading calls
+`contract.py`, which they do not touch.
 
 There is deliberately no evaluation script here: **building your own harness is
 a Stage 1 deliverable** — the exercise page documents exactly what it must
