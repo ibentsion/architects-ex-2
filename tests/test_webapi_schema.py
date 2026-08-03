@@ -203,6 +203,33 @@ def test_question_index_reads_wrapped_bare_and_jsonl_sources(tmp_path, monkeypat
     assert index.get("nope") is None
 
 
+def test_question_index_reads_the_blind_submission_questions(tmp_path, monkeypatch):
+    """blind_questions.json names the ids in team_1_results.jsonl — the graded
+    submission. Without it that dataset renders with no questions at all."""
+    root = write_repo(tmp_path, monkeypatch)
+    (root / "blind_questions.json").write_text(
+        json.dumps({"questions": [{"id": "int-001-apartment-easy", "question": "שאלה עיוורת"}]}),
+        encoding="utf-8",
+    )
+    jsonl(root / "team_1_results.jsonl",
+          [{"id": "int-001-apartment-easy", "answer": "תשובה", "domain": "apartment"}])
+
+    _total, pairs = load_pairs("team_1_results.jsonl")
+    assert pairs[0].question == "שאלה עיוורת"
+
+
+def test_a_missing_question_source_is_silent_not_an_error(tmp_path, monkeypatch):
+    """blind_questions.json is not in git — it only exists after a fetch. Its
+    absence must not break the index (nor must any other source's)."""
+    root = write_repo(tmp_path, monkeypatch)
+    (root / "reference_questions.json").write_text(
+        json.dumps([{"id": "dev-01", "question": "שאלה"}]), encoding="utf-8")
+    assert not (root / "blind_questions.json").exists()
+
+    index = QuestionIndex.load()
+    assert set(index.by_id) == {"dev-01"}
+
+
 def test_question_index_covers_every_real_question_source():
     """Regression guard: if a question file's shape changes, the History view
     silently loses its question text. v1/v2/v3 ids are pairwise disjoint."""
@@ -219,6 +246,31 @@ def test_question_index_covers_every_real_question_source():
     assert len(index.by_id) >= 180
     assert (v1 | v2 | v3) <= set(index.by_id)
     assert all(index.get(qid)["question"] for qid in v1 | v2 | v3)
+
+
+@pytest.mark.skipif(
+    not (paths.REPO_ROOT / "blind_questions.json").is_file(),
+    reason="blind_questions.json is fetched from the artifacts dataset, not in git",
+)
+def test_the_graded_submission_joins_to_its_questions_in_the_real_repo():
+    """The regression this guards: team_1_results.jsonl IS the graded run, and
+    it was rendering 390 pairs with question=None."""
+    raw = json.loads((paths.REPO_ROOT / "blind_questions.json").read_text(encoding="utf-8"))
+    blind_ids = {q["id"] for q in (raw["questions"] if isinstance(raw, dict) else raw)}
+
+    index = QuestionIndex.load()
+    assert blind_ids <= set(index.by_id)
+
+    # The blind namespace must not shadow (or be shadowed by) the dev sets.
+    for name in ("reference_questions.json", "reference_questions_v2.json",
+                 "reference_questions_v3.json"):
+        other = json.loads((paths.REPO_ROOT / name).read_text(encoding="utf-8"))
+        other_ids = {r["id"] for r in (other["questions"] if isinstance(other, dict) else other)}
+        assert not (blind_ids & other_ids), f"id collision with {name}"
+
+    if (paths.REPO_ROOT / "team_1_results.jsonl").is_file():
+        _total, pairs = load_pairs("team_1_results.jsonl", limit=25)
+        assert pairs and all(p.question for p in pairs)
 
 
 # --------------------------------------------------------------------------- #

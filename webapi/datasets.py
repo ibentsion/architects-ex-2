@@ -29,15 +29,23 @@ EVAL_ANSWER_GLOB = "eval_results/**/answers/*.jsonl"
 #: Judged runs. Nested up to depth 3, so the walk has to be recursive.
 JUDGMENTS_GLOB = "eval_results/**/judgments.jsonl"
 
-#: Question sources, in precedence order. v1/v2/v3 ids are disjoint; the
-#: validation/holdout files are re-splits of v1+v2 and collide with identical
-#: content, so first-wins is safe and silent.
+#: Question sources, in precedence order. Their id namespaces are disjoint by
+#: construction (`dev-*` in v1, `v2-*`, `v3-*`, `int-*` in the blind set), and
+#: the validation/holdout files are re-splits of v1+v2 whose ids DO collide —
+#: with identical content — so first-wins is safe and silent.
+#:
+#: `blind_questions.json` is the graded submission's question set. It is not in
+#: git (it is fetched from the artifacts dataset), and it is the ONLY source
+#: that can name the ids in team_1_results.jsonl — without it the graded run
+#: renders with no questions at all. Every source here is optional: a missing
+#: file is skipped silently, because most of them are absent on a fresh clone.
 QUESTION_SOURCES = (
     "reference_questions.json",
     "reference_questions_v2.json",
     "reference_questions_v3.json",
     "ref_q_validation_set_v1.jsonl",
     "ref_q_holdout_set_v1.jsonl",
+    "blind_questions.json",
 )
 
 
