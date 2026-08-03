@@ -92,6 +92,13 @@ def page_text(file: str) -> tuple[str, str | None]:
 _store_lock = threading.Lock()
 _stores: dict[str, object] = {}
 
+# PDFium is not thread-safe. uvicorn runs sync endpoints on a thread pool and a
+# citation list fires one thumbnail request per card, so concurrent renders are
+# the normal case, not an edge one — unsynchronized they fail with
+# "PdfiumError: Data format error" on documents that load fine on their own.
+# Only the render is serialized; cache hits never take this lock.
+_render_lock = threading.Lock()
+
 
 def _page_store():
     """The evalharness PageStore for the current repo root.
@@ -191,20 +198,34 @@ def page_thumbnail(file: str, page: int) -> Path:
 
     import pypdfium2  # heavyweight; the bridge starts without touching it
 
-    document = pypdfium2.PdfDocument(path)
-    try:
-        if not 1 <= page <= len(document):
-            raise CorpusUnavailable(
-                f"page {page} is outside {file} (1..{len(document)})"
-            )
-        image = document[page - 1].render(scale=RENDER_SCALE).to_pil()
-    finally:
-        document.close()
+    with _render_lock:
+        if cached.is_file():
+            return cached  # another thread rendered it while we waited
 
-    if image.width > MAX_THUMBNAIL_WIDTH:
-        height = round(image.height * MAX_THUMBNAIL_WIDTH / image.width)
-        image = image.resize((MAX_THUMBNAIL_WIDTH, height))
+        try:
+            document = pypdfium2.PdfDocument(path)
+        except pypdfium2.PdfiumError as exc:
+            # A corrupt or unsupported PDF is a placeholder, not a 500.
+            raise CorpusUnavailable(f"cannot open {file}: {exc}") from exc
+        try:
+            if not 1 <= page <= len(document):
+                raise CorpusUnavailable(
+                    f"page {page} is outside {file} (1..{len(document)})"
+                )
+            image = document[page - 1].render(scale=RENDER_SCALE).to_pil()
+        except pypdfium2.PdfiumError as exc:
+            raise CorpusUnavailable(f"cannot render {file} p{page}: {exc}") from exc
+        finally:
+            document.close()
 
-    cached.parent.mkdir(parents=True, exist_ok=True)
-    image.convert("RGB").save(cached, "JPEG", quality=JPEG_QUALITY)
+        if image.width > MAX_THUMBNAIL_WIDTH:
+            height = round(image.height * MAX_THUMBNAIL_WIDTH / image.width)
+            image = image.resize((MAX_THUMBNAIL_WIDTH, height))
+
+        # Write-then-rename: a half-written JPEG would be cached forever and
+        # served as a broken image on every later request.
+        cached.parent.mkdir(parents=True, exist_ok=True)
+        staging = cached.with_suffix(".jpg.tmp")
+        image.convert("RGB").save(staging, "JPEG", quality=JPEG_QUALITY)
+        staging.replace(cached)
     return cached

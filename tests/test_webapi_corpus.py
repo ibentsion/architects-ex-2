@@ -9,6 +9,7 @@ from __future__ import annotations
 import io
 import json
 import shutil
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -97,6 +98,50 @@ def test_pdf_page_renders_once_and_is_served_from_cache(corpus_repo, client):
 def test_a_page_outside_the_document_is_404_not_a_traceback(corpus_repo, client, page):
     response = client.get("/api/citation/thumbnail", params={"file": ANCHOR_PDF, "page": page})
     assert response.status_code == 404
+
+
+def test_concurrent_cold_renders_all_succeed(corpus_repo, client):
+    """Every citation card requests its own thumbnail, so concurrent cold
+    renders are the normal case. PDFium is not thread-safe: unsynchronized,
+    this raised `PdfiumError: Data format error` (a 500) on documents that
+    render fine one at a time."""
+    targets = [
+        (ANCHOR_PDF, 1),
+        ("travel/files/הודעה-על-הגדרת-ספורט-אתגרי.pdf", 1),
+    ] * 8
+
+    def fetch(target):
+        file, page = target
+        return client.get("/api/citation/thumbnail",
+                          params={"file": file, "page": page}).status_code
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        codes = list(pool.map(fetch, targets))
+
+    assert codes == [200] * len(targets)
+
+
+def test_a_corrupt_pdf_is_404_not_a_500(corpus_repo, client):
+    broken = corpus_repo / "corpus" / "apartment" / "files" / "broken.pdf"
+    broken.write_bytes(b"%PDF-1.4\nthis is not actually a pdf\n")
+
+    response = client.get("/api/citation/thumbnail",
+                          params={"file": "apartment/files/broken.pdf", "page": 1})
+    assert response.status_code == 404
+    assert "broken.pdf" in response.json()["detail"]
+
+
+def test_a_failed_render_leaves_no_partial_file_in_the_cache(corpus_repo, client):
+    broken = corpus_repo / "corpus" / "apartment" / "files" / "broken.pdf"
+    broken.write_bytes(b"%PDF-1.4\nnope\n")
+    client.get("/api/citation/thumbnail",
+               params={"file": "apartment/files/broken.pdf", "page": 1})
+
+    thumbs = corpus_repo / "cache" / "webui_thumbs"
+    assert not list(thumbs.glob("*.tmp"))
+    assert not list(thumbs.glob("*.jpg")) or all(
+        p.stat().st_size > 0 for p in thumbs.glob("*.jpg")
+    )
 
 
 def test_thumbnail_traversal_is_400(corpus_repo, client):

@@ -185,7 +185,9 @@ export function LiveChatView() {
         />
       </section>
 
-      <CitationSidebar />
+      {/* Citations arrive with the answer event, so the panel skeletons while
+          the query is in flight. */}
+      <CitationSidebar loading={busy} />
     </div>
   );
 }

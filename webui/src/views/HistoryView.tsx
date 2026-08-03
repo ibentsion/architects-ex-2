@@ -291,7 +291,7 @@ export function HistoryView() {
         {!error && selectedPair && <PairDetail pair={selectedPair} />}
       </section>
 
-      <CitationSidebar />
+      <CitationSidebar loading={loading} />
     </div>
   );
 }
