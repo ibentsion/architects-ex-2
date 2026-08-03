@@ -117,13 +117,15 @@ export WEBUI_DIST="webui/dist"
 # and is not published. UI_PASSWORD on the bridge is the gate.
 unset AGENT_TOKEN || true
 
+# The bridge logs to STDOUT, not a file: it is the process users actually hit,
+# and a file inside the container is unreachable without SSH (endpoints get no
+# authorized keys). A 500 here has to show up in `nebius ai endpoint logs`.
 echo "=== serving the bridge + UI on :$BRIDGE_PORT (gated by UI_PASSWORD)"
-python -m uvicorn webapi.bridge_app:app --host 0.0.0.0 --port "$BRIDGE_PORT" \
-    > "uvicorn_bridge_${TS}.log" 2>&1 &
+python -m uvicorn webapi.bridge_app:app --host 0.0.0.0 --port "$BRIDGE_PORT" 2>&1 &
 BRIDGE_PID=$!
 trap 'kill "$SERVER_PID" "$BRIDGE_PID" 2>/dev/null || true' EXIT
 sleep 5
-kill -0 "$BRIDGE_PID" 2>/dev/null || { echo "=== bridge died on startup:"; cat "uvicorn_bridge_${TS}.log"; exit 1; }
+kill -0 "$BRIDGE_PID" 2>/dev/null || { echo "=== bridge died on startup (see above)"; exit 1; }
 
 python - "$BRIDGE_PORT" <<'PY' || { echo "=== bridge health never passed"; exit 1; }
 import sys, time, urllib.request
@@ -144,7 +146,7 @@ cat <<EOF
 === ready. The whole app is on :${BRIDGE_PORT} — open the endpoint's public URL
     in a browser and log in with UI_PASSWORD.
 
-    logs: uvicorn_ui_${TS}.log (agent), uvicorn_bridge_${TS}.log (bridge)
+    logs: uvicorn_ui_${TS}.log (agent, in-container); the bridge logs here.
 EOF
 
 wait "$SERVER_PID" "$BRIDGE_PID"
