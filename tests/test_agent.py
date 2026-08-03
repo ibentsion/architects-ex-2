@@ -566,3 +566,117 @@ def test_the_loop_s_retrieve_tool_uses_the_same_policy(monkeypatch):
     )
     engine._answer("שאלה")
     assert ("מה ההשתתפות העצמית", ["apartment", "business", "mortgage"]) in engine.retriever.calls
+
+
+# --------------------------------------------------------------------------- #
+# event_sink — the live-streaming hook (webapi/agent_app.py). The sink sees the
+# trace as it is written, not after the answer is assembled.
+# --------------------------------------------------------------------------- #
+
+
+def sink_engine(**classification_overrides):
+    return make_engine(
+        simple_classification(**classification_overrides),
+        {
+            "שאלת דירה": [make_candidate(APT1, rerank_score=0.9)],
+            "שאלת רכב": [make_candidate(TRV1, rerank_score=0.6)],
+        },
+    )
+
+
+def test_emit_hands_the_sink_the_very_dict_it_appends():
+    """The sink is a view of the trace list, not a copy — which is why the
+    _emit docstring tells consumers to treat the record as read-only.
+    (Answer.trace itself is a pydantic-validated copy of these dicts.)"""
+    trace: list[dict] = []
+    seen: list[dict] = []
+    record = {"step": "classify", "ms": 12}
+    engine_mod._emit(trace, seen.append, record)
+    assert trace == [record] and trace[0] is record
+    assert seen == [record] and seen[0] is record
+
+
+def test_emit_without_a_sink_just_records():
+    trace: list[dict] = []
+    engine_mod._emit(trace, None, {"step": "hint"})
+    assert trace == [{"step": "hint"}]
+
+
+def test_event_sink_sees_every_trace_record_in_order():
+    engine = sink_engine()
+    seen: list[dict] = []
+    answer, _ = engine._answer("שאלה", event_sink=seen.append)
+    assert seen == answer.trace  # same records, same order
+    assert [r["step"] for r in seen] == [
+        "hint", "classify", "retrieve", "retrieve", "synthesize"
+    ]
+
+
+def test_event_sink_sees_the_loop_steps_too(monkeypatch):
+    engine = sink_engine(needs_calculation=True)
+    orchestrator_turns(
+        monkeypatch,
+        [
+            (None, [tool_call("calculate", {"expression": "1 + 1"})]),
+            ("DONE", None),
+        ],
+    )
+    seen: list[dict] = []
+    answer, _ = engine._answer("שאלה", event_sink=seen.append)
+    assert [r["step"] for r in seen] == [
+        "hint", "classify", "retrieve", "retrieve",
+        "orchestrator", "calculate", "orchestrator", "synthesize",
+    ]
+    assert seen == answer.trace
+
+
+def test_event_sink_fires_before_the_next_pipeline_step_runs():
+    """The point of the hook: a browser sees `classify` while retrieval is
+    still running, not after the whole answer is assembled."""
+    engine = sink_engine()
+    observed: list[tuple[str, int, int]] = []
+
+    def sink(record):
+        observed.append((record["step"], len(engine.retriever.calls), len(engine.generator.calls)))
+
+    engine._answer("שאלה", event_sink=sink)
+    by_step = {step: (n_retrieve, n_generate) for step, n_retrieve, n_generate in observed}
+    assert by_step["hint"] == (0, 0)       # emitted before any retrieval
+    assert by_step["classify"] == (0, 0)   # emitted before prefetch starts
+    assert by_step["synthesize"] == (2, 1)  # emitted after generation, as it must be
+    assert observed[2][0] == "retrieve" and observed[2][2] == 0  # before synthesis
+
+
+def test_no_event_sink_is_the_untouched_legacy_path():
+    engine = sink_engine()
+    answer, tokens = engine._answer("שאלה")
+    assert [t["step"] for t in answer.trace] == [
+        "hint", "classify", "retrieve", "retrieve", "synthesize"
+    ]
+    assert answer.text == "תשובה"
+    assert tokens == {"prompt": 10, "completion": 5}
+
+
+def test_answer_accepts_event_sink_as_a_keyword_only_extra():
+    engine = sink_engine()
+    seen: list[dict] = []
+    answer = engine.answer("שאלה", event_sink=seen.append)
+    assert answer.text == "תשובה"
+    assert [r["step"] for r in seen] == [
+        "hint", "classify", "retrieve", "retrieve", "synthesize"
+    ]
+
+
+def test_a_raising_sink_never_fails_the_answer(caplog):
+    """A browser disconnecting mid-stream must not cost the answer."""
+    engine = sink_engine()
+
+    def boom(_record):
+        raise RuntimeError("client gone")
+
+    answer, tokens = engine._answer("שאלה", event_sink=boom)
+    assert answer.text == "תשובה"
+    assert tokens == {"prompt": 10, "completion": 5}
+    assert [t["step"] for t in answer.trace] == [
+        "hint", "classify", "retrieve", "retrieve", "synthesize"
+    ]

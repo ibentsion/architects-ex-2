@@ -33,7 +33,7 @@ import json
 import logging
 import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any
+from typing import Any, Callable
 
 from tf_client import chat as tf_chat
 
@@ -104,6 +104,30 @@ computed. Work in as few turns as possible. When everything needed is available,
 single word DONE. Do not answer the customer yourself."""
 
 
+#: A live consumer of trace records (webapi/agent_app.py streams them as SSE).
+EventSink = Callable[[dict[str, Any]], None]
+
+
+def _emit(trace: list[dict[str, Any]], sink: EventSink | None, record: dict[str, Any]) -> None:
+    """Record one pipeline step: append it to ``trace``, then hand it to
+    ``sink`` (when there is one) so a live consumer sees the step while the
+    next one is still running.
+
+    The sink receives the SAME dict instance that stays in ``answer.trace`` —
+    consumers must treat it as read-only; mutating it corrupts the answer.
+
+    A sink failure never fails the answer: a browser disconnecting mid-stream
+    is a normal event, not a pipeline error.
+    """
+    trace.append(record)
+    if sink is None:
+        return
+    try:
+        sink(record)
+    except Exception as exc:
+        logger.warning("event_sink raised (%s: %s) — continuing", type(exc).__name__, exc)
+
+
 def _render_evidence(retrieved: list[RetrievedChunk]) -> str:
     if not retrieved:
         return "(אין קטעים — לא נמצאו מקורות רלוונטיים)"
@@ -167,14 +191,23 @@ class AgentEngine:
     # Public contract (same as QueryEngine)
     # ------------------------------------------------------------------ #
 
-    def answer(self, question: str, category: str | None = None) -> Answer:
-        return self._answer(question, category)[0]
+    def answer(
+        self, question: str, category: str | None = None, *, event_sink: EventSink | None = None
+    ) -> Answer:
+        return self._answer(question, category, event_sink=event_sink)[0]
 
     def _answer(
-        self, question: str, category: str | None = None
+        self,
+        question: str,
+        category: str | None = None,
+        *,
+        event_sink: EventSink | None = None,
     ) -> tuple[Answer, dict[str, int] | None]:
         # category is part of the engine interface but the agent predicts its
         # own filters; the CLI rejects --category with --engine agent.
+        # event_sink is keyword-only and optional: every existing positional
+        # caller (contract.py, rag/cli/query.py, evalharness) is unaffected.
+        sink = event_sink
         trace: list[dict[str, Any]] = []
         total_tokens = {"prompt": 0, "completion": 0}
 
@@ -185,20 +218,24 @@ class AgentEngine:
         t_hint = time.monotonic()
         hint, hint_summary = build_hint(self.retriever, question)
         hint_ms = (time.monotonic() - t_hint) * 1000
-        trace.append(
+        _emit(
+            trace,
+            sink,
             {
                 "step": "hint",
                 "ms": round(hint_ms),
                 "top_category": hint_summary["top_category"],
                 "top_share": hint_summary["top_share"],
                 "n_hits": hint_summary["n_hits"],
-            }
+            },
         )
 
         t0 = time.monotonic()
         classification = self.classifier.classify(question, hint=hint)
         classification_ms = (time.monotonic() - t0) * 1000
-        trace.append(
+        _emit(
+            trace,
+            sink,
             {
                 "step": "classify",
                 "ms": round(classification_ms),
@@ -208,7 +245,7 @@ class AgentEngine:
                 "needs_calculation": classification.needs_calculation,
                 "dependent": classification.dependent,
                 "difficulty": classification.estimated_difficulty,
-            }
+            },
         )
 
         # Prefetch all sub-questions concurrently.
@@ -231,14 +268,16 @@ class AgentEngine:
             }
             if retried:
                 entry["retried_unfiltered"] = True
-            trace.append(entry)
+            _emit(trace, sink, entry)
         retrieval_ms = (time.monotonic() - t1) * 1000
 
         # Agent loop only when the fast paths can't handle the query.
         calc_results: list[tuple[str, float]] = []
         loop_cost = 0.0
         if classification.needs_calculation or classification.dependent:
-            loop_cost = self._run_loop(question, classification, pool, calc_results, trace, total_tokens)
+            loop_cost = self._run_loop(
+                question, classification, pool, calc_results, trace, sink, total_tokens
+            )
 
         retrieved = sorted(
             pool.values(), key=lambda r: (-(r.rerank_score or 0.0), r.chunk.chunk_id)
@@ -277,13 +316,15 @@ class AgentEngine:
         t2 = time.monotonic()
         result = generator.generate(synth_question, retrieved, system_addendum=addendum)
         generation_ms = (time.monotonic() - t2) * 1000
-        trace.append(
+        _emit(
+            trace,
+            sink,
             {
                 "step": "synthesize",
                 "ms": round(generation_ms),
                 "model": generator.model,
                 "fast_synthesis": routed_fast,
-            }
+            },
         )
         for key in total_tokens:
             total_tokens[key] += result.tokens.get(key, 0)
@@ -417,6 +458,7 @@ class AgentEngine:
         pool: dict[str, RetrievedChunk],
         calc_results: list[tuple[str, float]],
         trace: list[dict[str, Any]],
+        sink: EventSink | None,
         total_tokens: dict[str, int],
     ) -> float:
         """Native tool-calling loop on the orchestrator model. Mutates
@@ -454,19 +496,23 @@ class AgentEngine:
                 for key in total_tokens:
                     total_tokens[key] += usage.get(key, 0)
                 tool_calls = getattr(message, "tool_calls", None) or []
-                trace.append(
+                _emit(
+                    trace,
+                    sink,
                     {
                         "step": "orchestrator",
                         "hop": hop,
                         "ms": round((time.monotonic() - t0) * 1000),
                         "n_tool_calls": len(tool_calls),
                         "content": (message.content or "")[:200],
-                    }
+                    },
                 )
                 if not tool_calls:
                     break
                 messages.append(_assistant_message_dict(message))
-                messages.extend(self._execute_tool_calls(tool_calls, pool, calc_results, trace))
+                messages.extend(
+                    self._execute_tool_calls(tool_calls, pool, calc_results, trace, sink)
+                )
             else:
                 logger.warning("Agent loop hit max_hops=%d — proceeding to synthesis", self.harness.max_hops)
         except Exception as exc:
@@ -475,7 +521,7 @@ class AgentEngine:
                 type(exc).__name__,
                 exc,
             )
-            trace.append({"step": "orchestrator", "error": f"{type(exc).__name__}: {exc}"})
+            _emit(trace, sink, {"step": "orchestrator", "error": f"{type(exc).__name__}: {exc}"})
         return cost
 
     def _execute_tool_calls(
@@ -484,6 +530,7 @@ class AgentEngine:
         pool: dict[str, RetrievedChunk],
         calc_results: list[tuple[str, float]],
         trace: list[dict[str, Any]],
+        sink: EventSink | None,
     ) -> list[dict[str, Any]]:
         """Execute a turn's tool calls (concurrently when >1) and return the
         tool-role messages, in call order."""
@@ -529,7 +576,7 @@ class AgentEngine:
             if tc.function.name == "calculate" and "value" in detail:
                 calc_results.append((detail["expression"], detail["value"]))
             self._merge_pool(pool, results)  # main thread — no pool races
-            trace.append({"step": tc.function.name, "phase": "loop", **detail})
+            _emit(trace, sink, {"step": tc.function.name, "phase": "loop", **detail})
             tool_messages.append(
                 {"role": "tool", "tool_call_id": tc.id, "content": content}
             )
