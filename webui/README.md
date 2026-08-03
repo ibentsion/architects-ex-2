@@ -66,6 +66,17 @@ cloud/serve_endpoint.sh status            # prints the URL
 The UI bundle travels through the artifacts dataset rather than being built on
 the node, so the GPU image needs no Node toolchain.
 
+`status` prints the URL to hand out. The platform publishes two public
+endpoints — a managed `https://` tunnel and the instance's raw `IP:port` — but
+**the tunnel only routes when the endpoint was created with `--auth token`**.
+`--full` cannot use that (a browser sends no `Authorization` header on
+navigation), so it is served over the raw IP on **plain HTTP**, and `status`
+probes both and lists the reachable one first.
+
+Plain HTTP means the password and every question cross the network in the
+clear. For a short-lived demo among people you know that is a considered
+trade; do not reuse a password you care about, and stop the endpoint afterwards.
+
 **This mode is internet-facing**, and the bridge reads repo files by design —
 the corpus, `eval_results/`, the graded submission — while every question spends
 the *shared* course Token Factory key. So access is gated by a password

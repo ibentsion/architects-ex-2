@@ -48,13 +48,34 @@ _endpoint_id() {
 }
 
 _public_url() {
+    # The platform publishes two public endpoints: a managed https:// tunnel and
+    # the instance's raw IP:port. The tunnel only routes when the endpoint was
+    # created with --auth token; under --auth none (which --full needs, because
+    # a browser cannot send an Authorization header) it answers 404 forever.
+    # The spec does not echo the auth mode back, so asking each one is the only
+    # honest way to say which URL to hand out. Reachable ones come first.
     nebius ai endpoint get "$1" --format json 2>/dev/null | python3 -c '
-import json, sys
-status = json.load(sys.stdin).get("status", {})
-for url in status.get("public_endpoints", []):
-    if str(url).startswith("https://"):
-        print(url)
-        break
+import json, sys, urllib.request, urllib.error
+
+data = json.load(sys.stdin)
+urls = [str(u) for u in data.get("status", {}).get("public_endpoints", [])]
+# A raw host:port is only a URL once it has a scheme.
+urls = [u if "://" in u else "http://" + u for u in urls]
+
+def reachable(url):
+    """/healthz is deliberately outside the password gate, so an unauthenticated
+    200 means the app is serving. 401 also proves routing works (token mode)."""
+    try:
+        with urllib.request.urlopen(url + "/healthz", timeout=5) as r:
+            return r.status == 200
+    except urllib.error.HTTPError as e:
+        return e.code == 401
+    except Exception:
+        return False
+
+checked = [(u, reachable(u)) for u in urls]
+for url, ok in sorted(checked, key=lambda p: not p[1]):
+    print(url if ok else url + "   (not routing)")
 '
 }
 
@@ -83,6 +104,9 @@ case "$MODE" in
             # password -- which is why serve_ui.sh refuses to start without one.
             UI_PASSWORD="${UI_PASSWORD:-$(python3 -c 'import secrets; print(secrets.token_urlsafe(12))')}"
             printf '%s\n' "$UI_PASSWORD" > "$PASSWORD_FILE"
+            # Don't leave the other mode's credential lying around claiming to
+            # be current.
+            rm -f "$TOKEN_FILE"
             SERVE_CMD="WITH_BRIDGE=1 bash cloud/serve_ui.sh"
             PORT_SPEC="8080/http"
             AUTH_FLAGS=(--auth none)
@@ -90,6 +114,7 @@ case "$MODE" in
         else
             AGENT_TOKEN=$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')
             printf '%s\n' "$AGENT_TOKEN" > "$TOKEN_FILE"
+            rm -f "$PASSWORD_FILE"
             PORT_SPEC="8000/http"
             AUTH_FLAGS=(--auth token --token "$AGENT_TOKEN")
         fi
@@ -146,10 +171,14 @@ cd $EX2_ROOT/repo && bash cloud/setup_node.sh && source cloud/env.sh && $SERVE_C
             | python3 -c 'import json,sys; print(json.load(sys.stdin)["status"]["state"])')
         echo "id:    $ID"
         echo "state: $STATE"
-        echo "url:   $(_public_url "$ID")"
+        # First line is the one to use; a second line is the other published
+        # endpoint, kept visible so a 404 on one is diagnosable.
+        _public_url "$ID" | sed '1s/^/url:   /; 2,$s/^/also:  /'
         # `|| true`: a bare test as the last command would make `status` exit 1
-        # whenever the token file is absent, which is not a failure.
-        [ -f "$TOKEN_FILE" ] && echo "token: $TOKEN_FILE" || true
+        # whenever the file is absent, which is not a failure. Only one of the
+        # two exists — create removes the other mode's credential.
+        [ -f "$TOKEN_FILE" ] && echo "token: $TOKEN_FILE (agent bearer token)" || true
+        [ -f "$PASSWORD_FILE" ] && echo "login: $(cat "$PASSWORD_FILE")" || true
         ;;
 
     logs)
