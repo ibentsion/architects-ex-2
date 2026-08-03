@@ -7,22 +7,34 @@ It runs on the laptop and does three things the GPU node cannot:
   * serves the QA-History view over the repo's own answer/judgment files;
   * serves citation previews and page thumbnails from the local ``corpus/``.
 
-No CORS middleware: the Vite dev server proxies ``/api``, so the browser is
-always same-origin and a permissive header here would be a hole with nothing
-to open.
+When ``WEBUI_DIST`` points at a built frontend it also serves that, so the whole
+app can run as one process on the node behind a single public URL. In that
+deployment ``UI_PASSWORD`` gates everything (see :mod:`webapi.auth`).
+
+No CORS middleware: the Vite dev server proxies ``/api``, and the hosted build
+is served from this same origin, so a permissive header here would be a hole
+with nothing to open.
 """
 from __future__ import annotations
 
 import json
 import logging
 import os
+from pathlib import Path
 from typing import Any, AsyncIterator
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import (
+    FileResponse,
+    HTMLResponse,
+    JSONResponse,
+    RedirectResponse,
+    Response,
+    StreamingResponse,
+)
 
-from webapi import corpus_view, stt
+from webapi import auth, corpus_view, stt
 from webapi.corpus_view import CorpusUnavailable
 from webapi.datasets import DatasetInfo, UnknownDataset, discover_datasets, load_pairs
 from webapi.paths import PathEscape
@@ -31,8 +43,65 @@ from webapi.stt import SttNotConfigured
 logger = logging.getLogger(__name__)
 
 DEFAULT_AGENT_BASE_URL = "http://localhost:8000"
+#: Paths reachable without a session — the login form itself, and a health
+#: check the platform can poll without credentials.
+PUBLIC_PATHS = frozenset({"/login", "/healthz"})
 
 app = FastAPI(title="APEX Exercise 2 -- support UI bridge")
+
+
+@app.middleware("http")
+async def require_login(request: Request, call_next):
+    """The whole access control for a public deployment. No-op when
+    ``UI_PASSWORD`` is unset, which is the localhost default."""
+    if not auth.enabled() or request.url.path in PUBLIC_PATHS:
+        return await call_next(request)
+    if auth.valid_session(request.cookies.get(auth.COOKIE_NAME)):
+        return await call_next(request)
+    # An API call gets a machine-readable 401; a browser navigation gets the
+    # login form. Redirecting XHR would hand the caller an HTML page.
+    if request.url.path.startswith("/api/"):
+        return JSONResponse({"detail": "authentication required"}, status_code=401)
+    return RedirectResponse("/login", status_code=303)
+
+
+@app.get("/healthz")
+def healthz() -> dict[str, str]:
+    return {"status": "ok"}
+
+
+@app.get("/login")
+def login_form() -> Response:
+    if not auth.enabled():
+        # Nothing to log in to; don't show a password box that accepts anything.
+        return RedirectResponse("/", status_code=303)
+    return HTMLResponse(auth.login_page())
+
+
+@app.post("/login")
+async def login_submit(request: Request) -> Response:
+    if not auth.enabled():
+        return RedirectResponse("/", status_code=303)
+    form = await request.form()
+    candidate = str(form.get("password") or "")
+    if not auth.password_matches(candidate):
+        logger.warning("failed login from %s", request.client.host if request.client else "?")
+        return HTMLResponse(auth.login_page("סיסמה שגויה"), status_code=401)
+
+    value, max_age = auth.issue_session()
+    response = RedirectResponse("/", status_code=303)
+    response.set_cookie(
+        auth.COOKIE_NAME,
+        value,
+        max_age=max_age,
+        httponly=True,
+        samesite="lax",
+        # The managed endpoint URL is https; a plain-http local run would drop a
+        # Secure cookie entirely, so only set it when the request arrived over TLS.
+        secure=request.url.scheme == "https",
+        path="/",
+    )
+    return response
 
 
 def _agent_base_url() -> str:
@@ -213,3 +282,39 @@ def citation_content(
         "file_name": file,
         "page_number": page,
     }
+
+
+# --------------------------------------------------------------------------- #
+# Hosted frontend
+# --------------------------------------------------------------------------- #
+# Only mounted when a built bundle exists. In local development Vite serves the
+# frontend and proxies /api here, so there is nothing to mount and the bridge
+# stays API-only. On the node the whole app is one process behind one URL.
+#
+# Declared last on purpose: the catch-all would otherwise shadow /api/*.
+
+
+def _dist_dir() -> Path | None:
+    dist = Path(os.environ.get("WEBUI_DIST", "webui/dist"))
+    return dist if (dist / "index.html").is_file() else None
+
+
+@app.get("/{asset_path:path}")
+def frontend(asset_path: str) -> Response:
+    dist = _dist_dir()
+    if dist is None:
+        raise HTTPException(404, detail="no built frontend (WEBUI_DIST unset or not built)")
+
+    # Resolve inside dist/ and reject anything that escapes it. Same rule as
+    # webapi.paths, applied to a different root.
+    root = dist.resolve()
+    try:
+        candidate = (root / asset_path).resolve()
+        candidate.relative_to(root)
+    except (ValueError, OSError):
+        raise HTTPException(400, detail="path escapes the bundle") from None
+
+    if asset_path and candidate.is_file():
+        return FileResponse(candidate)
+    # SPA fallback: unknown paths are client-side routes, not 404s.
+    return FileResponse(root / "index.html", headers={"Cache-Control": "no-cache"})

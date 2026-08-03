@@ -23,9 +23,16 @@ trap 'rm -rf "$WORK"' EXIT
 "$HF" repo create "$ARTIFACTS_REPO" --repo-type dataset --private --exist-ok >/dev/null
 
 for name in "${DIRS[@]}"; do
-    [ -d "$name" ] || { echo "skip $name (not a directory here)"; continue; }
-    echo "packing $name/ ..."
-    tar cf - "$name" | gzip -1 > "$WORK/$name.tar.gz"
+    # The built web UI is the one artifact whose tarball name differs from its
+    # path: it lives at webui/dist (where vite writes it and the bridge's
+    # WEBUI_DIST default looks), but "webui/dist.tar.gz" is not a filename.
+    case "$name" in
+        webui-dist) src="webui/dist" ;;
+        *)          src="$name" ;;
+    esac
+    [ -d "$src" ] || { echo "skip $name (not a directory here)"; continue; }
+    echo "packing $src/ ..."
+    tar cf - "$src" | gzip -1 > "$WORK/$name.tar.gz"
     du -h "$WORK/$name.tar.gz"
     echo "uploading $name.tar.gz to $ARTIFACTS_REPO ..."
     "$HF" upload "$ARTIFACTS_REPO" "$WORK/$name.tar.gz" "$name.tar.gz" --repo-type dataset

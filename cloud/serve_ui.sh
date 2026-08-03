@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
 # Serve the streaming agent app for the web-UI demo (Stage 3 optional bonus).
+# Started on the node by cloud/serve_endpoint.sh — never run it by hand.
 #
-#   cloud/submit_job.sh run 'bash cloud/serve_ui.sh' --timeout 3h
+# Two topologies:
 #
-# Then, on the laptop:
-#   ssh -N -L 8000:localhost:8000 <node>            # tunnel
-#   ./venv/bin/python -m uvicorn webapi.bridge_app:app --port 8080
-#   npm --prefix webui run dev
+#   WITH_BRIDGE unset  — agent only, on $PORT. The bridge and frontend run on
+#                        the laptop against it (webui/README.md).
+#   WITH_BRIDGE=1      — agent on localhost:$PORT plus the bridge on
+#                        $BRIDGE_PORT serving the built frontend, so the whole
+#                        app is one public URL a browser can just open. The
+#                        bridge is gated by UI_PASSWORD; refuses to start without
+#                        one, because in this mode it is internet-facing and it
+#                        reads repo files by design.
 #
 # This is NOT the graded endpoint — cloud/blind_run.sh serves contract:app for
 # that. Same engine and same config; this one streams the pipeline's trace.
@@ -14,7 +19,14 @@ set -euo pipefail
 
 TS=$(date -u +%Y%m%dT%H%M%SZ)
 PORT="${PORT:-8000}"
+BRIDGE_PORT="${BRIDGE_PORT:-8080}"
+ARTIFACTS_REPO="${ARTIFACTS_REPO:-ibentsion/apex-ex2-artifacts}"
 export RAG_CONFIG="${RAG_CONFIG:-configs/ship.yaml}"
+
+if [ -n "${WITH_BRIDGE:-}" ] && [ -z "${UI_PASSWORD:-}" ]; then
+    echo "WITH_BRIDGE=1 needs UI_PASSWORD — refusing to serve the repo publicly with no gate" >&2
+    exit 2
+fi
 
 # Import first: a broken import inside uvicorn only shows up as a health check
 # that never passes, which costs 5 minutes to learn nothing.
@@ -75,15 +87,64 @@ except Exception as exc:
     print(f"warm-up call failed ({exc}) — continuing")
 PY
 
-NODE_HOST=$(hostname)
-cat <<EOF
+if [ -z "${WITH_BRIDGE:-}" ]; then
+    cat <<EOF
 
-=== ready. On the laptop:
-    ssh -N -L ${PORT}:localhost:${PORT} ${NODE_HOST}
-    ./venv/bin/python -m uvicorn webapi.bridge_app:app --port 8080
-    npm --prefix webui run dev
+=== ready. The agent is on :${PORT}; point a laptop bridge at it with
+    AGENT_BASE_URL (see webui/README.md and cloud/serve_endpoint.sh).
 
     logs: uvicorn_ui_${TS}.log
 EOF
+    wait "$SERVER_PID"
+    exit 0
+fi
 
-wait "$SERVER_PID"
+# --- everything-on-the-node mode ------------------------------------------- #
+# The frontend is a static bundle built on a laptop and shipped through the same
+# HF artifacts dataset as corpus/cache/rag_index (cloud/upload_artifacts.sh
+# webui-dist). Building it here would mean a Node toolchain on the GPU image for
+# no reason.
+if [ ! -f webui/dist/index.html ]; then
+    echo "=== fetching webui-dist.tar.gz from $ARTIFACTS_REPO"
+    tarball=$(python -c "from huggingface_hub import hf_hub_download; print(hf_hub_download('$ARTIFACTS_REPO', 'webui-dist.tar.gz', repo_type='dataset'))")
+    tar xzf "$tarball"
+fi
+[ -f webui/dist/index.html ] || { echo "=== no webui/dist/index.html after fetch"; exit 1; }
+
+export AGENT_BASE_URL="http://localhost:${PORT}"
+export WEBUI_DIST="webui/dist"
+# AGENT_TOKEN deliberately unset: the agent is on loopback inside this container
+# and is not published. UI_PASSWORD on the bridge is the gate.
+unset AGENT_TOKEN || true
+
+echo "=== serving the bridge + UI on :$BRIDGE_PORT (gated by UI_PASSWORD)"
+python -m uvicorn webapi.bridge_app:app --host 0.0.0.0 --port "$BRIDGE_PORT" \
+    > "uvicorn_bridge_${TS}.log" 2>&1 &
+BRIDGE_PID=$!
+trap 'kill "$SERVER_PID" "$BRIDGE_PID" 2>/dev/null || true' EXIT
+sleep 5
+kill -0 "$BRIDGE_PID" 2>/dev/null || { echo "=== bridge died on startup:"; cat "uvicorn_bridge_${TS}.log"; exit 1; }
+
+python - "$BRIDGE_PORT" <<'PY' || { echo "=== bridge health never passed"; exit 1; }
+import sys, time, urllib.request
+for attempt in range(30):
+    try:
+        with urllib.request.urlopen(f"http://localhost:{sys.argv[1]}/healthz", timeout=5) as r:
+            if r.status == 200:
+                print(f"=== bridge up after ~{attempt * 2}s")
+                sys.exit(0)
+    except Exception:
+        pass
+    time.sleep(2)
+sys.exit(1)
+PY
+
+cat <<EOF
+
+=== ready. The whole app is on :${BRIDGE_PORT} — open the endpoint's public URL
+    in a browser and log in with UI_PASSWORD.
+
+    logs: uvicorn_ui_${TS}.log (agent), uvicorn_bridge_${TS}.log (bridge)
+EOF
+
+wait "$SERVER_PID" "$BRIDGE_PID"

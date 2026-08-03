@@ -51,6 +51,33 @@ npm --prefix webui run dev
 cloud/serve_endpoint.sh stop        # it holds a GPU until you do this
 ```
 
+### Everything on the node (one URL to share)
+
+Agent, bridge and the built frontend all run in the endpoint container, so
+anyone you give the URL to can open it in a browser with nothing installed:
+
+```bash
+npm --prefix webui run build
+cloud/upload_artifacts.sh webui-dist      # ships dist/ like corpus/cache/rag_index
+cloud/serve_endpoint.sh create --full     # prints the password
+cloud/serve_endpoint.sh status            # prints the URL
+```
+
+The UI bundle travels through the artifacts dataset rather than being built on
+the node, so the GPU image needs no Node toolchain.
+
+**This mode is internet-facing**, and the bridge reads repo files by design —
+the corpus, `eval_results/`, the graded submission — while every question spends
+the *shared* course Token Factory key. So access is gated by a password
+(`webapi/auth.py`): the platform's `--auth token` is useless here because a
+browser navigating to a URL sends no `Authorization` header, so the endpoint is
+open at the platform layer and the **bridge** is the gate. `serve_ui.sh` refuses
+to start in this mode without `UI_PASSWORD`. The password is generated at create
+time and written to `.ui_password` (gitignored).
+
+Sessions are HMAC-signed cookies keyed off the password, so changing the
+password logs everyone out and restarting the bridge does not.
+
 The endpoint is created with `--auth token` and a generated bearer token: the
 URL is public, and every question spends the **shared** course Token Factory
 key. `AGENT_TOKEN` is what the bridge presents; without it the endpoint answers
@@ -65,6 +92,8 @@ same-origin — which is why the bridge ships no CORS middleware.
 |---|---|---|---|
 | `AGENT_BASE_URL` | `http://localhost:8000` | bridge | The agent app. Read per request, so pointing it at a public node URL needs no code change. |
 | `AGENT_TOKEN` | *(unset)* | bridge | Bearer token sent to the agent. Required when it is a `nebius ai endpoint` created with `--auth token`; unset for a local agent. |
+| `UI_PASSWORD` | *(unset — gate off)* | bridge | Shared password. Unset means no gate, which is the localhost default. Set it and every path except `/login` and `/healthz` needs a session. |
+| `WEBUI_DIST` | `webui/dist` | bridge | Built frontend to serve. Ignored when the bundle isn't there, which is the dev case (Vite serves it and proxies `/api`). |
 | `RAG_CONFIG` | `configs/ship.yaml` | agent app | Same config the graded endpoint uses. Read, never written. |
 | `STT_MODEL` | *(unset — STT off)* | bridge | Enables backend transcription, e.g. `base` on CPU or an `ivrit-ai` model on the node. |
 | `STT_DEVICE` | `cpu` | bridge | `cuda` on the node. |

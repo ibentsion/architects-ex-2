@@ -11,3 +11,4 @@ backups/
 node_modules/
 webui/dist/
 .agent_token
+.ui_password

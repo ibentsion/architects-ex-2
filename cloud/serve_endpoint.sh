@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 # Serve the web UI's agent on a GPU node, reachable from a laptop browser.
 #
-#   cloud/serve_endpoint.sh create     # start it, print the URL and the token
-#   cloud/serve_endpoint.sh status     # URL + state of the running endpoint
-#   cloud/serve_endpoint.sh logs       # container logs
-#   cloud/serve_endpoint.sh stop       # STOP IT -- it holds a GPU until you do
+#   cloud/serve_endpoint.sh create        # agent only; bridge + UI run locally
+#   cloud/serve_endpoint.sh create --full # EVERYTHING on the node: one public
+#                                         # URL anyone can open in a browser
+#   cloud/serve_endpoint.sh status        # URL + state of the running endpoint
+#   cloud/serve_endpoint.sh logs          # container logs
+#   cloud/serve_endpoint.sh stop          # STOP IT -- it holds a GPU until you do
+#
+# --full needs the built UI on the artifacts dataset first:
+#   npm --prefix webui run build && cloud/upload_artifacts.sh webui-dist
 #
 # Why an endpoint and not a job (cloud/submit_job.sh):
 # a `nebius ai job` gets a private VPC IP only. No public IP, no SSH authorized
@@ -30,7 +35,12 @@ BRANCH="${BRANCH:-main}"
 TOKEN_FILE=".agent_token"
 
 MODE="${1:-}"
-[ -n "$MODE" ] || { echo "usage: cloud/serve_endpoint.sh create|status|logs|stop"; exit 2; }
+[ -n "$MODE" ] || { echo "usage: cloud/serve_endpoint.sh create [--full]|status|logs|stop"; exit 2; }
+shift || true
+
+FULL=""
+[ "${1:-}" = "--full" ] && { FULL=1; shift; }
+PASSWORD_FILE=".ui_password"
 
 _endpoint_id() {
     nebius ai endpoint get-by-name --name "$NAME" --format json 2>/dev/null \
@@ -60,18 +70,38 @@ case "$MODE" in
         fi
         [ -n "${HF_TOKEN:-}" ] || { echo "HF_TOKEN not set (env or ~/.cache/huggingface/token)"; exit 2; }
 
-        AGENT_TOKEN=$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')
         umask 077
-        printf '%s\n' "$AGENT_TOKEN" > "$TOKEN_FILE"
+        SERVE_CMD="bash cloud/serve_ui.sh"
+        AUTH_FLAGS=()
+        EXTRA_ENV=()
+
+        if [ -n "$FULL" ]; then
+            # Everything on the node behind one URL. The platform's --auth token
+            # cannot be used here: it wants an Authorization header, and a
+            # browser navigating to a URL sends none. So the endpoint is open at
+            # the platform layer and the BRIDGE enforces access with a shared
+            # password -- which is why serve_ui.sh refuses to start without one.
+            UI_PASSWORD="${UI_PASSWORD:-$(python3 -c 'import secrets; print(secrets.token_urlsafe(12))')}"
+            printf '%s\n' "$UI_PASSWORD" > "$PASSWORD_FILE"
+            SERVE_CMD="WITH_BRIDGE=1 bash cloud/serve_ui.sh"
+            PORT_SPEC="8080/http"
+            AUTH_FLAGS=(--auth none)
+            EXTRA_ENV=(--env UI_PASSWORD="$UI_PASSWORD")
+        else
+            AGENT_TOKEN=$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')
+            printf '%s\n' "$AGENT_TOKEN" > "$TOKEN_FILE"
+            PORT_SPEC="8000/http"
+            AUTH_FLAGS=(--auth token --token "$AGENT_TOKEN")
+        fi
 
         # Same bootstrap as submit_job.sh: clone-or-update on the volume, run the
         # idempotent setup, then serve. Everything persists across endpoints.
         REMOTE_CMD="mkdir -p $EX2_ROOT && \
 if [ -d $EX2_ROOT/repo/.git ]; then git -C $EX2_ROOT/repo fetch origin $BRANCH && git -C $EX2_ROOT/repo reset --hard origin/$BRANCH; \
 else git clone -b $BRANCH $REPO_URL $EX2_ROOT/repo; fi && \
-cd $EX2_ROOT/repo && bash cloud/setup_node.sh && source cloud/env.sh && bash cloud/serve_ui.sh"
+cd $EX2_ROOT/repo && bash cloud/setup_node.sh && source cloud/env.sh && $SERVE_CMD"
 
-        echo "creating endpoint $NAME (branch $BRANCH)"
+        echo "creating endpoint $NAME (branch $BRANCH${FULL:+, full app})"
         nebius ai endpoint create \
             --name "$NAME" \
             --image "$IMAGE" \
@@ -79,26 +109,32 @@ cd $EX2_ROOT/repo && bash cloud/setup_node.sh && source cloud/env.sh && bash clo
             --args "-c \"$REMOTE_CMD\"" \
             --platform "$PLATFORM" \
             --preset "$PRESET" \
-            --container-port 8000/http \
+            --container-port "$PORT_SPEC" \
             --public \
-            --auth token \
-            --token "$AGENT_TOKEN" \
+            "${AUTH_FLAGS[@]}" \
             --volume "$VOLUME" \
             --env NEBIUS_API_KEY="$NEBIUS_API_KEY" \
             --env HF_TOKEN="$HF_TOKEN" \
             --env OPENAI_BASE_URL="$TF_BASE_URL" \
             --env OPENAI_API_KEY="$NEBIUS_API_KEY" \
+            "${EXTRA_ENV[@]}" \
             > /dev/null
 
         ID=$(_endpoint_id)
         echo "endpoint: $ID"
-        echo "token written to $TOKEN_FILE (gitignored)"
         echo
-        echo "the engine warms on startup; wait for /health to answer 200, then:"
-        echo "    export AGENT_BASE_URL=\$(cloud/serve_endpoint.sh status | grep -o 'https://[^ ]*')"
-        echo "    export AGENT_TOKEN=\$(cat $TOKEN_FILE)"
-        echo "    ./venv/bin/python -m uvicorn webapi.bridge_app:app --port 8080"
-        echo "    npm --prefix webui run dev"
+        if [ -n "$FULL" ]; then
+            echo "password written to $PASSWORD_FILE (gitignored):  $UI_PASSWORD"
+            echo "share the URL from 'cloud/serve_endpoint.sh status' plus that password."
+            echo "startup clones, sets up, fetches the UI bundle and warms the engine (~4 min)."
+        else
+            echo "token written to $TOKEN_FILE (gitignored)"
+            echo "the engine warms on startup; wait for /health to answer 200, then:"
+            echo "    export AGENT_BASE_URL=\$(cloud/serve_endpoint.sh status | grep -o 'https://[^ ]*')"
+            echo "    export AGENT_TOKEN=\$(cat $TOKEN_FILE)"
+            echo "    ./venv/bin/python -m uvicorn webapi.bridge_app:app --port 8080"
+            echo "    npm --prefix webui run dev"
+        fi
         echo
         echo "IT HOLDS A GPU UNTIL STOPPED:  cloud/serve_endpoint.sh stop"
         ;;
