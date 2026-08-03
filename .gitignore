@@ -8,3 +8,5 @@ rag_index/
 backups/
 .pytest_cache/
 *.partial.jsonl
+node_modules/
+webui/dist/
