@@ -66,16 +66,28 @@ cloud/serve_endpoint.sh status            # prints the URL
 The UI bundle travels through the artifacts dataset rather than being built on
 the node, so the GPU image needs no Node toolchain.
 
-`status` prints the URL to hand out. The platform publishes two public
-endpoints — a managed `https://` tunnel and the instance's raw `IP:port` — but
-**the tunnel only routes when the endpoint was created with `--auth token`**.
-`--full` cannot use that (a browser sends no `Authorization` header on
-navigation), so it is served over the raw IP on **plain HTTP**, and `status`
-probes both and lists the reachable one first.
+`status` prints the URL to hand out — use the `https:` line.
 
-Plain HTTP means the password and every question cross the network in the
-clear. For a short-lived demo among people you know that is a considered
-trade; do not reuse a password you care about, and stop the endpoint afterwards.
+Getting https took a Cloudflare quick tunnel, and the reason is the microphone:
+browsers refuse `getUserMedia` and the Web Speech API outside a **secure
+context** (https, or localhost). The platform's own routes cannot provide one
+here. It publishes a managed `https://` tunnel and the instance's raw
+`IP:port`, but the managed tunnel terminates TLS itself and returns its own 404
+unless the endpoint was created with `--auth token` — which `--full` cannot use,
+because a browser sends no `Authorization` header when you navigate to a URL.
+Verified on both `/http` and `/tcp` port modes. That leaves the raw IP, which is
+plain HTTP, where the mic is blocked and the password would cross the network in
+the clear.
+
+So `--full` starts `cloudflared` against the bridge and prints the
+`https://….trycloudflare.com` URL. The binary is pinned by version and verified
+by sha256 before it is executed — it fronts an app that spends the shared key.
+The password gate applies to the tunnel exactly as to the raw IP, and uvicorn
+runs with `--proxy-headers` (trusted from loopback only, where cloudflared
+connects) so the session cookie is marked `Secure` on an https visit.
+
+The raw `http://IP:port` stays reachable as a fallback; everything works there
+except voice.
 
 **This mode is internet-facing**, and the bridge reads repo files by design —
 the corpus, `eval_results/`, the graded submission — while every question spends
