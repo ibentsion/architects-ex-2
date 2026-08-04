@@ -41,7 +41,7 @@ function recognizerCtor(): RecognizerCtor | undefined {
   return scope.SpeechRecognition ?? scope.webkitSpeechRecognition;
 }
 
-export type VoiceMode = "speech-api" | "recorder" | "unsupported";
+export type VoiceMode = "speech-api" | "recorder" | "insecure-context" | "unsupported";
 
 export interface VoiceHandlers {
   /** Live partial text, for showing in the textarea as the user speaks. */
@@ -53,6 +53,16 @@ export interface VoiceHandlers {
 }
 
 export function voiceMode(): VoiceMode {
+  // Microphone access needs a secure context: https, or localhost/127.0.0.1,
+  // which browsers trust. Check this FIRST — on a plain-http origin Chrome
+  // still exposes webkitSpeechRecognition, so without this the hook picks
+  // speech-api, starts, and reports the failure as `not-allowed`, i.e. as a
+  // permission the user denied. The origin is the problem, not the permission,
+  // and telling someone to "allow the microphone" sends them to a browser
+  // setting that will not fix it.
+  if (typeof window !== "undefined" && window.isSecureContext === false) {
+    return "insecure-context";
+  }
   if (recognizerCtor()) return "speech-api";
   if (typeof MediaRecorder !== "undefined" && navigator.mediaDevices) return "recorder";
   return "unsupported";
@@ -106,6 +116,14 @@ export function useVoiceInput(handlers: VoiceHandlers) {
       recognizerRef.current = recognizer;
       recognizer.start();
       setActive(true);
+      return;
+    }
+
+    if (mode === "insecure-context") {
+      setError(
+        "קלט קולי דורש חיבור מאובטח (https) — הדפדפן חוסם את המיקרופון בכתובת http. " +
+          "נסו דרך localhost או כתובת https.",
+      );
       return;
     }
 

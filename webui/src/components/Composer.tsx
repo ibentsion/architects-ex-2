@@ -71,12 +71,23 @@ export function Composer({
           </button>
           <button
             type="button"
-            disabled={busy || voice.mode === "unsupported"}
+            disabled={
+              busy ||
+              voice.mode === "unsupported" ||
+              // Disabled rather than failing on click: on a plain-http origin
+              // the browser blocks the microphone outright, and the tooltip is
+              // the only place that can say why.
+              voice.mode === "insecure-context"
+            }
             onClick={() => (voice.active ? voice.stop() : void voice.start())}
             title={
-              voice.mode === "speech-api"
-                ? "זיהוי דיבור בדפדפן (he-IL)"
-                : "הקלטה ושליחה לתמלול בשרת"
+              voice.mode === "insecure-context"
+                ? "קלט קולי דורש https — הדפדפן חוסם מיקרופון בכתובת http"
+                : voice.mode === "unsupported"
+                  ? "הדפדפן הזה לא תומך בקלט קולי"
+                  : voice.mode === "speech-api"
+                    ? "זיהוי דיבור בדפדפן (he-IL)"
+                    : "הקלטה ושליחה לתמלול בשרת"
             }
             className={`rounded-lg border px-4 py-2 text-xs font-medium transition-colors disabled:opacity-40 ${
               voice.active
