@@ -21,6 +21,19 @@ TS=$(date -u +%Y%m%dT%H%M%SZ)
 PORT="${PORT:-8000}"
 BRIDGE_PORT="${BRIDGE_PORT:-8080}"
 ARTIFACTS_REPO="${ARTIFACTS_REPO:-ibentsion/apex-ex2-artifacts}"
+
+# PUBLIC_TUNNEL=1 fronts the bridge with a Cloudflare quick tunnel, purely to
+# get *https*: browsers refuse microphone access outside a secure context, and
+# the endpoint's own public route is plain http on a raw IP (the platform's
+# managed https tunnel only forwards for --auth token endpoints, which a
+# browser cannot satisfy on navigation). Pinned + checksummed rather than
+# "curl | latest": this binary sits in front of an app that spends the shared
+# Token Factory key.
+CLOUDFLARED_VERSION="2026.7.3"
+CLOUDFLARED_SHA256="9d71c677db00134c1bd4144b7783486b654ad281b1ea62b4972098d19f770f17"
+# Normally exported by cloud/env.sh, which the endpoint sources first; defaulted
+# here so the script is runnable on its own.
+EX2_ROOT="${EX2_ROOT:-/mnt/data/ex2/ibentsion}"
 export RAG_CONFIG="${RAG_CONFIG:-configs/ship.yaml}"
 
 if [ -n "${WITH_BRIDGE:-}" ] && [ -z "${UI_PASSWORD:-}" ]; then
@@ -121,9 +134,14 @@ unset AGENT_TOKEN || true
 # and a file inside the container is unreachable without SSH (endpoints get no
 # authorized keys). A 500 here has to show up in `nebius ai endpoint logs`.
 echo "=== serving the bridge + UI on :$BRIDGE_PORT (gated by UI_PASSWORD)"
-python -m uvicorn webapi.bridge_app:app --host 0.0.0.0 --port "$BRIDGE_PORT" 2>&1 &
+# --proxy-headers so X-Forwarded-Proto from the tunnel is honoured; uvicorn
+# trusts it only from 127.0.0.1 by default, which is exactly where cloudflared
+# connects from. Without it the session cookie never gets its Secure flag on
+# an https visit, and direct hits on the raw public IP must NOT be able to
+# spoof the scheme.
+python -m uvicorn webapi.bridge_app:app --host 0.0.0.0 --port "$BRIDGE_PORT" --proxy-headers 2>&1 &
 BRIDGE_PID=$!
-trap 'kill "$SERVER_PID" "$BRIDGE_PID" 2>/dev/null || true' EXIT
+trap 'kill "$SERVER_PID" "$BRIDGE_PID" ${TUNNEL_PID:-} 2>/dev/null || true' EXIT
 sleep 5
 kill -0 "$BRIDGE_PID" 2>/dev/null || { echo "=== bridge died on startup (see above)"; exit 1; }
 
@@ -141,10 +159,51 @@ for attempt in range(30):
 sys.exit(1)
 PY
 
+if [ -n "${PUBLIC_TUNNEL:-}" ]; then
+    if [ ! -x "$EX2_ROOT/cloudflared" ]; then
+        echo "=== fetching cloudflared $CLOUDFLARED_VERSION"
+        python - "$CLOUDFLARED_VERSION" "$EX2_ROOT/cloudflared.part" <<'PY'
+import sys, urllib.request
+version, dest = sys.argv[1], sys.argv[2]
+url = (f"https://github.com/cloudflare/cloudflared/releases/download/{version}"
+       "/cloudflared-linux-amd64")
+with urllib.request.urlopen(url, timeout=300) as r, open(dest, "wb") as f:
+    f.write(r.read())
+PY
+        ACTUAL=$(sha256sum "$EX2_ROOT/cloudflared.part" | cut -d' ' -f1)
+        if [ "$ACTUAL" != "$CLOUDFLARED_SHA256" ]; then
+            rm -f "$EX2_ROOT/cloudflared.part"
+            echo "=== cloudflared checksum mismatch (got $ACTUAL) — refusing to run it" >&2
+            exit 1
+        fi
+        chmod +x "$EX2_ROOT/cloudflared.part"
+        mv "$EX2_ROOT/cloudflared.part" "$EX2_ROOT/cloudflared"
+    fi
+
+    echo "=== starting cloudflare quick tunnel (for https, so the mic works)"
+    "$EX2_ROOT/cloudflared" tunnel --no-autoupdate \
+        --url "http://localhost:${BRIDGE_PORT}" > "tunnel_${TS}.log" 2>&1 &
+    TUNNEL_PID=$!
+
+    # The URL is assigned at runtime and only ever appears in cloudflared's own
+    # output, so it has to be scraped back out and echoed to the container log.
+    TUNNEL_URL=""
+    for _ in $(seq 1 30); do
+        sleep 2
+        TUNNEL_URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' "tunnel_${TS}.log" | head -1 || true)
+        [ -n "$TUNNEL_URL" ] && break
+    done
+    if [ -n "$TUNNEL_URL" ]; then
+        echo "=== PUBLIC HTTPS URL: $TUNNEL_URL"
+    else
+        echo "=== tunnel did not report a URL; last lines:"; tail -20 "tunnel_${TS}.log"
+    fi
+fi
+
 cat <<EOF
 
-=== ready. The whole app is on :${BRIDGE_PORT} — open the endpoint's public URL
-    in a browser and log in with UI_PASSWORD.
+=== ready. The whole app is on :${BRIDGE_PORT} — open the public URL above
+    (or the endpoint's raw IP) and log in with UI_PASSWORD.
 
     logs: uvicorn_ui_${TS}.log (agent, in-container); the bridge logs here.
 EOF

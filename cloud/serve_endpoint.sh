@@ -107,7 +107,10 @@ case "$MODE" in
             # Don't leave the other mode's credential lying around claiming to
             # be current.
             rm -f "$TOKEN_FILE"
-            SERVE_CMD="WITH_BRIDGE=1 bash cloud/serve_ui.sh"
+            # PUBLIC_TUNNEL: the raw public IP is plain http, and browsers block
+            # the microphone outside a secure context. A Cloudflare quick tunnel
+            # is the https front. The password gate still applies to it.
+            SERVE_CMD="WITH_BRIDGE=1 PUBLIC_TUNNEL=1 bash cloud/serve_ui.sh"
             PORT_SPEC="8080/http"
             AUTH_FLAGS=(--auth none)
             EXTRA_ENV=(--env UI_PASSWORD="$UI_PASSWORD")
@@ -171,6 +174,12 @@ cd $EX2_ROOT/repo && bash cloud/setup_node.sh && source cloud/env.sh && $SERVE_C
             | python3 -c 'import json,sys; print(json.load(sys.stdin)["status"]["state"])')
         echo "id:    $ID"
         echo "state: $STATE"
+        # The https tunnel URL is assigned at runtime by cloudflared and exists
+        # only in the container log, so it has to be read back from there. It is
+        # the one to hand out: the raw IP is http, where browsers block the mic.
+        TUNNEL=$(nebius ai endpoint logs "$ID" 2>/dev/null \
+            | grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' | tail -1 || true)
+        [ -n "$TUNNEL" ] && echo "https: $TUNNEL   <- share this (mic works)" || true
         # First line is the one to use; a second line is the other published
         # endpoint, kept visible so a 404 on one is diagnosable.
         _public_url "$ID" | sed '1s/^/url:   /; 2,$s/^/also:  /'
